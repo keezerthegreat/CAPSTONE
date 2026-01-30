@@ -12,8 +12,19 @@ use App\Http\Controllers\ClearanceController;
 | AUTH (PUBLIC)
 |--------------------------------------------------------------------------
 */
-Route::get('/', [AuthController::class, 'login'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticate'])->name('login.submit');
+
+// ROOT → redirect to login (NO POST EVER HERE)
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
+// LOGIN PAGE
+Route::get('/login', [AuthController::class, 'login'])
+    ->name('login');
+
+// LOGIN ACTION
+Route::post('/login', [AuthController::class, 'authenticate'])
+    ->name('login.submit');
 
 /*
 |--------------------------------------------------------------------------
@@ -23,26 +34,20 @@ Route::post('/login', [AuthController::class, 'authenticate'])->name('login.subm
 Route::middleware('auth')->group(function () {
 
     /*
-    |--------------------------------------------------------------------------
     | DASHBOARD
-    |--------------------------------------------------------------------------
     */
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
     /*
-    |--------------------------------------------------------------------------
-    | STATIC PAGES (NO CONTROLLER LOGIC)
-    |--------------------------------------------------------------------------
+    | STATIC PAGES
     */
     Route::view('/barangay-update', 'pages.barangay')->name('barangay.update');
     Route::view('/read-message', 'pages.message')->name('read.message');
     Route::view('/worker-info', 'pages.worker')->name('worker.info');
 
     /*
-    |--------------------------------------------------------------------------
     | RESIDENT MODULE
-    |--------------------------------------------------------------------------
     */
     Route::get('/residents', [ResidentController::class, 'index'])
         ->name('residents.index');
@@ -53,14 +58,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/residents', [ResidentController::class, 'store'])
         ->name('residents.store');
 
-    // 📍 RESIDENT LOCATION (MAP)
     Route::get('/resident-location', [ResidentController::class, 'location'])
         ->name('residents.location');
 
     /*
-    |--------------------------------------------------------------------------
-    | CERTIFICATE MODULE (FULL CRUD)
-    |--------------------------------------------------------------------------
+    | CERTIFICATE MODULE
     */
     Route::get('/certificate', [CertificateController::class, 'index'])
         ->name('certificate.index');
@@ -81,9 +83,7 @@ Route::middleware('auth')->group(function () {
         ->name('certificate.destroy');
 
     /*
-    |--------------------------------------------------------------------------
     | CLEARANCE MODULE
-    |--------------------------------------------------------------------------
     */
     Route::get('/clearance', [ClearanceController::class, 'index'])
         ->name('clearance.index');
@@ -91,16 +91,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/clearance', [ClearanceController::class, 'store'])
         ->name('clearance.store');
 
-    Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])
-        ->name('clearance.destroy');
-
     Route::get('/clearance/print/{id}', [ClearanceController::class, 'print'])
         ->name('clearance.print');
 
+    Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])
+        ->name('clearance.destroy');
+
     /*
-    |--------------------------------------------------------------------------
     | LOGOUT
-    |--------------------------------------------------------------------------
     */
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
