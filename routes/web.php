@@ -13,7 +13,7 @@ use App\Http\Controllers\ClearanceController;
 |--------------------------------------------------------------------------
 */
 
-// ROOT → redirect to login (NO POST EVER HERE)
+// ROOT → redirect to login
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -31,6 +31,7 @@ Route::post('/login', [AuthController::class, 'authenticate'])
 | PROTECTED ROUTES (AUTH REQUIRED)
 |--------------------------------------------------------------------------
 */
+
 Route::middleware('auth')->group(function () {
 
     /*
