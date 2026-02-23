@@ -26,6 +26,7 @@ Route::get('/login', [AuthController::class, 'login'])
 Route::post('/login', [AuthController::class, 'authenticate'])
     ->name('login.submit');
 
+
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES (AUTH REQUIRED)
