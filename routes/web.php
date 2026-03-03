@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ClearanceController;
+use App\Http\Controllers\WorkerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -104,4 +105,11 @@ Route::middleware('auth')->group(function () {
     */
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
+
+        Route::get('/dashboard', function () {
+            return view('dashboard');
+        })->name('dashboard');
+
+
+        Route::resource('workers', WorkerController::class);
 });
