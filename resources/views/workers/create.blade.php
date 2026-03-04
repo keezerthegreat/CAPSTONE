@@ -23,12 +23,12 @@
 
     <div>
         <label class="block text-sm">Full Name</label>
-        <input type="text" name="full_name" class="w-full border rounded p-2">
+        <input type="text" required name="full_name" class="w-full border rounded p-2">
     </div>
 
     <div>
-        <label class="block text-sm">Gender</label>
-        <select name="gender" class="w-full border rounded p-2">
+        <label class="block text-sm" >Gender</label>
+        <select name="gender" required class="w-full border rounded p-2">
             <option value="">Select</option>
             <option>Male</option>
             <option>Female</option>
@@ -37,17 +37,17 @@
 
     <div>
         <label class="block text-sm">Contact Number</label>
-        <input type="text" name="contact_number" class="w-full border rounded p-2">
+        <input type="text" required name="contact_number" class="w-full border rounded p-2">
     </div>
 
     <div>
         <label class="block text-sm">Address</label>
-        <input type="text" name="address" class="w-full border rounded p-2">
+        <input type="text" required name="address" class="w-full border rounded p-2">
     </div>
 
     <div>
-        <label class="block text-sm">Position</label>
-        <select name="position" class="w-full border rounded p-2">
+        <label class="block text-sm" >Position</label>
+        <select name="position" required class="w-full border rounded p-2">
             <option value="">-- Select Position --</option>
             <option>Barangay Captain</option>
             <option>Kagawad</option>
@@ -70,6 +70,32 @@
     <button class="bg-slate-900 text-white px-4 py-2 rounded">
         Save Worker
     </button>
+    
+            <a href="{{ route('workers.index') }}"
+                class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+               Cancel
+            </a>
 </form>
+
+<script>
+function checkForm() {
+
+    let inputs = document.querySelectorAll('form input, form select');
+    let hasValue = false;
+
+    inputs.forEach(function(input) {
+        if (input.value.trim() !== '') {
+            hasValue = true;
+        }
+    });
+
+    if (!hasValue) {
+        alert("Nothing has changed. Please fill up the form.");
+        return false; // stop submit
+    }
+
+    return true; // allow submit
+}
+</script>
 
 @endsection
