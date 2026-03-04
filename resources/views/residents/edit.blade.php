@@ -1,0 +1,199 @@
+@extends('layouts.app')
+
+@section('content')
+<style>
+:root { --primary:#1a3a6b; --primary-light:#2554a0; --bg:#f0f4f8; --card:#fff; --text:#1e293b; --muted:#64748b; --border:#e2e8f0; }
+.bidb-wrap { background:var(--bg); min-height:100vh; padding:28px; }
+.page-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+.page-hdr h1 { font-size:22px; font-weight:700; color:var(--primary); margin:0; }
+.breadcrumb { font-size:13px; color:var(--muted); margin-top:2px; }
+.breadcrumb span { color:var(--primary); font-weight:500; }
+.card { background:var(--card); border-radius:14px; border:1px solid var(--border); box-shadow:0 1px 6px rgba(0,0,0,.06); margin-bottom:20px; overflow:hidden; }
+.card-header { padding:16px 20px; border-bottom:1px solid var(--border); }
+.card-title { font-weight:700; color:var(--primary); font-size:14px; }
+.card-body { padding:24px; }
+.form-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-group.full { grid-column:span 3; }
+label { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+input, select, textarea { padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:inherit; color:var(--text); outline:none; background:#fff; width:100%; box-sizing:border-box; }
+input:focus, select:focus, textarea:focus { border-color:var(--primary); }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; text-decoration:none; }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-outline { background:#fff; color:var(--primary); border:1.5px solid var(--primary); }
+.alert-error { background:#fee2e2; border:1px solid #fecaca; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; }
+</style>
+
+<div class="bidb-wrap">
+  <div class="page-hdr">
+    <div>
+      <h1><i class="fas fa-user-edit" style="margin-right:8px"></i>Edit Resident</h1>
+      <div class="breadcrumb">Home › <a href="{{ route('residents.index') }}" style="color:var(--primary);text-decoration:none">Residents</a> › <span>Edit</span></div>
+    </div>
+    <a href="{{ route('residents.index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+
+  @if($errors->any())
+    <div class="alert-error">
+      <strong>Please fix the following errors:</strong>
+      <ul style="margin:8px 0 0 20px">
+        @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+      </ul>
+    </div>
+  @endif
+
+  <form method="POST" action="{{ route('residents.update', $resident->id) }}">
+    @csrf
+    @method('PUT')
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-id-card" style="margin-right:6px"></i>Personal Information</div></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" name="last_name" value="{{ old('last_name', $resident->last_name) }}" required>
+          </div>
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" name="first_name" value="{{ old('first_name', $resident->first_name) }}" required>
+          </div>
+          <div class="form-group">
+            <label>Middle Name</label>
+            <input type="text" name="middle_name" value="{{ old('middle_name', $resident->middle_name) }}">
+          </div>
+          <div class="form-group">
+            <label>Sex *</label>
+            <select name="gender" required>
+              <option value="">Select...</option>
+              <option value="Male" {{ $resident->gender == 'Male' ? 'selected' : '' }}>Male</option>
+              <option value="Female" {{ $resident->gender == 'Female' ? 'selected' : '' }}>Female</option>
+              <option value="Other" {{ $resident->gender == 'Other' ? 'selected' : '' }}>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date of Birth *</label>
+            <input type="date" name="birthdate" value="{{ old('birthdate', $resident->birthdate) }}" required>
+          </div>
+          <div class="form-group">
+            <label>Age *</label>
+            <input type="number" name="age" value="{{ old('age', $resident->age) }}" min="0" max="120" required>
+          </div>
+          <div class="form-group">
+            <label>Civil Status</label>
+            <select name="civil_status">
+              <option value="">Select...</option>
+              @foreach(['Single','Married','Widowed','Separated','Annulled','Live-in'] as $cs)
+                <option value="{{ $cs }}" {{ $resident->civil_status == $cs ? 'selected' : '' }}>{{ $cs }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nationality</label>
+            <input type="text" name="nationality" value="{{ old('nationality', $resident->nationality) }}">
+          </div>
+          <div class="form-group">
+            <label>Religion</label>
+            <input type="text" name="religion" value="{{ old('religion', $resident->religion) }}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-phone" style="margin-right:6px"></i>Contact Information</div></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" name="contact_number" value="{{ old('contact_number', $resident->contact_number) }}" placeholder="09xxxxxxxxx">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" value="{{ old('email', $resident->email) }}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-map-marker-alt" style="margin-right:6px"></i>Address</div></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Province *</label>
+            <input type="text" name="province" value="{{ old('province', $resident->province) }}" required>
+          </div>
+          <div class="form-group">
+            <label>City / Municipality *</label>
+            <input type="text" name="city" value="{{ old('city', $resident->city) }}" required>
+          </div>
+          <div class="form-group">
+            <label>Barangay *</label>
+            <input type="text" name="barangay" value="{{ old('barangay', $resident->barangay) }}" required>
+          </div>
+          <div class="form-group full">
+            <label>House No., Street / Purok / Sitio *</label>
+            <textarea name="address" rows="2" required>{{ old('address', $resident->address) }}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-briefcase" style="margin-right:6px"></i>Socio-Economic Information</div></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Occupation</label>
+            <input type="text" name="occupation" value="{{ old('occupation', $resident->occupation) }}">
+          </div>
+          <div class="form-group">
+            <label>Employer / Workplace</label>
+            <input type="text" name="employer" value="{{ old('employer', $resident->employer) }}">
+          </div>
+          <div class="form-group">
+            <label>Monthly Income</label>
+            <input type="number" name="monthly_income" value="{{ old('monthly_income', $resident->monthly_income) }}" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Education Level</label>
+            <select name="education_level">
+              <option value="">Select...</option>
+              @foreach(['No Formal Education','Elementary','High School','Senior High School','Vocational','College','Post-Graduate'] as $ed)
+                <option value="{{ $ed }}" {{ $resident->education_level == $ed ? 'selected' : '' }}>{{ $ed }}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-tags" style="margin-right:6px"></i>Special Classifications</div></div>
+      <div class="card-body">
+        <div style="display:flex;gap:32px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+            <input type="checkbox" name="is_senior" value="1" {{ $resident->is_senior ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+            Senior Citizen (60+)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+            <input type="checkbox" name="is_pwd" value="1" {{ $resident->is_pwd ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+            Person with Disability (PWD)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+            <input type="checkbox" name="is_voter" value="1" {{ $resident->is_voter ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+            Registered Voter
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+    </div>
+
+  </form>
+</div>
+@endsection
