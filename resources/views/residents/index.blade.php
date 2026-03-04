@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('page-title', 'Residents')
+
 @section('content')
 
 <style>

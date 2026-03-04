@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('page-title', 'Certificates')
+@section('page-title', 'Certificate Forms')
 
 @section('content')
 <style>
