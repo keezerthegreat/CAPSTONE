@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class ResidentController extends Controller
 {
     /**
-     * Show list of residents
+     * Display list of residents
      */
     public function index()
     {
@@ -17,7 +17,7 @@ class ResidentController extends Controller
     }
 
     /**
-     * Show add resident form
+     * Show create form
      */
     public function create()
     {
@@ -25,97 +25,63 @@ class ResidentController extends Controller
     }
 
     /**
-     * Store resident data
-     * ✅ stays on same page
+     * Store new resident
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
 
-            // ================= PERSONAL INFO =================
+            // Personal Info
             'last_name'      => 'required|string|max:255',
             'first_name'     => 'required|string|max:255',
             'middle_name'    => 'nullable|string|max:255',
-
             'gender'         => 'required|in:Male,Female,Other',
             'birthdate'      => 'required|date',
             'age'            => 'required|integer|min:0|max:120',
-
             'civil_status'   => 'nullable|string|max:255',
             'nationality'    => 'nullable|string|max:255',
             'religion'       => 'nullable|string|max:255',
 
-            // ================= CONTACT INFO =================
+            // Contact
             'contact_number' => 'nullable|string|max:20',
             'email'          => 'nullable|email|max:255',
 
-            // ================= ADDRESS =================
+            // Address
             'province'       => 'required|string|max:255',
             'city'           => 'required|string|max:255',
             'barangay'       => 'required|string|max:255',
             'address'        => 'required|string|max:255',
 
-            // ================= SOCIO-ECONOMIC =================
+            // Socio-economic
             'occupation'     => 'nullable|string|max:255',
             'employer'       => 'nullable|string|max:255',
             'monthly_income' => 'nullable|numeric|min:0',
             'education_level'=> 'nullable|string|max:255',
 
-            // ================= SPECIAL CLASSIFICATION =================
+            // Classification
             'is_senior'      => 'nullable|boolean',
             'is_pwd'         => 'nullable|boolean',
             'is_voter'       => 'nullable|boolean',
-
-            // ================= GEOLOCATION =================
-            'latitude'       => 'required|numeric|between:-90,90',
-            'longitude'      => 'required|numeric|between:-180,180',
         ]);
 
         Resident::create($validated);
 
-        // ✅ STAY ON SAME PAGE
-        return back()->with('success', 'Resident record added successfully.');
+        return redirect()
+            ->route('residents.index')
+            ->with('success', 'Resident record added successfully.');
     }
 
     /**
-     * Show resident locations on map
+     * Delete resident (Stable version)
      */
-    public function location()
-{
-    $households = \App\Models\Household::whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->get();
+    public function destroy($id)
+    {
+        $resident = Resident::findOrFail($id);
+        $resident->delete();
 
-    return view('residents.location', compact('households'));
-}
-public function show($id)
-{
-    $resident = Resident::findOrFail($id);
-    return view('residents.show', compact('resident'));
-}
-
-public function edit($id)
-{
-    $resident = Resident::findOrFail($id);
-    return view('residents.edit', compact('resident'));
-}
-
-public function update(Request $request, $id)
-{
-    $resident = Resident::findOrFail($id);
-    $resident->update($request->all());
-    return redirect()->route('residents.index')
-        ->with('success', 'Resident updated successfully.');
-}
-
-public function destroy($id)
-{
-    $resident = Resident::findOrFail($id);
-    $resident->delete();
-    return redirect()->route('residents.index')
-        ->with('success', 'Resident deleted successfully.');
-}
-}
+        return redirect()
+            ->route('residents.index')
+            ->with('success', 'Resident deleted successfully!');
+    }
     
-
-
+}

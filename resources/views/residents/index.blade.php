@@ -96,7 +96,12 @@ tbody tr:last-child td { border-bottom: none; }
       <table id="residentsTable">
         <thead>
           <tr>
-            <th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Address</th><th>Classifications</th><th>Actions</th>
+            <th>#</th><th>Full Name</th>
+            <th>Sex / Age</th>
+            <th>Civil Status</th>
+            <th>Address</th>
+            <th>Classifications</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -123,10 +128,12 @@ tbody tr:last-child td { border-bottom: none; }
               <div class="action-btns">
                 <a href="{{ route('residents.show', $resident->id) }}" class="btn btn-sm btn-view"><i class="fas fa-eye"></i> View</a>
                 <a href="{{ route('residents.edit', $resident->id) }}" class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</a>
+
                 <form method="POST" action="{{ route('residents.destroy', $resident->id) }}" style="display:inline" onsubmit="return confirm('Delete this resident?')">
                   @csrf @method('DELETE')
                   <button type="submit" class="btn btn-sm btn-delete"><i class="fas fa-trash"></i></button>
                 </form>
+                
               </div>
             </td>
           </tr>
