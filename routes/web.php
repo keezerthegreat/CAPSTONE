@@ -154,4 +154,10 @@ Route::middleware('auth')->group(function () {
 
 
         Route::resource('workers', WorkerController::class);
+
+    /*
+    | WORKER
+    */    
+        Route::resource('workers', WorkerController::class);
+
 });

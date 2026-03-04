@@ -2,6 +2,20 @@
 
 @section('content')
 
+<a href="{{ url()->previous() }}"
+   style="
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 12px;
+        background-color: #2c3e50;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+   ">
+    ← Back
+</a>
+
 <h2 class="text-xl font-semibold mb-6">Add Worker</h2>
 
 <form action="{{ route('workers.store') }}" method="POST" class="bg-white p-6 rounded-lg shadow space-y-4">
@@ -34,6 +48,7 @@
     <div>
         <label class="block text-sm">Position</label>
         <select name="position" class="w-full border rounded p-2">
+            <option value="">-- Select Position --</option>
             <option>Barangay Captain</option>
             <option>Kagawad</option>
             <option>Secretary</option>
