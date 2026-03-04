@@ -19,11 +19,27 @@
         @csrf
         @method('PUT')
 
-        <!-- Full Name -->
+        <!-- First Name -->
         <div class="mb-4">
-            <label class="block text-sm">Full Name</label>
-            <input type="text" name="full_name"
-                   value="{{ old('full_name', $worker->full_name) }}"
+            <label class="block text-sm">First Name</label>
+            <input type="text" name="first_name"
+                   value="{{ old('first_name', $worker->first_name) }}"
+                   class="w-full border rounded p-2" required>
+        </div>
+
+        <!-- Middle Name -->
+        <div class="mb-4">
+            <label class="block text-sm">Middle Name</label>
+            <input type="text" name="middle_name"
+                   value="{{ old('middle_name', $worker->middle_name) }}"
+                   class="w-full border rounded p-2">
+        </div>
+
+        <!-- Last Name -->
+        <div class="mb-4">
+            <label class="block text-sm">Last Name</label>
+            <input type="text" name="last_name"
+                   value="{{ old('last_name', $worker->last_name) }}"
                    class="w-full border rounded p-2" required>
         </div>
 
@@ -60,7 +76,6 @@
                 <option value="" disabled {{ old('position', $worker->position) ? '' : 'selected' }}>
                     -- Select Position --
                 </option>
-
                 <option value="Barangay Captain" {{ old('position', $worker->position) == 'Barangay Captain' ? 'selected' : '' }}>Barangay Captain</option>
                 <option value="Kagawad" {{ old('position', $worker->position) == 'Kagawad' ? 'selected' : '' }}>Kagawad</option>
                 <option value="Secretary" {{ old('position', $worker->position) == 'Secretary' ? 'selected' : '' }}>Secretary</option>

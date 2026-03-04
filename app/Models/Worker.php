@@ -2,21 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Worker extends Model
 {
-  protected $fillable = [
-    'full_name',
-    'gender',
-    'birth_date',
-    'contact_number',
-    'address',
-    'position',
-    'department',
-    'date_started',
-    'term_start',
-    'term_end',
-    'status'
-];
+    use HasFactory;
+
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'middle_name',
+        'birthdate',
+        'gender',
+        'civil_status',
+        'address',
+        'contact_number',
+        'email',
+        'position',
+        'date_hired',
+        'employment_status',
+    ];
+
+    protected $casts = [
+        'birthdate'  => 'date',
+        'date_hired' => 'date',
+    ];
 }

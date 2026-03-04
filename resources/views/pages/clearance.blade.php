@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('page-title', 'Barangay Clearance')
+@section('page-title', 'Barangay Clearance Forms')
 
 @section('content')
 <style>

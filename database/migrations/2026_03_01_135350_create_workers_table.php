@@ -6,23 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-   public function up(): void
+public function up(): void
 {
     Schema::create('workers', function (Blueprint $table) {
         $table->id();
-        $table->string('full_name');
+
+        // Personal Info
+        $table->string('first_name');
+        $table->string('last_name');
+        $table->string('middle_name')->nullable();
+        $table->date('birthdate')->nullable();
         $table->string('gender')->nullable();
-        $table->date('birth_date')->nullable();
-        $table->string('contact_number')->nullable();
+        $table->string('civil_status')->nullable();
+
+        // Contact Info
         $table->string('address')->nullable();
+        $table->string('contact_number')->nullable();
+        $table->string('email')->nullable();
 
+        // Barangay Details
         $table->string('position');
-        $table->string('department')->nullable();
-        $table->date('date_started')->nullable();
-        $table->date('term_start')->nullable();
-        $table->date('term_end')->nullable();
-
-        $table->string('status')->default('Active');
+        $table->date('date_hired')->nullable();
+        $table->string('employment_status')->nullable();
 
         $table->timestamps();
     });
