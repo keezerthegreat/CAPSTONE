@@ -7,6 +7,8 @@ use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\WorkerController;
+use App\Http\Controllers\HouseholdController;
+use App\Http\Controllers\ReportsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +52,30 @@ Route::middleware('auth')->group(function () {
     Route::view('/worker-info', 'pages.worker')->name('worker.info');
 
     /*
+    | HOUSEHOLD MODULE
+    */
+    Route::get('/households', [HouseholdController::class, 'index'])
+        ->name('households.index');
+
+    Route::get('/households/create', [HouseholdController::class, 'create'])
+        ->name('households.create');
+
+    Route::post('/households', [HouseholdController::class, 'store'])
+        ->name('households.store');
+
+    Route::get('/households/{id}', [HouseholdController::class, 'show'])
+        ->name('households.show');
+
+    Route::get('/households/{id}/edit', [HouseholdController::class, 'edit'])
+        ->name('households.edit');
+
+    Route::put('/households/{id}', [HouseholdController::class, 'update'])
+        ->name('households.update');
+
+    Route::delete('/households/{id}', [HouseholdController::class, 'destroy'])
+        ->name('households.destroy');
+
+    /*
     | RESIDENT MODULE
     */
     Route::get('/residents', [ResidentController::class, 'index'])
@@ -60,6 +86,18 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/residents', [ResidentController::class, 'store'])
         ->name('residents.store');
+        
+    Route::get('/residents/{id}', [ResidentController::class, 'show'])
+        ->name('residents.show');
+
+    Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])
+        ->name('residents.edit');
+
+    Route::put('/residents/{id}', [ResidentController::class, 'update'])
+        ->name('residents.update');
+
+    Route::delete('/residents/{id}', [ResidentController::class, 'destroy'])
+        ->name('residents.destroy');    
 
     Route::get('/resident-location', [ResidentController::class, 'location'])
         ->name('residents.location');
@@ -101,14 +139,18 @@ Route::middleware('auth')->group(function () {
         ->name('clearance.destroy');
 
     /*
+    | REPORTS MODULE
+    */
+    Route::get('/reports', [ReportsController::class, 'index'])
+        ->name('reports.index');
+        
+    /*
     | LOGOUT
     */
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 
-        Route::get('/dashboard', function () {
-            return view('dashboard');
-        })->name('dashboard');
+        
 
 
         Route::resource('workers', WorkerController::class);

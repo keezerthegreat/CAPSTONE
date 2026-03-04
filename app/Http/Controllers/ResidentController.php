@@ -81,13 +81,41 @@ class ResidentController extends Controller
      * Show resident locations on map
      */
     public function location()
-    {
-        $residents = Resident::whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->get();
+{
+    $households = \App\Models\Household::whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->get();
 
-        return view('residents.location', compact('residents'));
-    }
+    return view('residents.location', compact('households'));
 }
+public function show($id)
+{
+    $resident = Resident::findOrFail($id);
+    return view('residents.show', compact('resident'));
+}
+
+public function edit($id)
+{
+    $resident = Resident::findOrFail($id);
+    return view('residents.edit', compact('resident'));
+}
+
+public function update(Request $request, $id)
+{
+    $resident = Resident::findOrFail($id);
+    $resident->update($request->all());
+    return redirect()->route('residents.index')
+        ->with('success', 'Resident updated successfully.');
+}
+
+public function destroy($id)
+{
+    $resident = Resident::findOrFail($id);
+    $resident->delete();
+    return redirect()->route('residents.index')
+        ->with('success', 'Resident deleted successfully.');
+}
+}
+    
 
 
