@@ -78,6 +78,18 @@ tbody tr:last-child td { border-bottom:none; }
             <label>Resident Name <span class="req">*</span></label>
             <input type="text" name="resident_name" placeholder="e.g. Juan Dela Cruz" required>
           </div>
+
+            <div class="form-group">
+            <label>Certificate Type <span class="req">*</span></label>
+            <select name="certificate_type" required>
+              <option value="">Select type...</option>
+              <option value="Good Moral Character Clearance">Good Moral Character</option>
+              <option value="Residency Certificate">Residency Certificate</option>
+              <option value="Indigency Certificate">Indigency Certificate</option>
+              <option value="Business Operation">Business Operation</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label>Purpose <span class="req">*</span></label>
             <input type="text" name="purpose" placeholder="e.g. Employment, Travel, Loan" required>

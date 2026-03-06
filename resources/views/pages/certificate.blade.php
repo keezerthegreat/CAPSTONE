@@ -107,7 +107,7 @@ tbody tr:last-child td { border-bottom:none; }
         <table>
           <thead>
             <tr>
-              <th>Cert No.</th>
+              <th>Certificate No.</th>
               <th>Resident Name</th>
               <th>Type</th>
               <th>Date Issued</th>
