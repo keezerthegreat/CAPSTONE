@@ -125,7 +125,12 @@
       <a href="{{ route('households.index') }}"
           class="nav-item {{ request()->is('households*') ? 'active' : '' }}">
           <i class="fas fa-home"></i> Households
-      </a>      
+      </a>
+
+      <a href="{{ route('families.index') }}" class="nav-link {{ request()->routeIs('families.*') ? 'active' : '' }}">
+        <i class="fas fa-people-roof"></i>
+        <span>Families</span>
+      </a>
 
       <a href="{{ route('residents.index') }}"
          class="nav-item {{ request()->is('residents*') ? 'active' : '' }}">

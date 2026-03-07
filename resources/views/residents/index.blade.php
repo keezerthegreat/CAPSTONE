@@ -70,10 +70,10 @@ tbody tr:last-child td { border-bottom: none; }
   @endif
 
   <div class="res-stats">
-    <div class="res-stat"><div class="slabel">Total Residents</div><div class="svalue">{{ $residents->count() }}</div></div>
-    <div class="res-stat"><div class="slabel">Senior Citizens</div><div class="svalue">{{ $residents->where('is_senior', true)->count() }}</div></div>
-    <div class="res-stat"><div class="slabel">Persons w/ Disability</div><div class="svalue">{{ $residents->where('is_pwd', true)->count() }}</div></div>
-    <div class="res-stat"><div class="slabel">Registered Voters</div><div class="svalue">{{ $residents->where('is_voter', true)->count() }}</div></div>
+    <div class="res-stat"><div class="slabel">Total Residents</div><div class="svalue">{{ $residents->where('is_deceased', false)->count() }}</div></div>
+    <div class="res-stat"><div class="slabel">Senior Citizens</div><div class="svalue">{{ $residents->where('is_senior', true)->where('is_deceased', false)->count() }}</div></div>
+    <div class="res-stat"><div class="slabel">Persons w/ Disability</div><div class="svalue">{{ $residents->where('is_pwd', true)->where('is_deceased', false)->count() }}</div></div>
+    <div class="res-stat"><div class="slabel">Registered Voters</div><div class="svalue">{{ $residents->where('is_voter', true)->where('is_deceased', false)->count() }}</div></div>
   </div>
 
   <div class="card">
@@ -116,7 +116,11 @@ tbody tr:last-child td { border-bottom: none; }
             <td style="color:var(--muted);font-size:12px">{{ $index + 1 }}</td>
 
             <td>
-              <div style="font-weight:700">{{ $resident->last_name }}, {{ $resident->first_name }} {{ $resident->middle_name }}</div>
+              <div style="font-weight:700">{{ $resident->last_name }}, {{ $resident->first_name }} {{ $resident->middle_name }}
+                @if($resident->is_deceased)
+                  <span style="background:#fee2e2;color:#be123c;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;margin-left:4px">Deceased</span>
+                @endif
+              </div>
               <div style="font-size:11px;color:var(--muted)">ID #{{ $resident->id }}</div>
             </td>
 
@@ -145,7 +149,7 @@ tbody tr:last-child td { border-bottom: none; }
                   <i class="fas fa-eye"></i> View
                 </a>
 
-                @if(auth()->user()->role === 'admin')
+                @if(true)
 
                 <a href="{{ route('residents.edit', $resident->id) }}" class="btn btn-sm btn-edit">
                   <i class="fas fa-edit"></i> Edit

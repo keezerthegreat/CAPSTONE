@@ -45,5 +45,9 @@ class Resident extends Model
         // Location
         'latitude',
         'longitude',
+
+        // Deceased
+        'is_deceased',
+        'date_of_death',
     ];
 }

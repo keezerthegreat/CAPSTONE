@@ -9,6 +9,7 @@ use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\FamilyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,7 @@ Route::middleware('auth')->group(function () {
 
         // Workers / Employees
         Route::resource('workers', WorkerController::class);
+        Route::resource('families', FamilyController::class);
 
         // Certificate Admin Actions
         Route::get('/certificate/{id}/edit', [CertificateController::class, 'edit'])->name('certificate.edit');

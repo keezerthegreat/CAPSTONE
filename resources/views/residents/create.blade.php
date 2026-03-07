@@ -64,62 +64,59 @@ input::placeholder { color:#94a3b8; }
   <form method="POST" action="{{ route('residents.store') }}">
     @csrf
 
-    <!-- Personal Information -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title"><i class="fas fa-id-card"></i> Personal Information</div>
-      </div>
-      <div class="card-body">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Last Name <span class="req">*</span></label>
-            <input type="text" name="last_name" value="{{ old('last_name') }}" placeholder="e.g. Dela Cruz" required>
-          </div>
-          <div class="form-group">
-            <label>First Name <span class="req">*</span></label>
-            <input type="text" name="first_name" value="{{ old('first_name') }}" placeholder="e.g. Juan" required>
-          </div>
-          <div class="form-group">
-            <label>Middle Name</label>
-            <input type="text" name="middle_name" value="{{ old('middle_name') }}" placeholder="e.g. Santos">
-          </div>
-          <div class="form-group">
-            <label>Sex <span class="req">*</span></label>
-            <select name="gender" required>
-              <option value="">Select...</option>
-              <option value="Male"   {{ old('gender')=='Male'   ? 'selected':'' }}>Male</option>
-              <option value="Female" {{ old('gender')=='Female' ? 'selected':'' }}>Female</option>
-              <option value="Other"  {{ old('gender')=='Other'  ? 'selected':'' }}>Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Date of Birth <span class="req">*</span></label>
-            <input type="date" name="birthdate" value="{{ old('birthdate') }}" required>
-          </div>
-          <div class="form-group">
-            <label>Age <span class="req">*</span></label>
-            <input type="number" name="age" value="{{ old('age') }}" placeholder="e.g. 25" min="0" max="120" required>
-          </div>
-          <div class="form-group">
-            <label>Civil Status</label>
-            <select name="civil_status">
-              <option value="">Select...</option>
-              @foreach(['Single','Married','Widowed','Separated','Annulled','Live-in'] as $cs)
-                <option value="{{ $cs }}" {{ old('civil_status')==$cs ? 'selected':'' }}>{{ $cs }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Nationality</label>
-            <input type="text" name="nationality" value="{{ old('nationality', 'Filipino') }}">
-          </div>
-          <div class="form-group">
-            <label>Religion</label>
-            <input type="text" name="religion" value="{{ old('religion') }}" placeholder="e.g. Roman Catholic">
-          </div>
+  <!-- Personal Information -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-id-card"></i> Personal Information</div>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Last Name <span class="req">*</span></label>
+          <input type="text" name="last_name" value="{{ old('last_name') }}" placeholder="e.g. Dela Cruz" required>
+        </div>
+        <div class="form-group">
+          <label>First Name <span class="req">*</span></label>
+          <input type="text" name="first_name" value="{{ old('first_name') }}" placeholder="e.g. Juan" required>
+        </div>
+        <div class="form-group">
+          <label>Middle Name</label>
+          <input type="text" name="middle_name" value="{{ old('middle_name') }}" placeholder="e.g. Santos">
+        </div>
+        <div class="form-group">
+          <label>Sex <span class="req">*</span></label>
+          <select name="gender" required>
+            <option value="">Select...</option>
+            <option value="Male"   {{ old('gender')=='Male'   ? 'selected':'' }}>Male</option>
+            <option value="Female" {{ old('gender')=='Female' ? 'selected':'' }}>Female</option>
+            <option value="Other"  {{ old('gender')=='Other'  ? 'selected':'' }}>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date of Birth <span class="req">*</span></label>
+          <input type="date" name="birthdate" id="birthdate" value="{{ old('birthdate') }}" required>
+        </div>
+        <input type="hidden" name="age" id="age" value="{{ old('age') }}">
+        <div class="form-group">
+          <label>Civil Status</label>
+          <select name="civil_status">
+            <option value="">Select...</option>
+            @foreach(['Single','Married','Widowed','Separated','Annulled','Live-in'] as $cs)
+              <option value="{{ $cs }}" {{ old('civil_status')==$cs ? 'selected':'' }}>{{ $cs }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nationality</label>
+          <input type="text" name="nationality" value="{{ old('nationality', 'Filipino') }}">
+        </div>
+        <div class="form-group">
+          <label>Religion</label>
+          <input type="text" name="religion" value="{{ old('religion') }}" placeholder="e.g. Roman Catholic">
         </div>
       </div>
     </div>
+  </div>
 
     <!-- Contact Information -->
     <div class="card">
@@ -242,6 +239,17 @@ map.on('click', function(e) {
     document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
     if (marker) map.removeLayer(marker);
     marker = L.marker(e.latlng).addTo(map);
+});
+</script>
+
+<script>
+document.getElementById('birthdate').addEventListener('change', function() {
+  const birthdate = new Date(this.value);
+  const today = new Date();
+  let age = today.getFullYear() - birthdate.getFullYear();
+  const m = today.getMonth() - birthdate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) age--;
+  document.getElementById('age').value = age;
 });
 </script>
 

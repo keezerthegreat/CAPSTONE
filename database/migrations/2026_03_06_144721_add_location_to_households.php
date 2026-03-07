@@ -6,30 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('households', function (Blueprint $table) {
-
-            // 📍 Location coordinates for map pin
-            $table->decimal('latitude', 10, 7)->nullable()->after('member_count');
-            $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
-
+            if (!Schema::hasColumn('households', 'latitude')) {
+                $table->decimal('latitude', 10, 7)->nullable()->after('member_count');
+            }
+            if (!Schema::hasColumn('households', 'longitude')) {
+                $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('households', function (Blueprint $table) {
-
-            $table->dropColumn('latitude');
-            $table->dropColumn('longitude');
-
+            if (Schema::hasColumn('households', 'latitude')) {
+                $table->dropColumn('latitude');
+            }
+            if (Schema::hasColumn('households', 'longitude')) {
+                $table->dropColumn('longitude');
+            }
         });
     }
 };

@@ -73,12 +73,9 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
           </div>
           <div class="form-group">
             <label>Date of Birth *</label>
-            <input type="date" name="birthdate" value="{{ old('birthdate', $resident->birthdate) }}" required>
+            <input type="date" name="birthdate" id="birthdate" value="{{ old('birthdate', $resident->birthdate) }}" required>
           </div>
-          <div class="form-group">
-            <label>Age *</label>
-            <input type="number" name="age" value="{{ old('age', $resident->age) }}" min="0" max="120" required>
-          </div>
+          <input type="hidden" name="age" id="age" value="{{ old('age', $resident->age) }}">
           <div class="form-group">
             <label>Civil Status</label>
             <select name="civil_status">
@@ -169,25 +166,50 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header"><div class="card-title"><i class="fas fa-tags" style="margin-right:6px"></i>Special Classifications</div></div>
-      <div class="card-body">
-        <div style="display:flex;gap:32px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-            <input type="checkbox" name="is_senior" value="1" {{ $resident->is_senior ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-            Senior Citizen (60+)
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-            <input type="checkbox" name="is_pwd" value="1" {{ $resident->is_pwd ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-            Person with Disability (PWD)
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-            <input type="checkbox" name="is_voter" value="1" {{ $resident->is_voter ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-            Registered Voter
-          </label>
+<div class="card">
+  <div class="card-header"><div class="card-title"><i class="fas fa-tags" style="margin-right:6px"></i>Special Classifications</div></div>
+  <div class="card-body">
+    <div style="display:flex;gap:32px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_senior" value="1" {{ $resident->is_senior ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Senior Citizen (60+)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_pwd" value="1" {{ $resident->is_pwd ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Person with Disability (PWD)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_voter" value="1" {{ $resident->is_voter ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Registered Voter
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- Deceased Status -->
+<div class="card" style="border:1.5px solid #fecdd3">
+  <div class="card-header" style="background:#fff1f2"><div class="card-title" style="color:#be123c"><i class="fas fa-cross" style="margin-right:6px"></i>Deceased Status</div></div>
+  <div class="card-body">
+    <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:center">
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_deceased" value="1" id="isDeceased" {{ $resident->is_deceased ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Mark as Deceased
+      </label>
+      <div id="deathDateField" style="{{ $resident->is_deceased ? '' : 'display:none' }}">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Date of Death</label>
+          <input type="date" name="date_of_death" value="{{ $resident->date_of_death }}" style="padding:9px 12px;border:1.5px solid #fecdd3;border-radius:8px;font-size:14px;font-family:inherit;width:200px">
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('isDeceased').addEventListener('change', function() {
+  document.getElementById('deathDateField').style.display = this.checked ? '' : 'none';
+});
+</script>
 
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
@@ -196,4 +218,5 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
 
   </form>
 </div>
+<script>document.getElementById('birthdate').addEventListener('change', function() { const birthdate = new Date(this.value); const today = new Date(); let age = today.getFullYear() - birthdate.getFullYear(); const m = today.getMonth() - birthdate.getMonth(); if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) age--; document.getElementById('age').value = age; });</script>
 @endsection
