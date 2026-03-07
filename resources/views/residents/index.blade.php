@@ -58,9 +58,11 @@ tbody tr:last-child td { border-bottom: none; }
       <h1><i class="fas fa-users" style="margin-right:8px;font-size:20px"></i>Resident Records</h1>
       <div class="breadcrumb">Home › <span>Residents</span></div>
     </div>
-    <a href="{{ route('residents.create') }}" class="btn btn-primary">
-      <i class="fas fa-user-plus"></i> Add Resident
-    </a>
+
+   <a href="{{ route('residents.create') }}" class="btn btn-primary">
+   <i class="fas fa-user-plus"></i> Add Resident
+  </a>
+
   </div>
 
   @if(session('success'))
@@ -92,11 +94,13 @@ tbody tr:last-child td { border-bottom: none; }
         <option value="voter">Registered Voter</option>
       </select>
     </div>
+
     <div class="table-wrap">
       <table id="residentsTable">
         <thead>
           <tr>
-            <th>#</th><th>Full Name</th>
+            <th>#</th>
+            <th>Full Name</th>
             <th>Sex / Age</th>
             <th>Civil Status</th>
             <th>Address</th>
@@ -104,41 +108,74 @@ tbody tr:last-child td { border-bottom: none; }
             <th>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           @forelse($residents as $index => $resident)
-          <tr data-name="{{ strtolower($resident->last_name . ' ' . $resident->first_name) }}" data-gender="{{ $resident->gender }}" data-senior="{{ $resident->is_senior ? 'senior' : '' }}" data-pwd="{{ $resident->is_pwd ? 'pwd' : '' }}" data-voter="{{ $resident->is_voter ? 'voter' : '' }}">
+          <tr>
+
             <td style="color:var(--muted);font-size:12px">{{ $index + 1 }}</td>
+
             <td>
               <div style="font-weight:700">{{ $resident->last_name }}, {{ $resident->first_name }} {{ $resident->middle_name }}</div>
               <div style="font-size:11px;color:var(--muted)">ID #{{ $resident->id }}</div>
             </td>
+
             <td>{{ $resident->gender }} / {{ $resident->age }} yrs</td>
+
             <td>{{ $resident->civil_status ?? '—' }}</td>
+
             <td>
               <div>{{ $resident->address ?? '—' }}</div>
               <div style="font-size:11px;color:var(--muted)">{{ $resident->barangay }}, {{ $resident->city }}</div>
             </td>
+
             <td>
               @if($resident->is_senior)<span class="badge badge-senior">Senior</span>@endif
               @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
               @if($resident->is_voter)<span class="badge" style="background:#f3e8ff;color:#6b21a8">Voter</span>@endif
-              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter)<span style="color:var(--muted);font-size:12px">—</span>@endif
+              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter)
+              <span style="color:var(--muted);font-size:12px">—</span>
+              @endif
             </td>
+
             <td>
               <div class="action-btns">
-                <a href="{{ route('residents.show', $resident->id) }}" class="btn btn-sm btn-view"><i class="fas fa-eye"></i> View</a>
-                <a href="{{ route('residents.edit', $resident->id) }}" class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</a>
+
+                <a href="{{ route('residents.show', $resident->id) }}" class="btn btn-sm btn-view">
+                  <i class="fas fa-eye"></i> View
+                </a>
+
+                @if(auth()->user()->role === 'admin')
+
+                <a href="{{ route('residents.edit', $resident->id) }}" class="btn btn-sm btn-edit">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
 
                 <form method="POST" action="{{ route('residents.destroy', $resident->id) }}" style="display:inline" onsubmit="return confirm('Delete this resident?')">
-                  @csrf @method('DELETE')
-                  <button type="submit" class="btn btn-sm btn-delete"><i class="fas fa-trash"></i></button>
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="btn btn-sm btn-delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
                 </form>
-                
+
+                @endif
+
+              </div>
+            </td>
+
+          </tr>
+          @empty
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div style="font-size:40px;opacity:.3;margin-bottom:12px">
+                  <i class="fas fa-user-slash"></i>
+                </div>
+                <div style="font-weight:600">No residents found</div>
               </div>
             </td>
           </tr>
-          @empty
-          <tr><td colspan="7"><div class="empty-state"><div style="font-size:40px;opacity:.3;margin-bottom:12px"><i class="fas fa-user-slash"></i></div><div style="font-weight:600">No residents found</div></div></td></tr>
           @endforelse
         </tbody>
       </table>
@@ -146,20 +183,4 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
 </div>
 
-<script>
-function filterTable() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const gender = document.getElementById('filterGender').value;
-  const cls = document.getElementById('filterClass').value;
-  document.querySelectorAll('#residentsTable tbody tr[data-name]').forEach(row => {
-    const matchQ = !q || (row.dataset.name||'').includes(q);
-    const matchG = !gender || row.dataset.gender === gender;
-    const matchC = !cls || row.dataset[cls] === cls;
-    row.style.display = (matchQ && matchG && matchC) ? '' : 'none';
-  });
-}
-document.getElementById('searchInput').addEventListener('keyup', filterTable);
-document.getElementById('filterGender').addEventListener('change', filterTable);
-document.getElementById('filterClass').addEventListener('change', filterTable);
-</script>
 @endsection

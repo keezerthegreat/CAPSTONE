@@ -121,13 +121,26 @@ tbody tr:last-child td { border-bottom:none; }
               <td>{{ $clearance->purpose }}</td>
               <td>{{ \Carbon\Carbon::parse($clearance->date_issued)->format('M d, Y') }}</td>
               <td>
-                <div class="action-btns">
-                  <a href="{{ route('clearance.print', $clearance->id) }}" target="_blank" class="btn btn-print"><i class="fas fa-print"></i> Print</a>
-                  <form action="{{ route('clearance.destroy', $clearance->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this clearance?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i></button>
-                  </form>
-                </div>
+               <div class="action-btns">
+
+  <a href="{{ route('clearance.print', $clearance->id) }}" target="_blank" class="btn btn-print">
+    <i class="fas fa-print"></i> Print
+  </a>
+
+  @if(auth()->user()->role === 'admin')
+
+  <form action="{{ route('clearance.destroy', $clearance->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this clearance?')">
+    @csrf
+    @method('DELETE')
+
+    <button type="submit" class="btn btn-delete">
+      <i class="fas fa-trash"></i>
+    </button>
+  </form>
+
+  @endif
+
+</div>
               </td>
             </tr>
             @empty

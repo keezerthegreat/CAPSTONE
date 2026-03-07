@@ -30,7 +30,7 @@ class ClearanceController extends Controller
 
         return redirect()->back()->with('success', 'Barangay Clearance issued successfully.');
     }
-
+ 
     public function destroy($id)
     {
         Clearance::findOrFail($id)->delete();

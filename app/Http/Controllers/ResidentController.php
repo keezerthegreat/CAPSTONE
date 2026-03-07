@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Resident;
+use App\Models\Household;
 use Illuminate\Http\Request;
 
 class ResidentController extends Controller
@@ -62,6 +63,10 @@ class ResidentController extends Controller
             'is_senior'      => 'nullable|boolean',
             'is_pwd'         => 'nullable|boolean',
             'is_voter'       => 'nullable|boolean',
+
+            // Map Location
+            'latitude'       => 'nullable|numeric',
+            'longitude'      => 'nullable|numeric',
         ]);
 
         Resident::create($validated);
@@ -72,7 +77,7 @@ class ResidentController extends Controller
     }
 
     /**
-     * Delete resident (Stable version)
+     * Delete resident
      */
     public function destroy($id)
     {
@@ -83,5 +88,29 @@ class ResidentController extends Controller
             ->route('residents.index')
             ->with('success', 'Resident deleted successfully!');
     }
-    
+
+    /**
+     * Map view (Residents + Households)
+     */
+    public function location()
+    {
+        $residents = Resident::select(
+            'first_name',
+            'last_name',
+            'address',
+            'latitude',
+            'longitude'
+        )->get();
+
+        $households = Household::select(
+            'household_number',
+            'head_first_name',
+            'head_last_name',
+            'sitio',
+            'latitude',
+            'longitude'
+        )->get();
+
+        return view('pages.map', compact('residents','households'));
+    }
 }

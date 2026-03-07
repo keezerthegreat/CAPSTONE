@@ -12,152 +12,102 @@ use App\Http\Controllers\ReportsController;
 
 /*
 |--------------------------------------------------------------------------
-| AUTH (PUBLIC)
+| PUBLIC ROUTES
 |--------------------------------------------------------------------------
 */
 
-// ROOT → redirect to login
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Root → Login
+Route::redirect('/', '/login');
 
-// LOGIN PAGE
-Route::get('/login', [AuthController::class, 'login'])
-    ->name('login');
-
-// LOGIN ACTION
-Route::post('/login', [AuthController::class, 'authenticate'])
-    ->name('login.submit');
+// Login
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'authenticate'])->name('login.submit');
 
 
 /*
 |--------------------------------------------------------------------------
-| PROTECTED ROUTES (AUTH REQUIRED)
+| AUTHENTICATED USERS
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth')->group(function () {
 
-    /*
-    | DASHBOARD
-    */
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
 
     /*
+    |--------------------------------------------------------------------------
     | STATIC PAGES
+    |--------------------------------------------------------------------------
     */
+
     Route::view('/barangay-update', 'pages.barangay')->name('barangay.update');
     Route::view('/read-message', 'pages.message')->name('read.message');
     Route::view('/worker-info', 'pages.worker')->name('worker.info');
 
+
     /*
-    | HOUSEHOLD MODULE
+    |--------------------------------------------------------------------------
+    | EMPLOYEE + ADMIN
+    |--------------------------------------------------------------------------
     */
-    Route::get('/households', [HouseholdController::class, 'index'])
-        ->name('households.index');
 
-    Route::get('/households/create', [HouseholdController::class, 'create'])
-        ->name('households.create');
+    // Certificates
+    Route::controller(CertificateController::class)->group(function () {
+        Route::get('/certificate', 'index')->name('certificate.index');
+        Route::post('/certificate', 'store')->name('certificate.store');
+        Route::get('/certificate/print/{id}', 'print')->name('certificate.print');
+    });
 
-    Route::post('/households', [HouseholdController::class, 'store'])
-        ->name('households.store');
+    // Clearance
+    Route::controller(ClearanceController::class)->group(function () {
+        Route::get('/clearance', 'index')->name('clearance.index');
+        Route::post('/clearance', 'store')->name('clearance.store');
+        Route::get('/clearance/print/{id}', 'print')->name('clearance.print');
+    });
 
-    Route::get('/households/{id}', [HouseholdController::class, 'show'])
-        ->name('households.show');
-
-    Route::get('/households/{id}/edit', [HouseholdController::class, 'edit'])
-        ->name('households.edit');
-
-    Route::put('/households/{id}', [HouseholdController::class, 'update'])
-        ->name('households.update');
-
-    Route::delete('/households/{id}', [HouseholdController::class, 'destroy'])
-        ->name('households.destroy');
 
     /*
-    | RESIDENT MODULE
+    |--------------------------------------------------------------------------
+    | ADMIN ONLY
+    |--------------------------------------------------------------------------
     */
-    Route::get('/residents', [ResidentController::class, 'index'])
-        ->name('residents.index');
 
-    Route::get('/residents/create', [ResidentController::class, 'create'])
-        ->name('residents.create');
+    Route::middleware('admin')->group(function () {
 
-    Route::post('/residents', [ResidentController::class, 'store'])
-        ->name('residents.store');
-        
-    Route::get('/residents/{id}', [ResidentController::class, 'show'])
-        ->name('residents.show');
+        // Households
+        Route::resource('households', HouseholdController::class);
+        Route::get('/households/map', [HouseholdController::class, 'map'])->name('households.map');
 
-    Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])
-        ->name('residents.edit');
+        // Residents
+        Route::resource('residents', ResidentController::class);
+        Route::get('/resident-location', [ResidentController::class, 'location'])->name('residents.location');
 
-    Route::put('/residents/{id}', [ResidentController::class, 'update'])
-        ->name('residents.update');
+        // Reports
+        Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
-    Route::delete('/residents/{id}', [ResidentController::class, 'destroy'])
-        ->name('residents.destroy');    
+        // Workers / Employees
+        Route::resource('workers', WorkerController::class);
 
-    Route::get('/resident-location', [ResidentController::class, 'location'])
-        ->name('residents.location');
+        // Certificate Admin Actions
+        Route::get('/certificate/{id}/edit', [CertificateController::class, 'edit'])->name('certificate.edit');
+        Route::put('/certificate/{id}', [CertificateController::class, 'update'])->name('certificate.update');
+        Route::delete('/certificate/{id}', [CertificateController::class, 'destroy'])->name('certificate.destroy');
 
-    /*
-    | CERTIFICATE MODULE
-    */
-    Route::get('/certificate', [CertificateController::class, 'index'])
-        ->name('certificate.index');
+        // Clearance Delete
+        Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])->name('clearance.destroy');
 
-    Route::post('/certificate', [CertificateController::class, 'store'])
-        ->name('certificate.store');
+    });
 
-    Route::get('/certificate/print/{id}', [CertificateController::class, 'print'])
-        ->name('certificate.print');
-
-    Route::get('/certificate/{id}/edit', [CertificateController::class, 'edit'])
-        ->name('certificate.edit');
-
-    Route::put('/certificate/{id}', [CertificateController::class, 'update'])
-        ->name('certificate.update');
-
-    Route::delete('/certificate/{id}', [CertificateController::class, 'destroy'])
-        ->name('certificate.destroy');
 
     /*
-    | CLEARANCE MODULE
-    */
-    Route::get('/clearance', [ClearanceController::class, 'index'])
-        ->name('clearance.index');
-
-    Route::post('/clearance', [ClearanceController::class, 'store'])
-        ->name('clearance.store');
-
-    Route::get('/clearance/print/{id}', [ClearanceController::class, 'print'])
-        ->name('clearance.print');
-
-    Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])
-        ->name('clearance.destroy');
-
-    /*
-    | REPORTS MODULE
-    */
-    Route::get('/reports', [ReportsController::class, 'index'])
-        ->name('reports.index');
-        
-    /*
+    |--------------------------------------------------------------------------
     | LOGOUT
+    |--------------------------------------------------------------------------
     */
-    Route::post('/logout', [AuthController::class, 'logout'])
-        ->name('logout');
 
-        
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
-        Route::resource('workers', WorkerController::class);
-
-    /*
-    | WORKER
-    */    
-        Route::resource('workers', WorkerController::class);
-
+    
 });

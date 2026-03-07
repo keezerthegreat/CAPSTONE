@@ -70,4 +70,12 @@ class HouseholdController extends Controller
         return redirect()->route('households.index')
             ->with('success', 'Household deleted successfully.');
     }
+    public function map()
+{
+    $households = \App\Models\Household::whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->get();
+
+    return view('households.map', compact('households'));
+}
 }
