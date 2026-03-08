@@ -53,7 +53,9 @@
         </div>
 
         <button class="btn btn-success">Update</button>
-        <a href="{{ route('certificate.index') }}" class="btn btn-secondary">Cancel</a>
+        <a href="{{ route('certificate.index') }}" class="btn btn-secondary">
+<i class="fas fa-times"></i> Discard Changes
+</a>
     </form>
 </div>
 @endsection

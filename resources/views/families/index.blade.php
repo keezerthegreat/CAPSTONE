@@ -101,14 +101,28 @@ tbody tr:last-child td { border-bottom:none; }
             </td>
             <td>
               <div class="action-btns">
-                <a href="{{ route('families.show', $family->id) }}" class="btn btn-sm btn-view"><i class="fas fa-eye"></i> View</a>
-                <a href="{{ route('families.edit', $family->id) }}" class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</a>
-                <form method="POST" action="{{ route('families.destroy', $family->id) }}" style="display:inline" onsubmit="return confirm('Delete this family?')">
-                  @csrf
-                  @method('DELETE')
-                  <button type="submit" class="btn btn-sm btn-delete"><i class="fas fa-trash"></i></button>
-                </form>
-              </div>
+
+<a href="{{ route('families.show', $family->id) }}" class="btn btn-sm btn-view">
+<i class="fas fa-eye"></i> View
+</a>
+
+@if(auth()->user()->role == 'admin')
+
+<a href="{{ route('families.edit', $family->id) }}" class="btn btn-sm btn-edit">
+<i class="fas fa-edit"></i> Edit
+</a>
+
+<form method="POST" action="{{ route('families.destroy', $family->id) }}" style="display:inline" onsubmit="return confirm('Delete this family?')">
+@csrf
+@method('DELETE')
+<button type="submit" class="btn btn-sm btn-delete">
+<i class="fas fa-trash"></i>
+</button>
+</form>
+
+@endif
+
+</div>
             </td>
           </tr>
           @empty

@@ -149,7 +149,7 @@ tbody tr:last-child td { border-bottom: none; }
                   <i class="fas fa-eye"></i> View
                 </a>
 
-                @if(true)
+                @if(auth()->user()->role == 'admin')
 
                 <a href="{{ route('residents.edit', $resident->id) }}" class="btn btn-sm btn-edit">
                   <i class="fas fa-edit"></i> Edit
@@ -161,7 +161,7 @@ tbody tr:last-child td { border-bottom: none; }
                   <button type="submit" class="btn btn-sm btn-delete">
                     <i class="fas fa-trash"></i>
                   </button>
-                </form>
+                </form> 
 
                 @endif
 
