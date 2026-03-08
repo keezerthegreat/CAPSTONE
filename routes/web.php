@@ -1,3 +1,4 @@
+```php
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/clearance/print/{id}', 'print')->name('clearance.print');
     });
 
+    // Families (EMPLOYEE + ADMIN CAN ACCESS)
+    Route::resource('families', FamilyController::class);
+
 
     /*
     |--------------------------------------------------------------------------
@@ -90,7 +94,6 @@ Route::middleware('auth')->group(function () {
 
         // Workers / Employees
         Route::resource('workers', WorkerController::class);
-        Route::resource('families', FamilyController::class);
 
         // Certificate Admin Actions
         Route::get('/certificate/{id}/edit', [CertificateController::class, 'edit'])->name('certificate.edit');
@@ -110,6 +113,7 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/clearance/{id}/edit', [ClearanceController::class, 'edit'])->name('clearance.edit');
 
-    
+Route::put('/clearance/{id}', [ClearanceController::class, 'update'])->name('clearance.update');
 });

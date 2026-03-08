@@ -120,28 +120,33 @@ tbody tr:last-child td { border-bottom:none; }
               <td>{{ $clearance->resident_name }}</td>
               <td>{{ $clearance->purpose }}</td>
               <td>{{ \Carbon\Carbon::parse($clearance->date_issued)->format('M d, Y') }}</td>
-              <td>
-               <div class="action-btns">
+             <td>
+<div class="action-btns">
 
-  <a href="{{ route('clearance.print', $clearance->id) }}" target="_blank" class="btn btn-print">
-    <i class="fas fa-print"></i> Print
-  </a>
+<a href="{{ route('clearance.print', $clearance->id) }}" target="_blank" class="btn btn-print">
+<i class="fas fa-print"></i> Print
+</a>
 
-  @if(auth()->user()->role === 'admin')
+@if(auth()->user()->role === 'admin')
 
-  <form action="{{ route('clearance.destroy', $clearance->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this clearance?')">
-    @csrf
-    @method('DELETE')
+<a href="{{ route('clearance.edit', $clearance->id) }}" class="btn btn-print">
+<i class="fas fa-edit"></i> Edit
+</a>
 
-    <button type="submit" class="btn btn-delete">
-      <i class="fas fa-trash"></i>
-    </button>
-  </form>
+<form action="{{ route('clearance.destroy', $clearance->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this clearance?')">
+@csrf
+@method('DELETE')
 
-  @endif
+<button type="submit" class="btn btn-delete">
+<i class="fas fa-trash"></i>
+</button>
+
+</form>
+
+@endif
 
 </div>
-              </td>
+</td>
             </tr>
             @empty
             <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">

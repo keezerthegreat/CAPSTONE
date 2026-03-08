@@ -30,7 +30,7 @@ class ClearanceController extends Controller
 
         return redirect()->back()->with('success', 'Barangay Clearance issued successfully.');
     }
- 
+
     public function destroy($id)
     {
         Clearance::findOrFail($id)->delete();
@@ -41,5 +41,31 @@ class ClearanceController extends Controller
     {
         $clearance = Clearance::findOrFail($id);
         return view('pages.clearance-print', compact('clearance'));
+    }
+
+    // ✅ ADD THIS
+    public function edit($id)
+    {
+        $clearance = Clearance::findOrFail($id);
+        return view('pages.clearance-edit', compact('clearance'));
+    }
+
+    // ✅ ADD THIS
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'resident_name' => 'required|string|max:255',
+            'purpose' => 'required|string|max:255',
+        ]);
+
+        $clearance = Clearance::findOrFail($id);
+
+        $clearance->update([
+            'resident_name' => $request->resident_name,
+            'purpose' => $request->purpose,
+        ]);
+
+        return redirect()->route('clearance.index')
+            ->with('success', 'Clearance updated successfully.');
     }
 }
