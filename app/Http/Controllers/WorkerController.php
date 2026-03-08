@@ -42,7 +42,19 @@ class WorkerController extends Controller
             'position'          => 'required|string|max:255',
             'date_hired'        => 'nullable|date',
             'employment_status' => 'nullable|string|max:50',
+
+            // PHOTO VALIDATION
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
+
+        // HANDLE PHOTO UPLOAD
+        if ($request->hasFile('photo')) {
+
+            $validated['photo'] = $request
+                ->file('photo')
+                ->store('workers', 'public');
+
+        }
 
         Worker::create($validated);
 
@@ -77,7 +89,19 @@ class WorkerController extends Controller
             'position'          => 'required|string|max:255',
             'date_hired'        => 'nullable|date',
             'employment_status' => 'nullable|string|max:50',
+
+            // PHOTO VALIDATION
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
+
+        // UPDATE PHOTO IF NEW ONE IS UPLOADED
+        if ($request->hasFile('photo')) {
+
+            $validated['photo'] = $request
+                ->file('photo')
+                ->store('workers', 'public');
+
+        }
 
         $worker->update($validated);
 

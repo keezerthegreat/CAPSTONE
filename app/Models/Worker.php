@@ -22,6 +22,7 @@ class Worker extends Model
         'position',
         'date_hired',
         'employment_status',
+        'photo' 
     ];
 
     protected $casts = [

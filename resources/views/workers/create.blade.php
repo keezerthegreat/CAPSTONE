@@ -111,12 +111,15 @@
         <p>Ormoc City, Leyte</p>
         <h3>WORKER INFORMATION FORM</h3>
     </div>
-
-    <form method="POST" action="{{ route('workers.store') }}">
+<form method="POST" action="{{ route('workers.store') }}" enctype="multipart/form-data">
         @csrf
 
         <div class="section-title">PERSONAL INFORMATION</div>
 
+<div class="form-group">
+<label>Worker Photo</label>
+<input type="file" name="photo" accept="image/*">
+</div>
         <div class="form-grid">
             <div class="form-group">
                 <label>First Name</label>
