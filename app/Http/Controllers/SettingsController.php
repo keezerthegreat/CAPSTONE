@@ -34,10 +34,12 @@ class SettingsController extends Controller
             ->with('success', 'Employee account for "' . $request->name . '" has been created successfully.');
     }
 
-    public function destroyEmployee(User $user)
+    public function destroyEmployee($id)
     {
+        $user = User::findOrFail($id);
+
         // Prevent deleting your own account
-        if ($user->id === auth()->id()) {
+        if ($user->id == auth()->id()) {
             return redirect()->route('settings.index')
                 ->with('error', 'You cannot delete your own account.');
         }

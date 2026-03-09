@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function () {
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings/employee', [SettingsController::class, 'storeEmployee'])->name('settings.employee.store');
-        Route::delete('/settings/employee/{user}', [SettingsController::class, 'destroyEmployee'])->name('settings.employee.destroy');
+        Route::delete('/settings/employee/{id}', [SettingsController::class, 'destroyEmployee'])->name('settings.employee.destroy');
         Route::post('/settings/theme', [SettingsController::class, 'setTheme'])->name('settings.theme');
 
         // Households
