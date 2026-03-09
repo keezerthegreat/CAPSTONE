@@ -47,7 +47,7 @@ tbody tr:last-child td { border-bottom:none; }
 <div class="bidb-wrap">
   <div class="page-hdr">
     <div>
-      <h1><i class="fas fa-file-alt" style="margin-right:8px"></i>Barangay Clearance</h1>
+      <h1><i class="fas fa-file-alt" style="margin-right:8px"></i>Clearance Form</h1>
       <div class="breadcrumb">Home › <span>Clearance Forms</span></div>
     </div>
   </div>
