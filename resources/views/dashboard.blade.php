@@ -250,33 +250,44 @@ function svgDonut($segments, $size=160, $thickness=30) {
 
   </div>
 
-  <!-- Recent Residents -->
+  <!-- Recent Activity -->
   <div class="card" style="margin-bottom:20px">
     <div class="card-header">
-      <div class="card-title"><i class="fas fa-clock"></i> Recently Added Residents</div>
-      <a href="{{ route('residents.index') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">View All →</a>
+      <div class="card-title"><i class="fas fa-history"></i> Recent Activity</div>
+      <a href="{{ route('audit.index') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">View All →</a>
     </div>
     <table class="recent-table">
       <thead>
-        <tr><th>Name</th><th>Sex / Age</th><th>Classifications</th></tr>
+        <tr><th>User</th><th>Action</th><th>Module</th><th>Description</th><th>Time</th></tr>
       </thead>
       <tbody>
-        @forelse($recentResidents as $r)
+        @forelse($recentLogs as $log)
+        @php
+          $badgeMap = [
+            'created'    => ['bg'=>'#dcfce7','color'=>'#15803d'],
+            'updated'    => ['bg'=>'#dbeafe','color'=>'#1e40af'],
+            'deleted'    => ['bg'=>'#fee2e2','color'=>'#991b1b'],
+            'logged_in'  => ['bg'=>'#fef9c3','color'=>'#854d0e'],
+            'logged_out' => ['bg'=>'#f3e8ff','color'=>'#6b21a8'],
+            'printed'    => ['bg'=>'#e0f2fe','color'=>'#0369a1'],
+          ];
+          $b = $badgeMap[$log->action] ?? ['bg'=>'#f1f5f9','color'=>'#475569'];
+        @endphp
         <tr>
+          <td style="font-weight:600;white-space:nowrap">{{ $log->user_name }}</td>
           <td>
-            <div style="font-weight:600">{{ $r->last_name }}, {{ $r->first_name }}</div>
-            <div style="font-size:11px;color:var(--muted)">ID #{{ $r->id }}</div>
+            <span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700;background:{{ $b['bg'] }};color:{{ $b['color'] }}">
+              {{ ucfirst(str_replace('_',' ',$log->action)) }}
+            </span>
           </td>
-          <td>{{ $r->gender }} / {{ $r->age }} yrs</td>
           <td>
-            @if($r->is_senior)<span class="badge badge-senior">Senior</span>@endif
-            @if($r->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
-            @if($r->is_voter)<span class="badge badge-voter">Voter</span>@endif
-            @if(!$r->is_senior && !$r->is_pwd && !$r->is_voter)<span style="color:var(--muted);font-size:12px">—</span>@endif
+            <span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10.5px;font-weight:600;background:var(--header-bg);color:var(--muted);border:1px solid var(--border)">{{ $log->module }}</span>
           </td>
+          <td style="color:var(--muted);font-size:12px;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $log->description }}</td>
+          <td style="color:var(--muted);font-size:11px;white-space:nowrap">{{ $log->created_at->diffForHumans() }}</td>
         </tr>
         @empty
-        <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">No residents yet.</td></tr>
+        <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">No activity logged yet.</td></tr>
         @endforelse
       </tbody>
     </table>

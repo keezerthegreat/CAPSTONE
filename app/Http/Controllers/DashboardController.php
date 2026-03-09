@@ -6,6 +6,7 @@ use App\Models\Resident;
 use App\Models\Clearance;
 use App\Models\Family;
 use App\Models\Household;
+use App\Models\ActivityLog;
 
 class DashboardController extends Controller
 {
@@ -34,12 +35,12 @@ class DashboardController extends Controller
             'Live-in'   => (clone $living)->where('civil_status', 'Live-in')->count(),
         ];
 
-        $recentResidents = Resident::where('is_deceased', false)->latest()->take(5)->get();
+        $recentLogs = ActivityLog::latest()->take(8)->get();
 
         return view('dashboard', compact(
             'totalResidents', 'male', 'female', 'seniors', 'pwd', 'voters',
             'minors', 'adults', 'clearances', 'totalFamilies', 'totalHouseholds',
-            'civilStatus', 'recentResidents'
+            'civilStatus', 'recentLogs'
         ));
     }
 }
