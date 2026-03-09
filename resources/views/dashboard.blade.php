@@ -28,7 +28,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
 }
 @endphp
 <style>
-:root { --primary:#1a3a6b; --primary-light:#2554a0; --accent:#f0a500; --bg:#f0f4f8; --card:#fff; --text:#1e293b; --muted:#64748b; --border:#e2e8f0; }
+
 .dash-wrap { background:var(--bg); min-height:100vh; padding:28px; }
 .dash-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
 .dash-hdr h1 { font-size:22px; font-weight:700; color:var(--primary); margin:0; }

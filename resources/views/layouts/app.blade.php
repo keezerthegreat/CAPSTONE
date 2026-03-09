@@ -7,8 +7,74 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>
+    /* ── THEME VARIABLES ── */
+    :root {
+      --body-bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --header-bg: #f8fafc;
+      --input-bg: #ffffff;
+      --text-color: #1e293b;
+      --muted-color: #64748b;
+      --border-color: #e2e8f0;
+      --hover-bg: #f8fafc;
+      --topbar-bg: #ffffff;
+      --topbar-border: #e2e8f0;
+      --topbar-text: #1a3a6b;
+      /* Aliases used by individual page styles */
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    [data-theme="dark"] {
+      --body-bg: #0d1527;
+      --card-bg: #1e293b;
+      --header-bg: #162032;
+      --input-bg: #0f1e3d;
+      --text-color: #e2e8f0;
+      --muted-color: #94a3b8;
+      --border-color: #334155;
+      --hover-bg: #162032;
+      --topbar-bg: #1e293b;
+      --topbar-border: #334155;
+      --topbar-text: #e2e8f0;
+      /* Aliases used by individual page styles */
+      --bg: #0d1527;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    /* Global dark mode overrides for hardcoded colors in pages */
+    [data-theme="dark"] .card-header,
+    [data-theme="dark"] .s-card-header { background: #162032 !important; }
+    [data-theme="dark"] input,
+    [data-theme="dark"] select,
+    [data-theme="dark"] textarea {
+      background: #0f1e3d !important;
+      color: #e2e8f0 !important;
+      border-color: #334155 !important;
+    }
+    [data-theme="dark"] .expand-item,
+    [data-theme="dark"] .sc-expand { background: #162032 !important; border-color: #334155 !important; }
+    [data-theme="dark"] tbody tr:hover { background: #162032 !important; }
+    [data-theme="dark"] thead tr { background: #162032 !important; }
+    [data-theme="dark"] .filter-select { background: #0f1e3d !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+    [data-theme="dark"] .search-wrap input { background: #0f1e3d !important; color: #e2e8f0 !important; }
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .res-stat,
+    [data-theme="dark"] .fam-stat { background: #1e293b !important; border-color: #334155 !important; }
+    [data-theme="dark"] .dash-wrap { background: var(--bg) !important; }
+    /* Workers page (Tailwind-based) dark overrides */
+    [data-theme="dark"] table.w-full { background: #1e293b !important; color: #e2e8f0 !important; }
+    [data-theme="dark"] thead.bg-slate-200 { background: #162032 !important; color: #94a3b8 !important; }
+    [data-theme="dark"] tr.border-t { border-color: #334155 !important; }
+    [data-theme="dark"] tr.border-t:hover { background: #162032 !important; }
+    [data-theme="dark"] div.bg-white { background: #1e293b !important; color: #e2e8f0 !important; }
+    [data-theme="dark"] .hover\:bg-slate-50:hover { background: #162032 !important; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--body-bg); transition: background .3s, color .3s; }
 
     /* ── SIDEBAR ── */
     .sidebar {
@@ -78,12 +144,13 @@
 
     /* ── TOP BAR ── */
     .topbar {
-      height: 56px; background: #fff;
-      border-bottom: 1px solid #e2e8f0;
+      height: 56px; background: var(--topbar-bg);
+      border-bottom: 1px solid var(--topbar-border);
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 24px; position: sticky; top: 0; z-index: 50;
+      transition: background .3s, border-color .3s;
     }
-    .topbar-title { font-size: 15px; font-weight: 700; color: #1a3a6b; }
+    .topbar-title { font-size: 15px; font-weight: 700; color: var(--topbar-text); }
     .topbar-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #64748b; }
     .topbar-date { font-size: 12px; color: #94a3b8; }
     .topbar-user {
@@ -173,6 +240,13 @@
         <i class="fas fa-envelope"></i> Read Message
       </a>
 
+      @if(auth()->user()->role === 'admin')
+      <a href="{{ route('settings.index') }}"
+         class="nav-item {{ request()->is('settings*') ? 'active' : '' }}">
+        <i class="fas fa-cog"></i> Settings
+      </a>
+      @endif
+
     </nav>
 
     <!-- Footer / Logout -->
@@ -214,6 +288,10 @@
 </div>
 
 <script>
+  // Apply saved theme on load
+  const savedTheme = localStorage.getItem('theme') || '{{ session("theme", "light") }}';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
   // Live date in topbar
   const d = new Date();
   document.getElementById('topbar-date').textContent = d.toLocaleDateString('en-PH', {weekday:'short', year:'numeric', month:'short', day:'numeric'});

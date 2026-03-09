@@ -10,6 +10,7 @@ use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\FamilyController;
+use App\Http\Controllers\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,12 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::middleware('admin')->group(function () {
+
+        // Settings
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings/employee', [SettingsController::class, 'storeEmployee'])->name('settings.employee.store');
+        Route::delete('/settings/employee/{user}', [SettingsController::class, 'destroyEmployee'])->name('settings.employee.destroy');
+        Route::post('/settings/theme', [SettingsController::class, 'setTheme'])->name('settings.theme');
 
         // Households
         Route::resource('households', HouseholdController::class);
