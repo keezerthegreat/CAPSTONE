@@ -124,7 +124,7 @@ tbody tr:last-child td { border-bottom:none; }
                 <form action="{{ route('workers.destroy', $worker->id) }}" method="POST" style="display:inline" onsubmit="return confirmDelete(this,'Delete {{ $worker->first_name }} {{ $worker->last_name }}? This action cannot be undone.')">
                   @csrf
                   @method('DELETE')
-                  <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i></button>
+                  <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
                 </form>
                 @endif
               </div>

@@ -259,7 +259,7 @@ tbody tr:last-child td { border-bottom: none; }
                   @csrf
                   @method('DELETE')
                   <button type="submit" class="btn btn-sm btn-delete">
-                    <i class="fas fa-trash"></i>
+                    <i class="fas fa-trash"></i> Delete
                   </button>
                 </form>
 

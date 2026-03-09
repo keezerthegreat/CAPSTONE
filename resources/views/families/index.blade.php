@@ -155,7 +155,7 @@ tbody tr:last-child td { border-bottom:none; }
                   <form method="POST" action="{{ route('families.destroy', $family->id) }}" style="display:inline" onsubmit="return confirmDelete(this,'Delete the {{ addslashes($family->family_name) }} family record? This cannot be undone.')" onclick="event.stopPropagation()">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-delete"><i class="fas fa-trash"></i></button>
+                    <button type="submit" class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Delete</button>
                   </form>
                 @endif
               </div>

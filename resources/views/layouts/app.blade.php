@@ -483,7 +483,6 @@
     </div>
   </div>
 </div>
-
 <script>
   // Apply saved theme immediately on load (before paint)
   (function() {

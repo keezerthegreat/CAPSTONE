@@ -230,8 +230,7 @@ tbody tr:last-child td { border-bottom:none; }
         @method('DELETE')
 
         <button type="submit" class="btn btn-sm btn-delete">
-          <i class="fas fa-trash"></i>
-        </button>
+          <i class="fas fa-trash"></i> Delete</button>
 
       </form>
 
