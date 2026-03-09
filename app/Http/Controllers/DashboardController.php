@@ -37,10 +37,41 @@ class DashboardController extends Controller
 
         $recentLogs = ActivityLog::latest()->take(8)->get();
 
+        // Residents per sitio (via household)
+        $bySitio = Resident::where('residents.is_deceased', false)
+            ->join('households', 'residents.household_id', '=', 'households.id')
+            ->selectRaw('households.sitio, COUNT(*) as total')
+            ->groupBy('households.sitio')
+            ->orderByDesc('total')
+            ->get();
+
+        // Residents with no household assigned
+        $noSitio = Resident::where('is_deceased', false)->whereNull('household_id')->count();
+
+        // Households per sitio
+        $householdsBySitio = Household::selectRaw('sitio, COUNT(*) as total')
+            ->groupBy('sitio')
+            ->orderByDesc('total')
+            ->get();
+
+        // Families per sitio (via household)
+        $familiesBySitio = Family::join('households', 'families.household_id', '=', 'households.id')
+            ->selectRaw('households.sitio, COUNT(*) as total')
+            ->groupBy('households.sitio')
+            ->orderByDesc('total')
+            ->get();
+
+        // Households by residency type
+        $householdsByType = [
+            'Residential' => Household::where('residency_type', 'Residential')->count(),
+            'Commercial' => Household::where('residency_type', 'Commercial')->count(),
+            'Rented'     => Household::where('residency_type', 'Rented')->count(),
+        ];
+
         return view('dashboard', compact(
             'totalResidents', 'male', 'female', 'seniors', 'pwd', 'voters',
             'minors', 'adults', 'clearances', 'totalFamilies', 'totalHouseholds',
-            'civilStatus', 'recentLogs'
+            'civilStatus', 'recentLogs', 'bySitio', 'noSitio', 'householdsBySitio', 'householdsByType', 'familiesBySitio'
         ));
     }
 }

@@ -218,23 +218,35 @@
       width: var(--sidebar-w); height: 100vh;
       background: linear-gradient(175deg, #0a1628 0%, #0d1e3a 60%, #0f1e3d 100%);
       display: flex; flex-direction: column;
-      z-index: 100; overflow-y: auto;
+      z-index: 100; overflow: hidden;
       border-right: 1px solid rgba(255,255,255,.04);
     }
 
     .sidebar-brand {
-      padding: 16px 14px 15px;
+      padding: 20px 0 18px;
       border-bottom: 1px solid rgba(255,255,255,.06);
-      display: flex; align-items: center; gap: 10px;
-      text-decoration: none; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; text-decoration: none; flex-shrink: 0;
+      width: 100%; box-sizing: border-box;
     }
-    .brand-icon {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: linear-gradient(135deg, #f0a500 0%, #d48900 100%);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 11px; color: #fff;
-      flex-shrink: 0; letter-spacing: .3px;
-      box-shadow: 0 2px 10px rgba(240,165,0,.3);
+    .brand-logo {
+      width: 72px; height: 72px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 6px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,.3);
+      margin: 0 auto;
+    }
+    .brand-logo img {
+      width: 100%; height: 100%;
+      object-fit: contain; display: block;
+      border-radius: 50%;
+    }
+    .brand-text {
+      text-align: center;
+      width: 100%;
     }
     .brand-text .name {
       font-size: 12.5px; font-weight: 700; color: #fff;
@@ -319,6 +331,35 @@
     }
     .btn-logout i { font-size: 11px; }
     .btn-logout:hover { background: rgba(220,38,38,.15); color: #fca5a5; }
+    .theme-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 10px; margin-bottom: 4px;
+    }
+    .theme-toggle-label {
+      font-size: 11px; font-weight: 500; color: rgba(255,255,255,.3);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .theme-toggle-label i { font-size: 10px; }
+    .theme-toggle-btn {
+      position: relative; width: 40px; height: 20px;
+      background: rgba(255,255,255,.1); border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.12); cursor: pointer;
+      transition: background .2s, border-color .2s; flex-shrink: 0;
+      padding: 0;
+    }
+    .theme-toggle-btn.dark { background: rgba(91,141,238,.35); border-color: rgba(91,141,238,.5); }
+    .theme-toggle-knob {
+      position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: rgba(255,255,255,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 7px; transition: transform .2s, background .2s;
+      pointer-events: none;
+    }
+    .theme-toggle-btn.dark .theme-toggle-knob {
+      transform: translateX(20px);
+      background: #93bbf7;
+    }
 
     /* ── MAIN CONTENT ── */
     .main-content { margin-left: var(--sidebar-w); min-height: 100vh; }
@@ -437,7 +478,9 @@
 
     <!-- Brand -->
     <a href="{{ route('dashboard') }}" class="sidebar-brand">
-      <div class="brand-icon">BC</div>
+      <div class="brand-logo">
+        <img src="{{ asset('images/cogon.png') }}" alt="Barangay Cogon Logo">
+      </div>
       <div class="brand-text">
         <div class="name">Barangay Cogon</div>
         <div class="sub">BIDB &middot; Ormoc City, Leyte</div>
@@ -518,6 +561,16 @@
           <div class="sidebar-user-role">{{ ucfirst(auth()->user()->role ?? 'staff') }}</div>
         </div>
       </div>
+      <div class="theme-toggle-row">
+        <span class="theme-toggle-label" id="themeLabel">
+          <i class="fas fa-sun"></i> Light Mode
+        </span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle dark/light mode">
+          <span class="theme-toggle-knob">
+            <i class="fas fa-sun" id="themeKnobIcon"></i>
+          </span>
+        </button>
+      </div>
       <form method="POST" action="{{ route('logout') }}">
         @csrf
         <button type="submit" class="btn-logout">
@@ -579,6 +632,41 @@
     const theme = localStorage.getItem('theme') || '{{ session("theme", "light") }}';
     document.documentElement.setAttribute('data-theme', theme);
   })();
+
+  function applyThemeUI(theme) {
+    const btn  = document.getElementById('themeToggleBtn');
+    const lbl  = document.getElementById('themeLabel');
+    const icon = document.getElementById('themeKnobIcon');
+    if (!btn) return;
+    if (theme === 'dark') {
+      btn.classList.add('dark');
+      lbl.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+      icon.className = 'fas fa-moon';
+    } else {
+      btn.classList.remove('dark');
+      lbl.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+      icon.className = 'fas fa-sun';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    applyThemeUI(current);
+
+    document.getElementById('themeToggleBtn').addEventListener('click', function() {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      applyThemeUI(next);
+
+      // Sync with server session (best-effort, no page reload)
+      fetch('/settings/theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]') ? document.querySelector('meta[name=csrf-token]').content : '{{ csrf_token() }}' },
+        body: JSON.stringify({ theme: next })
+      }).catch(function(){});
+    });
+  });
 
   const d = new Date();
   document.getElementById('topbar-date').textContent = d.toLocaleDateString('en-PH', {weekday:'short', year:'numeric', month:'short', day:'numeric'});

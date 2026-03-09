@@ -84,7 +84,7 @@ input::placeholder { color:#94a3b8; }
             <label>Classification <span class="req">*</span></label>
             <select name="residency_type" required>
               <option value="">Select...</option>
-              @foreach(['Residency','Commercial','Rented'] as $rt)
+              @foreach(['Residential','Commercial','Rented'] as $rt)
                 <option value="{{ $rt }}" {{ old('residency_type')==$rt ? 'selected':'' }}>{{ $rt }}</option>
               @endforeach
             </select>

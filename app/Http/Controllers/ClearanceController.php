@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Clearance;
+use App\Models\Resident;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -12,7 +13,10 @@ class ClearanceController extends Controller
     public function index()
     {
         $clearances = Clearance::latest()->get();
-        return view('pages.clearance', compact('clearances'));
+        $residents = Resident::where('is_deceased', false)
+            ->orderBy('last_name')->orderBy('first_name')
+            ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay']);
+        return view('pages.clearance', compact('clearances', 'residents'));
     }
 
     public function store(Request $request)

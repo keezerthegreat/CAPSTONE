@@ -47,24 +47,6 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
 .badge-admin    { background: #eff6ff; color: #1d4ed8; }
 .badge-employee { background: #f0fdf4; color: #166534; }
 
-/* Theme toggle */
-.theme-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
-.theme-card { border: 2px solid var(--border-color, #e2e8f0); border-radius: 12px; padding: 16px; cursor: pointer; text-align: center; transition: all .2s; background: var(--card-bg, #fff); }
-.theme-card:hover { border-color: #1a3a6b; }
-.theme-card.active { border-color: #16a34a; background: #f0fdf4; }
-.theme-preview { height: 60px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,.08); overflow: hidden; position: relative; }
-.preview-light { background: linear-gradient(135deg, #f0f4f8 60%, #fff 100%); }
-.preview-dark  { background: linear-gradient(135deg, #0f1e3d 60%, #1a3a6b 100%); }
-.preview-sidebar-l { position: absolute; left: 0; top: 0; bottom: 0; width: 28%; background: #0f1e3d; }
-.preview-sidebar-d { position: absolute; left: 0; top: 0; bottom: 0; width: 28%; background: #060e1f; }
-.preview-topbar-l { position: absolute; top: 0; left: 28%; right: 0; height: 30%; background: #fff; border-bottom: 1px solid #e2e8f0; }
-.preview-topbar-d { position: absolute; top: 0; left: 28%; right: 0; height: 30%; background: #1e293b; border-bottom: 1px solid #334155; }
-.theme-name { font-size: 13px; font-weight: 700; color: var(--text-color, #1e293b); }
-.theme-desc { font-size: 11px; color: var(--muted-color, #64748b); margin-top: 2px; }
-.theme-card.active .theme-name { color: #16a34a; }
-.check-icon { display: none; color: #16a34a; font-size: 16px; margin-bottom: 4px; }
-.theme-card.active .check-icon { display: block; }
-
 /* Page header */
 .page-hdr { margin-bottom: 24px; }
 .page-hdr h1 { font-size: 22px; font-weight: 700; color: var(--text-color, #1e293b); margin: 0; }
@@ -129,40 +111,6 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
                 </div>
             </div>
 
-            {{-- Appearance --}}
-            <div class="s-card">
-                <div class="s-card-header">
-                    <i class="fas fa-palette"></i>
-                    <span class="s-card-title">Appearance</span>
-                </div>
-                <div class="s-card-body">
-                    <p style="font-size:13px;color:var(--muted-color,#64748b);margin-bottom:14px">Choose your preferred display theme.</p>
-                    <div class="theme-options">
-
-                        <div class="theme-card {{ $theme === 'light' ? 'active' : '' }}" onclick="setTheme('light')">
-                            <i class="fas fa-check-circle check-icon"></i>
-                            <div class="theme-preview preview-light">
-                                <div class="preview-sidebar-l"></div>
-                                <div class="preview-topbar-l"></div>
-                            </div>
-                            <div class="theme-name">☀️ Light</div>
-                            <div class="theme-desc">Clean & bright</div>
-                        </div>
-
-                        <div class="theme-card {{ $theme === 'dark' ? 'active' : '' }}" onclick="setTheme('dark')">
-                            <i class="fas fa-check-circle check-icon"></i>
-                            <div class="theme-preview preview-dark">
-                                <div class="preview-sidebar-d"></div>
-                                <div class="preview-topbar-d"></div>
-                            </div>
-                            <div class="theme-name">🌙 Dark</div>
-                            <div class="theme-desc">Easy on the eyes</div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         {{-- RIGHT COLUMN - Employee Accounts List --}}
@@ -216,22 +164,4 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
     </div>
 </div>
 
-<script>
-function setTheme(theme) {
-    fetch('{{ route("settings.theme") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ theme })
-    }).then(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        // Update active card UI
-        document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    });
-}
-</script>
 @endsection

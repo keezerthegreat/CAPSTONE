@@ -31,8 +31,21 @@ tbody tr { cursor:pointer; }
 tbody tr:hover { background: #f0f7ff; }
 tbody tr:last-child td { border-bottom: none; }
 .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; margin: 1px; }
-.badge-senior { background: #fef3c7; color: #92400e; }
-.badge-pwd    { background: #fee2e2; color: #991b1b; }
+.badge-senior  { background: #fef3c7; color: #92400e; }
+.badge-pwd     { background: #fee2e2; color: #991b1b; }
+
+/* Pending verification section */
+.pending-card { background: #fffbeb; border-radius: 14px; border: 1.5px solid #fcd34d; box-shadow: 0 1px 6px rgba(0,0,0,.06); margin-bottom: 24px; overflow: hidden; }
+.pending-header { padding: 14px 20px; border-bottom: 1px solid #fcd34d; background: #fef3c7; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pending-title { font-weight: 700; color: #92400e; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.pending-count { background: #f59e0b; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.pending-note { font-size: 12px; color: #b45309; }
+.btn-approve { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.btn-approve:hover { background: #bbf7d0; }
+.btn-reject  { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+.btn-reject:hover  { background: #ffe4e6; }
+.pending-table thead tr { background: #fef9c3; }
+.pending-table td { background: transparent; }
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; transition: all .15s; text-decoration: none; }
 .btn-primary { background: var(--primary); color: #fff; }
 .btn-primary:hover { background: var(--primary-light); }
@@ -93,8 +106,147 @@ tbody tr:last-child td { border-bottom: none; }
     <div class="res-stat"><div class="slabel">Total Residents</div><div class="svalue">{{ $residents->where('is_deceased', false)->count() }}</div></div>
     <div class="res-stat"><div class="slabel">Senior Citizens</div><div class="svalue">{{ $residents->where('is_senior', true)->where('is_deceased', false)->count() }}</div></div>
     <div class="res-stat"><div class="slabel">Persons w/ Disability</div><div class="svalue">{{ $residents->where('is_pwd', true)->where('is_deceased', false)->count() }}</div></div>
-    <div class="res-stat"><div class="slabel">Registered Voters</div><div class="svalue">{{ $residents->where('is_voter', true)->where('is_deceased', false)->count() }}</div></div>
+    @php $totalPendingCount = $pendingResidents->count() + $pendingEdits->count(); @endphp
+    <div class="res-stat" style="{{ $totalPendingCount > 0 ? 'border-color:#fcd34d;background:#fffbeb;' : '' }}">
+      <div class="slabel" style="{{ $totalPendingCount > 0 ? 'color:#92400e;' : '' }}">Pending Verification</div>
+      <div class="svalue" style="{{ $totalPendingCount > 0 ? 'color:#d97706;' : '' }}">{{ $totalPendingCount }}</div>
+    </div>
   </div>
+
+  @php $totalPending = $pendingResidents->count() + $pendingEdits->count(); @endphp
+  @if($totalPending > 0)
+  <div class="pending-card">
+    <div class="pending-header">
+      <div class="pending-title">
+        <i class="fas fa-clock"></i>
+        Pending Verification
+        <span class="pending-count">{{ $totalPending }}</span>
+      </div>
+      <span class="pending-note">
+        @if(auth()->user()->role === 'admin')
+          <i class="fas fa-shield-alt" style="margin-right:4px"></i>As admin, you can approve or reject these records.
+        @else
+          <i class="fas fa-eye" style="margin-right:4px"></i>These records are awaiting admin approval.
+        @endif
+      </span>
+    </div>
+    <div class="table-wrap">
+      <table class="pending-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Resident</th>
+            <th>Sex / Age</th>
+            <th>Civil Status</th>
+            <th>Address</th>
+            <th>Submitted</th>
+            @if(auth()->user()->role === 'admin')
+            <th>Actions</th>
+            @endif
+          </tr>
+        </thead>
+        <tbody>
+
+          {{-- New resident submissions --}}
+          @foreach($pendingResidents as $pr)
+          <tr>
+            <td>
+              <span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap">
+                <i class="fas fa-user-plus" style="margin-right:3px"></i>New Resident
+              </span>
+            </td>
+            <td>
+              <div style="font-weight:700">{{ $pr->last_name }}, {{ $pr->first_name }} {{ $pr->middle_name }}</div>
+              <div style="font-size:11px;color:var(--muted)">ID #{{ $pr->id }}</div>
+            </td>
+            <td>{{ $pr->gender }} / {{ $pr->age }} yrs</td>
+            <td>{{ $pr->civil_status ?? '—' }}</td>
+            <td>
+              <div>{{ $pr->address ?? '—' }}</div>
+              <div style="font-size:11px;color:var(--muted)">{{ $pr->barangay }}, {{ $pr->city }}</div>
+            </td>
+            <td style="font-size:12px;color:var(--muted)">{{ $pr->created_at->format('M d, Y') }}</td>
+            @if(auth()->user()->role === 'admin')
+            <td>
+              <div class="action-btns">
+                <form method="POST" action="{{ route('residents.approve', $pr->id) }}" style="display:inline">
+                  @csrf
+                  <button type="submit" class="btn btn-sm btn-approve"><i class="fas fa-check"></i> Approve</button>
+                </form>
+                <form method="POST" action="{{ route('residents.reject', $pr->id) }}" style="display:inline"
+                  onsubmit="return confirm('Reject and remove this pending record for {{ addslashes($pr->first_name) }} {{ addslashes($pr->last_name) }}?')">
+                  @csrf
+                  <button type="submit" class="btn btn-sm btn-reject"><i class="fas fa-times"></i> Reject</button>
+                </form>
+              </div>
+            </td>
+            @endif
+          </tr>
+          @endforeach
+
+          {{-- Pending edit requests --}}
+          @foreach($pendingEdits as $pe)
+          @php $pr = $pe->resident; $pd = $pe->proposed_data; @endphp
+          <tr>
+            <td>
+              <span style="background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap">
+                <i class="fas fa-pencil-alt" style="margin-right:3px"></i>Edit Request
+              </span>
+            </td>
+            <td>
+              <div style="font-weight:700">{{ $pr->last_name }}, {{ $pr->first_name }} {{ $pr->middle_name }}</div>
+              <div style="font-size:11px;color:var(--muted)">ID #{{ $pr->id }} · By {{ $pe->submitted_by_name }}</div>
+              <button type="button" onclick="toggleEditDiff({{ $pe->id }})"
+                style="font-size:10px;color:#6d28d9;background:none;border:none;cursor:pointer;padding:0;margin-top:2px;font-family:inherit">
+                <i class="fas fa-eye" style="margin-right:3px"></i>View proposed changes
+              </button>
+              <div id="edit-diff-{{ $pe->id }}" style="display:none;margin-top:8px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:10px;font-size:11px;">
+                @php
+                  $fields = ['last_name'=>'Last Name','first_name'=>'First Name','middle_name'=>'Middle Name','gender'=>'Sex','birthdate'=>'Birthdate','age'=>'Age','civil_status'=>'Civil Status','address'=>'Address','barangay'=>'Barangay','city'=>'City','province'=>'Province','occupation'=>'Occupation','education_level'=>'Education'];
+                @endphp
+                @foreach($fields as $key => $label)
+                  @php $old = $pr->$key ?? '—'; $new = $pd[$key] ?? '—'; @endphp
+                  @if((string)$old !== (string)$new)
+                  <div style="display:flex;gap:6px;margin-bottom:4px;align-items:baseline">
+                    <span style="font-weight:700;color:#6d28d9;min-width:90px">{{ $label }}:</span>
+                    <span style="color:#be123c;text-decoration:line-through">{{ $old }}</span>
+                    <span style="color:#64748b">→</span>
+                    <span style="color:#166534;font-weight:600">{{ $new }}</span>
+                  </div>
+                  @endif
+                @endforeach
+              </div>
+            </td>
+            <td>{{ $pr->gender }} / {{ $pr->age }} yrs</td>
+            <td>{{ $pr->civil_status ?? '—' }}</td>
+            <td>
+              <div>{{ $pr->address ?? '—' }}</div>
+              <div style="font-size:11px;color:var(--muted)">{{ $pr->barangay }}, {{ $pr->city }}</div>
+            </td>
+            <td style="font-size:12px;color:var(--muted)">{{ $pe->created_at->format('M d, Y') }}</td>
+            @if(auth()->user()->role === 'admin')
+            <td>
+              <div class="action-btns">
+                <form method="POST" action="{{ route('residents.approveEdit', $pe->id) }}" style="display:inline">
+                  @csrf
+                  <button type="submit" class="btn btn-sm btn-approve"><i class="fas fa-check"></i> Approve</button>
+                </form>
+                <form method="POST" action="{{ route('residents.rejectEdit', $pe->id) }}" style="display:inline"
+                  onsubmit="return confirm('Reject this proposed edit for {{ addslashes($pr->first_name) }} {{ addslashes($pr->last_name) }}?')">
+                  @csrf
+                  <button type="submit" class="btn btn-sm btn-reject"><i class="fas fa-times"></i> Reject</button>
+                </form>
+              </div>
+            </td>
+            @endif
+          </tr>
+          @endforeach
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+  @endif
 
   <div class="card">
     <div class="filter-area">
@@ -249,12 +401,11 @@ tbody tr:last-child td { border-bottom: none; }
                   <i class="fas fa-eye"></i> View
                 </button>
 
-                @if(auth()->user()->role == 'admin')
-
                 <a href="{{ route('residents.edit', $resident->id) }}" class="btn btn-sm btn-edit" onclick="event.stopPropagation()">
                   <i class="fas fa-edit"></i> Edit
                 </a>
 
+                @if(auth()->user()->role == 'admin')
                 <form method="POST" action="{{ route('residents.destroy', $resident->id) }}" style="display:inline" onsubmit="return confirmDelete(this,'Delete {{ addslashes($resident->first_name) }} {{ addslashes($resident->last_name) }}\'s resident record? This cannot be undone.')" onclick="event.stopPropagation()">
                   @csrf
                   @method('DELETE')
@@ -262,7 +413,6 @@ tbody tr:last-child td { border-bottom: none; }
                     <i class="fas fa-trash"></i> Delete
                   </button>
                 </form>
-
                 @endif
 
               </div>
@@ -350,6 +500,11 @@ tbody tr:last-child td { border-bottom: none; }
 </div>
 
 <script>
+function toggleEditDiff(id) {
+  const el = document.getElementById('edit-diff-' + id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
 function openResidentModal(r) {
   document.getElementById('residentModal').classList.add('open');
   document.getElementById('rm-last').textContent    = r.last_name   || '—';

@@ -97,8 +97,8 @@ tbody tr:last-child td { border-bottom:none; }
       <div class="svalue">{{ $households->count() }}</div>
     </div>
     <div class="res-stat">
-      <div class="slabel">Residency</div>
-      <div class="svalue">{{ $households->where('residency_type','Residency')->count() }}</div>
+      <div class="slabel">Residential</div>
+      <div class="svalue">{{ $households->where('residency_type','Residential')->count() }}</div>
     </div>
     <div class="res-stat">
       <div class="slabel">Commercial</div>
@@ -133,7 +133,7 @@ tbody tr:last-child td { border-bottom:none; }
           </button>
           <div class="flt-dropdown" id="hh-dd-residency">
             <div class="flt-option selected" data-val="" onclick="setHhFlt('residency','','Classification')">All</div>
-            <div class="flt-option" data-val="Residency" onclick="setHhFlt('residency','Residency','Residency')">Residency</div>
+            <div class="flt-option" data-val="Residential" onclick="setHhFlt('residency','Residential','Residential')">Residential</div>
             <div class="flt-option" data-val="Commercial" onclick="setHhFlt('residency','Commercial','Commercial')">Commercial</div>
             <div class="flt-option" data-val="Rented" onclick="setHhFlt('residency','Rented','Rented')">Rented</div>
           </div>
@@ -192,8 +192,8 @@ tbody tr:last-child td { border-bottom:none; }
             </td>
             <td><span style="font-weight:700">{{ $hh->member_count }}</span> <span style="color:var(--muted);font-size:12px">member(s)</span></td>
             <td>
-              @if($hh->residency_type == 'Residency')
-                <span class="badge badge-perm">Residency</span>
+              @if($hh->residency_type == 'Residential')
+                <span class="badge badge-perm">Residential</span>
               @elseif($hh->residency_type == 'Commercial')
                 <span class="badge badge-trans">Commercial</span>
               @else
@@ -214,26 +214,21 @@ tbody tr:last-child td { border-bottom:none; }
       <i class="fas fa-eye"></i> View
     </button>
 
+    <a href="{{ route('households.edit', $hh->id) }}" class="btn btn-sm btn-edit" onclick="event.stopPropagation()">
+      <i class="fas fa-edit"></i> Edit
+    </a>
+
     @if(auth()->user()->role === 'admin')
-
-      <a href="{{ route('households.edit', $hh->id) }}" class="btn btn-sm btn-edit" onclick="event.stopPropagation()">
-        <i class="fas fa-edit"></i> Edit
-      </a>
-
       <form method="POST"
             action="{{ route('households.destroy', $hh->id) }}"
             style="display:inline"
             onsubmit="return confirmDelete(this,'Delete Household #{{ $hh->household_number }}? All linked data may be affected.')"
             onclick="event.stopPropagation()">
-
         @csrf
         @method('DELETE')
-
         <button type="submit" class="btn btn-sm btn-delete">
           <i class="fas fa-trash"></i> Delete</button>
-
       </form>
-
     @endif
 
   </div>
@@ -408,9 +403,7 @@ function openHouseholdModal(h) {
     </table>`;
   }
 
-  @if(auth()->user()->role === 'admin')
   document.getElementById('hm-edit-link').innerHTML = `<a href="/households/${h.id}/edit" style="color:var(--primary);font-weight:600;text-decoration:none"><i class="fas fa-edit" style="margin-right:4px"></i>Edit this household</a>`;
-  @endif
 }
 function closeHouseholdModal() {
   document.getElementById('householdModal').classList.remove('open');

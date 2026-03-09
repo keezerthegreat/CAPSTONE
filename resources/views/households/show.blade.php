@@ -55,7 +55,7 @@
           <div class="value" style="font-weight:700;color:var(--primary);font-size:16px">{{ $household->household_number }}</div>
         </div>
         <div class="info-item">
-          <div class="label">Residency Type</div>
+          <div class="label">Residential Type</div>
           <div class="value">
             @if($household->residency_type == 'Permanent')
               <span class="badge badge-perm">Permanent</span>

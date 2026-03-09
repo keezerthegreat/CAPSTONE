@@ -42,6 +42,16 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
     </div>
   @endif
 
+  @if(auth()->user()->role !== 'admin')
+  <div style="background:#eff6ff;border:1.5px solid #bfdbfe;color:#1e40af;padding:14px 18px;border-radius:10px;margin-bottom:20px;font-size:13px;display:flex;align-items:flex-start;gap:10px">
+    <i class="fas fa-info-circle" style="margin-top:2px;font-size:15px;flex-shrink:0"></i>
+    <div>
+      <strong>Edit Request Mode:</strong> Your changes will be submitted for admin verification.
+      The current resident record will <strong>not change</strong> until an admin approves your proposed edits.
+    </div>
+  </div>
+  @endif
+
   <form method="POST" action="{{ route('residents.update', $resident->id) }}">
     @csrf
     @method('PUT')
@@ -213,7 +223,11 @@ document.getElementById('isDeceased').addEventListener('change', function() {
 
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
-      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+      @if(auth()->user()->role === 'admin')
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+      @else
+        <button type="submit" class="btn btn-primary" style="background:#2563eb"><i class="fas fa-paper-plane"></i> Submit for Verification</button>
+      @endif
     </div>
 
   </form>

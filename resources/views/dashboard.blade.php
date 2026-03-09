@@ -34,7 +34,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
 .dash-hdr .sub { font-size:12px; color:var(--muted); margin-top:3px; font-weight:500; }
 
 /* Summary Cards */
-.summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+.summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; align-items:start; }
 .summary-card { background:var(--card); border-radius:14px; border:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.05); padding:20px; position:relative; cursor:pointer; transition:box-shadow .2s,transform .2s; }
 .summary-card:hover { box-shadow:0 4px 18px rgba(26,58,107,.11); transform:translateY(-2px); }
 .summary-card .sc-icon { width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:12px; }
@@ -43,13 +43,14 @@ function svgDonut($segments, $size=160, $thickness=30) {
 .summary-card .sc-sub { font-size:11.5px; color:var(--muted); margin-top:5px; }
 
 /* Tooltip */
-.sc-tooltip { display:none; position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; border-radius:10px; padding:11px 14px; font-size:11.5px; z-index:100; width:210px; box-shadow:0 8px 24px rgba(0,0,0,.22); pointer-events:none; }
-.sc-tooltip::before { content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%); border:5px solid transparent; border-bottom-color:#0f172a; border-top:none; }
+.sc-tooltip { display:none; position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%); background:var(--card); color:var(--text); border-radius:10px; padding:11px 14px; font-size:11.5px; z-index:100; width:210px; box-shadow:0 8px 24px rgba(0,0,0,.18); border:1px solid var(--border); pointer-events:none; }
+.sc-tooltip::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); border:5px solid transparent; border-bottom-color:var(--border); border-top:none; }
+.sc-tooltip::after { content:''; position:absolute; top:-4px; left:50%; transform:translateX(-50%); border:5px solid transparent; border-bottom-color:var(--card); border-top:none; }
 .summary-card:hover .sc-tooltip { display:block; }
-.sc-tooltip-row { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(255,255,255,.08); }
+.sc-tooltip-row { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid var(--border); }
 .sc-tooltip-row:last-child { border-bottom:none; }
-.sc-tooltip-row .tl { color:#94a3b8; }
-.sc-tooltip-row .tv { font-weight:700; color:#fff; }
+.sc-tooltip-row .tl { color:var(--muted); }
+.sc-tooltip-row .tv { font-weight:700; color:var(--primary); }
 
 /* Expand */
 .sc-expand { display:none; background:var(--header-bg); border-top:1px solid var(--border); margin:16px -20px -20px; padding:14px 20px; border-radius:0 0 14px 14px; }
@@ -141,54 +142,80 @@ function svgDonut($segments, $size=160, $thickness=30) {
         <div class="sc-tooltip-row"><span class="tl" style="color:#94a3b8;font-style:italic">Click to expand</span></div>
       </div>
       <div class="sc-expand" id="residentExpand">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Detailed Breakdown</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Residents by Sitio</div>
         <div class="expand-grid">
+          @forelse($bySitio as $row)
           <div class="expand-item">
-            <div class="ei-val">{{ $seniors }}</div>
-            <div class="ei-label">Seniors</div>
-            <div class="ei-pct">{{ $totalResidents > 0 ? round(($seniors/$totalResidents)*100,1) : 0 }}%</div>
+            <div class="ei-val">{{ $row->total }}</div>
+            <div class="ei-label">{{ $row->sitio }}</div>
+            <div class="ei-pct">{{ $totalResidents > 0 ? round(($row->total/$totalResidents)*100,1) : 0 }}%</div>
           </div>
+          @empty
+          <div class="expand-item" style="grid-column:span 3">
+            <div class="ei-label" style="padding:8px 0">No sitio data available</div>
+          </div>
+          @endforelse
+          @if($noSitio > 0)
           <div class="expand-item">
-            <div class="ei-val">{{ $pwd }}</div>
-            <div class="ei-label">PWD</div>
-            <div class="ei-pct">{{ $totalResidents > 0 ? round(($pwd/$totalResidents)*100,1) : 0 }}%</div>
+            <div class="ei-val" style="color:var(--muted)">{{ $noSitio }}</div>
+            <div class="ei-label">Unassigned</div>
+            <div class="ei-pct">{{ $totalResidents > 0 ? round(($noSitio/$totalResidents)*100,1) : 0 }}%</div>
           </div>
-          <div class="expand-item">
-            <div class="ei-val">{{ $voters }}</div>
-            <div class="ei-label">Voters</div>
-            <div class="ei-pct">{{ $totalResidents > 0 ? round(($voters/$totalResidents)*100,1) : 0 }}%</div>
-          </div>
-          <div class="expand-item">
-            <div class="ei-val">{{ $minors }}</div>
-            <div class="ei-label">Minors</div>
-            <div class="ei-pct">{{ $totalResidents > 0 ? round(($minors/$totalResidents)*100,1) : 0 }}%</div>
-          </div>
-          <div class="expand-item">
-            <div class="ei-val">{{ $adults }}</div>
-            <div class="ei-label">Adults</div>
-            <div class="ei-pct">{{ $totalResidents > 0 ? round(($adults/$totalResidents)*100,1) : 0 }}%</div>
-          </div>
-          <div class="expand-item">
-            <div class="ei-val">{{ $clearances }}</div>
-            <div class="ei-label">Clearances</div>
-            <div class="ei-pct">Total issued</div>
-          </div>
+          @endif
         </div>
       </div>
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card" id="householdCard">
       <div class="sc-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-home"></i></div>
       <div class="sc-label">Total Households</div>
       <div class="sc-value">{{ $totalHouseholds }}</div>
       <div class="sc-sub">Registered households</div>
+      <div class="sc-tooltip">
+        @foreach($householdsByType as $type => $count)
+        <div class="sc-tooltip-row"><span class="tl">{{ $type }}</span><span class="tv">{{ $count }}</span></div>
+        @endforeach
+        <div class="sc-tooltip-row"><span class="tl" style="color:#94a3b8;font-style:italic">Click to expand</span></div>
+      </div>
+      <div class="sc-expand" id="householdExpand">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Households by Sitio</div>
+        <div class="expand-grid">
+          @forelse($householdsBySitio as $row)
+          <div class="expand-item">
+            <div class="ei-val">{{ $row->total }}</div>
+            <div class="ei-label">{{ $row->sitio }}</div>
+            <div class="ei-pct">{{ $totalHouseholds > 0 ? round(($row->total/$totalHouseholds)*100,1) : 0 }}%</div>
+          </div>
+          @empty
+          <div class="expand-item" style="grid-column:span 3">
+            <div class="ei-label" style="padding:8px 0">No sitio data available</div>
+          </div>
+          @endforelse
+        </div>
+      </div>
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card" id="familyCard">
       <div class="sc-icon" style="background:#f3e8ff;color:#7c3aed"><i class="fas fa-people-roof"></i></div>
       <div class="sc-label">Total Families</div>
       <div class="sc-value">{{ $totalFamilies }}</div>
       <div class="sc-sub">Registered families</div>
+      <div class="sc-expand" id="familyExpand">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Families by Sitio</div>
+        <div class="expand-grid">
+          @forelse($familiesBySitio as $row)
+          <div class="expand-item">
+            <div class="ei-val">{{ $row->total }}</div>
+            <div class="ei-label">{{ $row->sitio }}</div>
+            <div class="ei-pct">{{ $totalFamilies > 0 ? round(($row->total/$totalFamilies)*100,1) : 0 }}%</div>
+          </div>
+          @empty
+          <div class="expand-item" style="grid-column:span 3">
+            <div class="ei-label" style="padding:8px 0">No sitio data available</div>
+          </div>
+          @endforelse
+        </div>
+      </div>
     </div>
 
   </div>
@@ -298,6 +325,12 @@ function svgDonut($segments, $size=160, $thickness=30) {
 <script>
 document.getElementById('residentCard').addEventListener('click', function() {
   document.getElementById('residentExpand').classList.toggle('open');
+});
+document.getElementById('householdCard').addEventListener('click', function() {
+  document.getElementById('householdExpand').classList.toggle('open');
+});
+document.getElementById('familyCard').addEventListener('click', function() {
+  document.getElementById('familyExpand').classList.toggle('open');
 });
 </script>
 @endsection

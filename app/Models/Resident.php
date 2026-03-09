@@ -56,6 +56,9 @@ class Resident extends Model
 
         // Household link
         'household_id',
+
+        // Verification
+        'status',
     ];
 
     public function family()

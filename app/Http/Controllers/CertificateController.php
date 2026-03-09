@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Certificate;
+use App\Models\Resident;
 use Illuminate\Http\Request;
 
 class CertificateController extends Controller
@@ -10,7 +11,10 @@ class CertificateController extends Controller
     public function index()
     {
         $certificates = Certificate::orderBy('id', 'desc')->get();
-        return view('pages.certificate', compact('certificates'));
+        $residents = Resident::where('is_deceased', false)
+            ->orderBy('last_name')->orderBy('first_name')
+            ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay']);
+        return view('pages.certificate', compact('certificates', 'residents'));
     }
 
     public function store(Request $request)

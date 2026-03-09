@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
@@ -11,8 +12,7 @@ class SettingsController extends Controller
     public function index()
     {
         $employees = User::where('role', 'employee')->orderBy('created_at', 'desc')->get();
-        $theme = session('theme', 'light');
-        return view('settings.index', compact('employees', 'theme'));
+        return view('settings.index', compact('employees'));
     }
 
     public function storeEmployee(Request $request)
@@ -39,7 +39,7 @@ class SettingsController extends Controller
         $user = User::findOrFail($id);
 
         // Prevent deleting your own account
-        if ($user->id == auth()->id()) {
+        if ($user->id == Auth::id()) {
             return redirect()->route('settings.index')
                 ->with('error', 'You cannot delete your own account.');
         }

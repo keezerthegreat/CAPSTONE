@@ -43,6 +43,28 @@ tbody tr:last-child td { border-bottom:none; }
 .stat-card .slabel { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
 .stat-card .svalue { font-size:24px; font-weight:800; color:var(--primary); }
 .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; background:#dbeafe; color:#1e40af; }
+
+/* Resident picker */
+.res-picker-btn { display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); cursor:pointer; font-size:14px; font-family:inherit; width:100%; text-align:left; transition:border-color .15s; }
+.res-picker-btn:hover { border-color:var(--primary); }
+.res-picker-btn.selected { border-color:var(--primary); color:var(--primary); font-weight:600; }
+.res-picker-btn .placeholder { color:var(--muted); font-weight:400; }
+.rpicker-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:300; align-items:center; justify-content:center; }
+.rpicker-backdrop.open { display:flex; }
+.rpicker-modal { background:var(--card); border-radius:14px; width:500px; max-width:95vw; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.25); overflow:hidden; }
+.rpicker-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.rpicker-header h3 { font-size:15px; font-weight:700; color:var(--primary); margin:0; }
+.rpicker-close { background:none; border:none; font-size:20px; color:var(--muted); cursor:pointer; }
+.rpicker-search { padding:12px 16px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.rpicker-search input { width:100%; padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; color:var(--text); background:var(--bg); outline:none; box-sizing:border-box; }
+.rpicker-search input:focus { border-color:var(--primary); }
+.rpicker-list { overflow-y:auto; flex:1; }
+.rpicker-item { padding:10px 16px; cursor:pointer; border-bottom:1px solid var(--border); transition:background .1s; }
+.rpicker-item:last-child { border-bottom:none; }
+.rpicker-item:hover { background:var(--hover-bg); }
+.rpicker-item .ri-name { font-size:13px; font-weight:600; color:var(--text); }
+.rpicker-item .ri-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+.rpicker-empty { padding:24px; text-align:center; color:var(--muted); font-size:13px; }
 </style>
 
 <div class="bidb-wrap">
@@ -78,7 +100,11 @@ tbody tr:last-child td { border-bottom:none; }
 
 <div class="form-group">
 <label>Resident Name <span class="req">*</span></label>
-<input type="text" name="resident_name" placeholder="e.g. Juan Dela Cruz" required>
+<input type="hidden" name="resident_name" id="ct-resident-name" required>
+<button type="button" class="res-picker-btn" id="ct-picker-btn" onclick="openResPicker()">
+  <span id="ct-picker-label" class="placeholder">Click to select a resident...</span>
+  <i class="fas fa-search" style="color:var(--muted);font-size:12px"></i>
+</button>
 </div>
 
 <div class="form-group">
@@ -147,19 +173,17 @@ tbody tr:last-child td { border-bottom:none; }
 <i class="fas fa-print"></i> Print
 </a>
 
-@if(auth()->user()->role == 'admin')
-
 <a href="{{ route('certificate.edit', $cert->id) }}" class="btn btn-edit">
 <i class="fas fa-edit"></i> Edit
 </a>
 
+@if(auth()->user()->role == 'admin')
 <form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" style="display:inline">
 @csrf
 @method('DELETE')
 <button type="submit" class="btn btn-delete">
 <i class="fas fa-trash"></i> Delete</button>
 </form>
-
 @endif
 
 </div>
@@ -183,5 +207,62 @@ No certificates issued yet.
 
 </div>
 </div>
+
+<!-- Resident Picker Modal -->
+<div id="resPickerModal" class="rpicker-backdrop">
+  <div class="rpicker-modal">
+    <div class="rpicker-header">
+      <h3><i class="fas fa-users" style="margin-right:8px"></i>Select Resident</h3>
+      <button class="rpicker-close" onclick="closeResPicker()">×</button>
+    </div>
+    <div class="rpicker-search">
+      <input type="text" id="resPickerSearch" placeholder="Search by name..." oninput="filterResidents(this.value)">
+    </div>
+    <div class="rpicker-list" id="resPickerList"></div>
+  </div>
+</div>
+
+<script>
+const allResidents = @json($residents);
+
+function openResPicker() {
+  document.getElementById('resPickerModal').classList.add('open');
+  document.getElementById('resPickerSearch').value = '';
+  filterResidents('');
+  setTimeout(() => document.getElementById('resPickerSearch').focus(), 50);
+}
+function closeResPicker() {
+  document.getElementById('resPickerModal').classList.remove('open');
+}
+function filterResidents(q) {
+  const list = document.getElementById('resPickerList');
+  const term = q.toLowerCase();
+  const filtered = allResidents.filter(r => {
+    const full = (r.last_name + ' ' + r.first_name + ' ' + (r.middle_name||'')).toLowerCase();
+    return !term || full.includes(term);
+  });
+  if (!filtered.length) {
+    list.innerHTML = '<div class="rpicker-empty"><i class="fas fa-user-slash" style="font-size:24px;opacity:.3;display:block;margin-bottom:8px"></i>No residents found.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(r => {
+    const name = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
+    const meta = [r.address, r.barangay].filter(Boolean).join(', ') || 'Barangay Cogon';
+    return `<div class="rpicker-item" onclick="selectResident('${name.replace(/'/g,"\\'")}')">
+      <div class="ri-name">${name}</div>
+      <div class="ri-meta">${meta}</div>
+    </div>`;
+  }).join('');
+}
+function selectResident(name) {
+  document.getElementById('ct-resident-name').value = name;
+  document.getElementById('ct-picker-label').textContent = name;
+  document.getElementById('ct-picker-btn').classList.add('selected');
+  closeResPicker();
+}
+document.getElementById('resPickerModal').addEventListener('click', function(e) {
+  if (e.target === this) closeResPicker();
+});
+</script>
 
 @endsection
