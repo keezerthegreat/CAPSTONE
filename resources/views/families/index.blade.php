@@ -37,6 +37,22 @@ tbody tr:last-child td { border-bottom:none; }
 .action-btns { display:flex; gap:5px; }
 .empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
 .alert-success { background:#dcfce7; border:1px solid #bbf7d0; color:#166534; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; display:flex; align-items:center; gap:8px; }
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; }
+.modal-backdrop.open { display:flex; }
+.modal { background:#fff; border-radius:16px; width:520px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-header h2 { font-size:16px; font-weight:700; color:var(--primary); margin:0; }
+.modal-close { background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1; padding:0; }
+.modal-body { padding:24px; }
+.modal-section { margin-bottom:20px; }
+.modal-section-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; }
+.mgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.mi { display:flex; flex-direction:column; gap:3px; }
+.mi .ml { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.mi .mv { font-size:13px; color:var(--text); font-weight:500; background:#f8fafc; border:1px solid var(--border); border-radius:7px; padding:7px 10px; }
+.mi.span2 { grid-column:span 2; }
+.mi.span3 { grid-column:span 3; }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
 </style>
 
 <div class="bidb-wrap">
@@ -102,9 +118,9 @@ tbody tr:last-child td { border-bottom:none; }
             <td>
               <div class="action-btns">
 
-<a href="{{ route('families.show', $family->id) }}" class="btn btn-sm btn-view">
+<button onclick='openFamilyModal(@json($family))' class="btn btn-sm btn-view">
 <i class="fas fa-eye"></i> View
-</a>
+</button>
 
 @if(auth()->user()->role == 'admin')
 
@@ -149,4 +165,60 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
   });
 });
 </script>
+
+<!-- Family View Modal -->
+<div id="familyModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-people-roof" style="margin-right:8px"></i>Family Profile</h2>
+      <button class="modal-close" onclick="closeFamilyModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-people-roof"></i> Family Information</div>
+        <div class="mgrid">
+          <div class="mi span3"><span class="ml">Family Name</span><span class="mv" id="fm-name" style="font-weight:700;color:var(--primary);font-size:15px"></span></div>
+          <div class="mi"><span class="ml">Head Last Name</span><span class="mv" id="fm-last"></span></div>
+          <div class="mi"><span class="ml">Head First Name</span><span class="mv" id="fm-first"></span></div>
+          <div class="mi"><span class="ml">Head Middle Name</span><span class="mv" id="fm-middle"></span></div>
+          <div class="mi"><span class="ml">No. of Members</span><span class="mv" id="fm-members"></span></div>
+          <div class="mi span2"><span class="ml">Linked Household</span><span class="mv" id="fm-hh"></span></div>
+          <div class="mi span3" id="fm-notes-wrap" style="display:none"><span class="ml">Notes</span><span class="mv" id="fm-notes"></span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeFamilyModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openFamilyModal(f) {
+  document.getElementById('familyModal').classList.add('open');
+  document.getElementById('fm-name').textContent    = f.family_name      || '—';
+  document.getElementById('fm-last').textContent    = f.head_last_name   || '—';
+  document.getElementById('fm-first').textContent   = f.head_first_name  || '—';
+  document.getElementById('fm-middle').textContent  = f.head_middle_name || '—';
+  document.getElementById('fm-members').textContent = f.member_count ? f.member_count + ' member(s)' : '—';
+  document.getElementById('fm-hh').textContent      = f.household_id ? 'HH #' + f.household_id : 'Not linked';
+  if (f.notes) {
+    document.getElementById('fm-notes').textContent = f.notes;
+    document.getElementById('fm-notes-wrap').style.display = '';
+  } else {
+    document.getElementById('fm-notes-wrap').style.display = 'none';
+  }
+}
+function closeFamilyModal() {
+  document.getElementById('familyModal').classList.remove('open');
+}
+document.getElementById('familyModal').addEventListener('click', function(e) {
+  if (e.target === this) closeFamilyModal();
+});
+</script>
+
 @endsection

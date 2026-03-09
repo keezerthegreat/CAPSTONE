@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Household;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,8 @@ class HouseholdController extends Controller
             'sitio'            => 'required',
         ]);
 
-        Household::create($request->all());
+        $household = Household::create($request->all());
+        ActivityLog::log('created', 'Household', "Added household: #{$household->household_number}");
 
         return redirect()->route('households.index')
             ->with('success', 'Household added successfully.');
@@ -57,6 +59,7 @@ class HouseholdController extends Controller
         ]);
 
         $household->update($request->all());
+        ActivityLog::log('updated', 'Household', "Updated household: #{$household->household_number}");
 
         return redirect()->route('households.index')
             ->with('success', 'Household updated successfully.');
@@ -65,6 +68,7 @@ class HouseholdController extends Controller
     public function destroy($id)
     {
         $household = Household::findOrFail($id);
+        ActivityLog::log('deleted', 'Household', "Deleted household: #{$household->household_number}");
         $household->delete();
 
         return redirect()->route('households.index')

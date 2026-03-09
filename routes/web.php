@@ -9,6 +9,7 @@ use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\SettingsController;
 
@@ -44,12 +45,7 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::view('/barangay-update', 'pages.barangay')->name('barangay.update');
-    Route::view('/read-message', 'pages.message')->name('read.message');
-    Route::view('/worker-info', 'pages.worker')->name('worker.info');
-
-
-    /*
+/*
     |--------------------------------------------------------------------------
     | EMPLOYEE + ADMIN
     |--------------------------------------------------------------------------
@@ -108,6 +104,9 @@ Route::middleware('auth')->group(function () {
 
         // Clearance Delete
         Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])->name('clearance.destroy');
+
+        // Audit Log
+        Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');
 
     });
 

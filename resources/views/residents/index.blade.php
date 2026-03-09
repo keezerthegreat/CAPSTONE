@@ -41,6 +41,22 @@ tbody tr:last-child td { border-bottom: none; }
 .action-btns { display: flex; gap: 5px; }
 .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
 .alert-success { background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; }
+.modal-backdrop.open { display:flex; }
+.modal { background:#fff; border-radius:16px; width:600px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-header h2 { font-size:16px; font-weight:700; color:var(--primary); margin:0; }
+.modal-close { background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1; padding:0; }
+.modal-body { padding:24px; }
+.modal-section { margin-bottom:20px; }
+.modal-section-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; }
+.mgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.mi { display:flex; flex-direction:column; gap:3px; }
+.mi .ml { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.mi .mv { font-size:13px; color:var(--text); font-weight:500; background:#f8fafc; border:1px solid var(--border); border-radius:7px; padding:7px 10px; }
+.mi.span2 { grid-column:span 2; }
+.mi.span3 { grid-column:span 3; }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
 </style>
 
 <div class="bidb-wrap">
@@ -136,9 +152,9 @@ tbody tr:last-child td { border-bottom: none; }
             <td>
               <div class="action-btns">
 
-                <a href="{{ route('residents.show', $resident->id) }}" class="btn btn-sm btn-view">
+                <button onclick='openResidentModal(@json($resident))' class="btn btn-sm btn-view">
                   <i class="fas fa-eye"></i> View
-                </a>
+                </button>
 
                 @if(auth()->user()->role == 'admin')
 
@@ -177,5 +193,104 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
   </div>
 </div>
+
+<!-- Resident View Modal -->
+<div id="residentModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-user" style="margin-right:8px"></i>Resident Profile</h2>
+      <button class="modal-close" onclick="closeResidentModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-user"></i> Personal Information</div>
+        <div id="rm-badges" style="margin-bottom:12px"></div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Last Name</span><span class="mv" id="rm-last"></span></div>
+          <div class="mi"><span class="ml">First Name</span><span class="mv" id="rm-first"></span></div>
+          <div class="mi"><span class="ml">Middle Name</span><span class="mv" id="rm-middle"></span></div>
+          <div class="mi"><span class="ml">Sex</span><span class="mv" id="rm-gender"></span></div>
+          <div class="mi"><span class="ml">Date of Birth</span><span class="mv" id="rm-birth"></span></div>
+          <div class="mi"><span class="ml">Age</span><span class="mv" id="rm-age"></span></div>
+          <div class="mi"><span class="ml">Civil Status</span><span class="mv" id="rm-civil"></span></div>
+          <div class="mi"><span class="ml">Nationality</span><span class="mv" id="rm-nat"></span></div>
+          <div class="mi"><span class="ml">Religion</span><span class="mv" id="rm-rel"></span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-phone"></i> Contact Information</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Contact Number</span><span class="mv" id="rm-contact"></span></div>
+          <div class="mi span2"><span class="ml">Email</span><span class="mv" id="rm-email"></span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Province</span><span class="mv" id="rm-prov"></span></div>
+          <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="rm-city"></span></div>
+          <div class="mi"><span class="ml">Barangay</span><span class="mv" id="rm-brgy"></span></div>
+          <div class="mi span3"><span class="ml">Complete Address</span><span class="mv" id="rm-addr"></span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-briefcase"></i> Socio-Economic</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Occupation</span><span class="mv" id="rm-occ"></span></div>
+          <div class="mi"><span class="ml">Employer</span><span class="mv" id="rm-emp"></span></div>
+          <div class="mi"><span class="ml">Monthly Income</span><span class="mv" id="rm-inc"></span></div>
+          <div class="mi span3"><span class="ml">Education Level</span><span class="mv" id="rm-edu"></span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeResidentModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openResidentModal(r) {
+  document.getElementById('residentModal').classList.add('open');
+  document.getElementById('rm-last').textContent    = r.last_name   || '—';
+  document.getElementById('rm-first').textContent   = r.first_name  || '—';
+  document.getElementById('rm-middle').textContent  = r.middle_name || '—';
+  document.getElementById('rm-gender').textContent  = r.gender      || '—';
+  document.getElementById('rm-birth').textContent   = r.birthdate   || '—';
+  document.getElementById('rm-age').textContent     = r.age ? r.age + ' yrs' : '—';
+  document.getElementById('rm-civil').textContent   = r.civil_status  || '—';
+  document.getElementById('rm-nat').textContent     = r.nationality   || '—';
+  document.getElementById('rm-rel').textContent     = r.religion      || '—';
+  document.getElementById('rm-contact').textContent = r.contact_number || '—';
+  document.getElementById('rm-email').textContent   = r.email         || '—';
+  document.getElementById('rm-prov').textContent    = r.province  || '—';
+  document.getElementById('rm-city').textContent    = r.city      || '—';
+  document.getElementById('rm-brgy').textContent    = r.barangay  || '—';
+  document.getElementById('rm-addr').textContent    = r.address   || '—';
+  document.getElementById('rm-occ').textContent     = r.occupation      || '—';
+  document.getElementById('rm-emp').textContent     = r.employer        || '—';
+  document.getElementById('rm-inc').textContent     = r.monthly_income ? '₱' + parseFloat(r.monthly_income).toLocaleString() : '—';
+  document.getElementById('rm-edu').textContent     = r.education_level || '—';
+  let badges = '';
+  if (r.is_deceased) badges += '<span class="badge" style="background:#fee2e2;color:#be123c">Deceased</span> ';
+  if (r.is_senior)   badges += '<span class="badge badge-senior">Senior Citizen</span> ';
+  if (r.is_pwd)      badges += '<span class="badge badge-pwd">PWD</span> ';
+  if (r.is_voter)    badges += '<span class="badge" style="background:#f3e8ff;color:#6b21a8">Registered Voter</span> ';
+  document.getElementById('rm-badges').innerHTML = badges;
+}
+function closeResidentModal() {
+  document.getElementById('residentModal').classList.remove('open');
+}
+document.getElementById('residentModal').addEventListener('click', function(e) {
+  if (e.target === this) closeResidentModal();
+});
+</script>
 
 @endsection

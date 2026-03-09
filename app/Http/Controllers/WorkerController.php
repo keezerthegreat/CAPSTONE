@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Worker;
 use Illuminate\Http\Request;
 
@@ -56,7 +57,8 @@ class WorkerController extends Controller
 
         }
 
-        Worker::create($validated);
+        $worker = Worker::create($validated);
+        ActivityLog::log('created', 'Worker', "Added worker: {$worker->first_name} {$worker->last_name} ({$worker->position})");
 
         return redirect()
             ->route('workers.index')
@@ -104,6 +106,7 @@ class WorkerController extends Controller
         }
 
         $worker->update($validated);
+        ActivityLog::log('updated', 'Worker', "Updated worker: {$worker->first_name} {$worker->last_name}");
 
         return redirect()
             ->route('workers.index')
@@ -115,6 +118,7 @@ class WorkerController extends Controller
     // ===============================
     public function destroy(Worker $worker)
     {
+        ActivityLog::log('deleted', 'Worker', "Deleted worker: {$worker->first_name} {$worker->last_name}");
         $worker->delete();
 
         return redirect()

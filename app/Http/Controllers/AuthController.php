@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -40,7 +41,7 @@ class AuthController extends Controller
             }
 
             $request->session()->regenerate();
-
+            ActivityLog::log('logged_in', 'Auth', 'User logged in');
             return redirect()->route('dashboard');
         }
 
@@ -53,6 +54,7 @@ class AuthController extends Controller
 
     public function logout()
     {
+        ActivityLog::log('logged_out', 'Auth', 'User logged out');
         Auth::logout();
         Session::flush();
         return redirect()->route('login');

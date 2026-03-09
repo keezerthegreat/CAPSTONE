@@ -45,6 +45,22 @@ tbody tr:last-child td { border-bottom:none; }
 .action-btns { display:flex; gap:5px; }
 .empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
 .alert-success { background:#dcfce7; border:1px solid #bbf7d0; color:#166534; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; display:flex; align-items:center; gap:8px; }
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; }
+.modal-backdrop.open { display:flex; }
+.modal { background:#fff; border-radius:16px; width:580px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-header h2 { font-size:16px; font-weight:700; color:var(--primary); margin:0; }
+.modal-close { background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1; padding:0; }
+.modal-body { padding:24px; }
+.modal-section { margin-bottom:20px; }
+.modal-section-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; }
+.mgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.mi { display:flex; flex-direction:column; gap:3px; }
+.mi .ml { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.mi .mv { font-size:13px; color:var(--text); font-weight:500; background:#f8fafc; border:1px solid var(--border); border-radius:7px; padding:7px 10px; }
+.mi.span2 { grid-column:span 2; }
+.mi.span3 { grid-column:span 3; }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
 </style>
 
 <div class="bidb-wrap">
@@ -159,9 +175,9 @@ tbody tr:last-child td { border-bottom:none; }
             <td>
   <div class="action-btns">
 
-    <a href="{{ route('households.show', $hh->id) }}" class="btn btn-sm btn-view">
+    <button onclick='openHouseholdModal(@json($hh))' class="btn btn-sm btn-view">
       <i class="fas fa-eye"></i> View
-    </a>
+    </button>
 
     @if(auth()->user()->role === 'admin')
 
@@ -221,4 +237,77 @@ document.getElementById('searchInput').addEventListener('keyup', filterTable);
 document.getElementById('filterResidency').addEventListener('change', filterTable);
 document.getElementById('filterSitio').addEventListener('change', filterTable);
 </script>
+
+<!-- Household View Modal -->
+<div id="householdModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-home" style="margin-right:8px"></i>Household Profile</h2>
+      <button class="modal-close" onclick="closeHouseholdModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-home"></i> Household Information</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Household No.</span><span class="mv" id="hm-num" style="font-weight:700;color:var(--primary)"></span></div>
+          <div class="mi"><span class="ml">Residency Type</span><span class="mv" id="hm-type"></span></div>
+          <div class="mi"><span class="ml">No. of Members</span><span class="mv" id="hm-members"></span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-user"></i> Household Head</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Last Name</span><span class="mv" id="hm-last"></span></div>
+          <div class="mi"><span class="ml">First Name</span><span class="mv" id="hm-first"></span></div>
+          <div class="mi"><span class="ml">Middle Name</span><span class="mv" id="hm-middle"></span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Sitio</span><span class="mv" id="hm-sitio"></span></div>
+          <div class="mi"><span class="ml">Street / Purok</span><span class="mv" id="hm-street"></span></div>
+          <div class="mi"><span class="ml">Barangay</span><span class="mv" id="hm-brgy"></span></div>
+          <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="hm-city"></span></div>
+          <div class="mi"><span class="ml">Province</span><span class="mv" id="hm-prov"></span></div>
+          <div class="mi"><span class="ml">Location</span><span class="mv" id="hm-loc"></span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeHouseholdModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openHouseholdModal(h) {
+  document.getElementById('householdModal').classList.add('open');
+  document.getElementById('hm-num').textContent     = h.household_number || '—';
+  document.getElementById('hm-type').textContent    = h.residency_type   || '—';
+  document.getElementById('hm-members').textContent = h.member_count ? h.member_count + ' member(s)' : '—';
+  document.getElementById('hm-last').textContent    = h.head_last_name   || '—';
+  document.getElementById('hm-first').textContent   = h.head_first_name  || '—';
+  document.getElementById('hm-middle').textContent  = h.head_middle_name || '—';
+  document.getElementById('hm-sitio').textContent   = h.sitio    || '—';
+  document.getElementById('hm-street').textContent  = h.street   || '—';
+  document.getElementById('hm-brgy').textContent    = h.barangay || '—';
+  document.getElementById('hm-city').textContent    = h.city     || '—';
+  document.getElementById('hm-prov').textContent    = h.province || '—';
+  document.getElementById('hm-loc').textContent     = (h.latitude && h.longitude) ? '📍 ' + h.latitude + ', ' + h.longitude : 'Not pinned';
+}
+function closeHouseholdModal() {
+  document.getElementById('householdModal').classList.remove('open');
+}
+document.getElementById('householdModal').addEventListener('click', function(e) {
+  if (e.target === this) closeHouseholdModal();
+});
+</script>
+
 @endsection

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Resident;
 use App\Models\Household;
 use Illuminate\Http\Request;
@@ -52,7 +53,8 @@ class ResidentController extends Controller
         $validated['is_pwd']    = $request->has('is_pwd')    ? 1 : 0;
         $validated['is_voter']  = $request->has('is_voter')  ? 1 : 0;
 
-        Resident::create($validated);
+        $resident = Resident::create($validated);
+        ActivityLog::log('created', 'Resident', "Added resident: {$resident->first_name} {$resident->last_name}");
 
         return redirect()->route('residents.index')
             ->with('success', 'Resident record added successfully.');
@@ -113,6 +115,7 @@ class ResidentController extends Controller
         }
 
         $resident->update($validated);
+        ActivityLog::log('updated', 'Resident', "Updated resident: {$resident->first_name} {$resident->last_name}");
 
         return redirect()->route('residents.index')
             ->with('success', 'Resident record updated successfully.');
@@ -121,6 +124,7 @@ class ResidentController extends Controller
     public function destroy($id)
     {
         $resident = Resident::findOrFail($id);
+        ActivityLog::log('deleted', 'Resident', "Deleted resident: {$resident->first_name} {$resident->last_name}");
         $resident->delete();
 
         return redirect()->route('residents.index')

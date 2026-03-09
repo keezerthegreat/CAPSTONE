@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Family;
 use App\Models\Household;
 use Illuminate\Http\Request;
@@ -31,7 +32,8 @@ class FamilyController extends Controller
             'member_count'     => 'required|integer|min:1',
             'notes'            => 'nullable|string',
         ]);
-        Family::create($validated);
+        $family = Family::create($validated);
+        ActivityLog::log('created', 'Family', "Added family: {$family->family_name}");
         return redirect()->route('families.index')->with('success', 'Family added.');
     }
 
@@ -59,11 +61,13 @@ class FamilyController extends Controller
             'notes'            => 'nullable|string',
         ]);
         $family->update($validated);
+        ActivityLog::log('updated', 'Family', "Updated family: {$family->family_name}");
         return redirect()->route('families.index')->with('success', 'Family updated.');
     }
 
     public function destroy(Family $family)
     {
+        ActivityLog::log('deleted', 'Family', "Deleted family: {$family->family_name}");
         $family->delete();
         return redirect()->route('families.index')->with('success', 'Family deleted.');
     }

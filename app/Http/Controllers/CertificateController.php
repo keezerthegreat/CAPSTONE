@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\ActivityLog;
 use App\Models\Certificate;
 use Illuminate\Http\Request;
 
@@ -21,6 +22,7 @@ class CertificateController extends Controller
             'purpose'          => $request->purpose,
             'issued_date'      => now(),
         ]);
+        ActivityLog::log('created', 'Certificate', "Issued certificate for: {$request->resident_name} ({$request->certificate_type})");
 
         return redirect()->back()->with('success', 'Certificate issued successfully.');
     }
@@ -42,6 +44,7 @@ class CertificateController extends Controller
             'certificate_type' => $request->certificate_type,
             'purpose'          => $request->purpose,
         ]);
+        ActivityLog::log('updated', 'Certificate', "Updated certificate for: {$request->resident_name}");
 
         return redirect('/certificate')->with('success', 'Certificate updated successfully.');
     }
@@ -49,7 +52,9 @@ class CertificateController extends Controller
     // 🔹 DELETE
     public function destroy($id)
     {
-        Certificate::findOrFail($id)->delete();
+        $certificate = Certificate::findOrFail($id);
+        ActivityLog::log('deleted', 'Certificate', "Deleted certificate for: {$certificate->resident_name}");
+        $certificate->delete();
         return redirect()->back()->with('success', 'Certificate deleted successfully.');
     }
 

@@ -84,10 +84,10 @@ function svgDonut($segments, $size=160, $thickness=30) {
 .badge-senior { background:#fef3c7; color:#92400e; }
 .badge-pwd    { background:#fee2e2; color:#991b1b; }
 .badge-voter  { background:#f3e8ff; color:#6b21a8; }
-.quick-actions { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:20px; }
-.qa-btn { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); text-decoration:none; color:var(--text); font-size:13px; font-weight:600; transition:all .15s; background:var(--card); }
+.quick-actions { display:flex; gap:10px; padding:16px 20px; flex-wrap:wrap; }
+.qa-btn { display:flex; align-items:center; gap:8px; padding:9px 16px; border-radius:10px; border:1.5px solid var(--border); text-decoration:none; color:var(--text); font-size:13px; font-weight:600; transition:all .15s; background:var(--card); white-space:nowrap; }
 .qa-btn:hover { border-color:var(--primary); color:var(--primary); background:#f0f4f8; }
-.qa-btn i { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.qa-btn i { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
 </style>
 
 <div class="dash-wrap">
@@ -96,6 +96,33 @@ function svgDonut($segments, $size=160, $thickness=30) {
     <div>
       <h1><i class="fas fa-tachometer-alt" style="margin-right:8px"></i>Dashboard</h1>
       <div class="sub">Barangay Cogon, Ormoc City, Leyte — Overview</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Bar -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+    </div>
+    <div class="quick-actions">
+      <a href="{{ route('residents.create') }}" class="qa-btn">
+        <i class="fas fa-user-plus" style="background:#dbeafe;color:#1d4ed8"></i>Add Resident
+      </a>
+      <a href="{{ route('clearance.index') }}" class="qa-btn">
+        <i class="fas fa-file-alt" style="background:#dcfce7;color:#16a34a"></i>New Clearance
+      </a>
+      <a href="{{ route('certificate.index') }}" class="qa-btn">
+        <i class="fas fa-certificate" style="background:#fef3c7;color:#d97706"></i>New Certificate
+      </a>
+      <a href="{{ route('residents.index') }}" class="qa-btn">
+        <i class="fas fa-users" style="background:#f3e8ff;color:#7c3aed"></i>View Residents
+      </a>
+      <a href="{{ route('residents.location') }}" class="qa-btn">
+        <i class="fas fa-map-marker-alt" style="background:#fee2e2;color:#dc2626"></i>Resident Map
+      </a>
+      <a href="{{ route('workers.index') }}" class="qa-btn">
+        <i class="fas fa-user-tie" style="background:#e0f2fe;color:#0284c7"></i>Worker Info
+      </a>
     </div>
   </div>
 
@@ -224,66 +251,36 @@ function svgDonut($segments, $size=160, $thickness=30) {
 
   </div>
 
-  <!-- Recent Residents + Quick Actions -->
-  <div class="two-col">
-
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title"><i class="fas fa-clock"></i> Recently Added Residents</div>
-        <a href="{{ route('residents.index') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">View All →</a>
-      </div>
-      <table class="recent-table">
-        <thead>
-          <tr><th>Name</th><th>Sex / Age</th><th>Classifications</th></tr>
-        </thead>
-        <tbody>
-          @forelse($recentResidents as $r)
-          <tr>
-            <td>
-              <div style="font-weight:600">{{ $r->last_name }}, {{ $r->first_name }}</div>
-              <div style="font-size:11px;color:var(--muted)">ID #{{ $r->id }}</div>
-            </td>
-            <td>{{ $r->gender }} / {{ $r->age }} yrs</td>
-            <td>
-              @if($r->is_senior)<span class="badge badge-senior">Senior</span>@endif
-              @if($r->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
-              @if($r->is_voter)<span class="badge badge-voter">Voter</span>@endif
-              @if(!$r->is_senior && !$r->is_pwd && !$r->is_voter)<span style="color:var(--muted);font-size:12px">—</span>@endif
-            </td>
-          </tr>
-          @empty
-          <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">No residents yet.</td></tr>
-          @endforelse
-        </tbody>
-      </table>
+  <!-- Recent Residents -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-clock"></i> Recently Added Residents</div>
+      <a href="{{ route('residents.index') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">View All →</a>
     </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div>
-      </div>
-      <div class="quick-actions">
-        <a href="{{ route('residents.create') }}" class="qa-btn">
-          <i class="fas fa-user-plus" style="background:#dbeafe;color:#1d4ed8"></i>Add Resident
-        </a>
-        <a href="{{ route('clearance.index') }}" class="qa-btn">
-          <i class="fas fa-file-alt" style="background:#dcfce7;color:#16a34a"></i>New Clearance
-        </a>
-        <a href="{{ route('certificate.index') }}" class="qa-btn">
-          <i class="fas fa-certificate" style="background:#fef3c7;color:#d97706"></i>New Certificate
-        </a>
-        <a href="{{ route('residents.index') }}" class="qa-btn">
-          <i class="fas fa-users" style="background:#f3e8ff;color:#7c3aed"></i>View Residents
-        </a>
-        <a href="{{ route('residents.location') }}" class="qa-btn">
-          <i class="fas fa-map-marker-alt" style="background:#fee2e2;color:#dc2626"></i>Resident Map
-        </a>
-        <a href="{{ route('workers.index') }}" class="qa-btn">
-          <i class="fas fa-user-tie" style="background:#e0f2fe;color:#0284c7"></i>Worker Info
-        </a>
-      </div>
-    </div>
-
+    <table class="recent-table">
+      <thead>
+        <tr><th>Name</th><th>Sex / Age</th><th>Classifications</th></tr>
+      </thead>
+      <tbody>
+        @forelse($recentResidents as $r)
+        <tr>
+          <td>
+            <div style="font-weight:600">{{ $r->last_name }}, {{ $r->first_name }}</div>
+            <div style="font-size:11px;color:var(--muted)">ID #{{ $r->id }}</div>
+          </td>
+          <td>{{ $r->gender }} / {{ $r->age }} yrs</td>
+          <td>
+            @if($r->is_senior)<span class="badge badge-senior">Senior</span>@endif
+            @if($r->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
+            @if($r->is_voter)<span class="badge badge-voter">Voter</span>@endif
+            @if(!$r->is_senior && !$r->is_pwd && !$r->is_voter)<span style="color:var(--muted);font-size:12px">—</span>@endif
+          </td>
+        </tr>
+        @empty
+        <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--muted)">No residents yet.</td></tr>
+        @endforelse
+      </tbody>
+    </table>
   </div>
 
 </div>

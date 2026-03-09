@@ -243,15 +243,12 @@
         <i class="fas fa-user-tie"></i> Worker Information
       </a>
 
-      <a href="/barangay-update"
-         class="nav-item {{ request()->is('barangay-update*') ? 'active' : '' }}">
-        <i class="fas fa-bullhorn"></i> Barangay Update
+@if(auth()->user()?->isAdmin())
+      <a href="{{ route('audit.index') }}"
+         class="nav-item {{ request()->is('audit-log*') ? 'active' : '' }}">
+        <i class="fas fa-history"></i> Audit Log
       </a>
-
-      <a href="/read-message"
-         class="nav-item {{ request()->is('read-message*') ? 'active' : '' }}">
-        <i class="fas fa-envelope"></i> Read Message
-      </a>
+      @endif
 
       @if(auth()->user()->role === 'admin')
       <a href="{{ route('settings.index') }}"

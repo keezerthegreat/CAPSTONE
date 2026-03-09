@@ -42,6 +42,7 @@ tbody tr:last-child td { border-bottom:none; }
 .stat-card { background:var(--card); border-radius:12px; padding:16px 18px; border:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.05); }
 .stat-card .slabel { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
 .stat-card .svalue { font-size:24px; font-weight:800; color:var(--primary); }
+.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; background:#dbeafe; color:#1e40af; }
 </style>
 
 <div class="bidb-wrap">
@@ -110,7 +111,7 @@ tbody tr:last-child td { border-bottom:none; }
             <tr>
               <th>Clearance No.</th>
               <th>Resident Name</th>
-              <th>Purpose</th>
+              <th>Certificate Type</th>
               <th>Date Issued</th>
               <th>Actions</th>
             </tr>
@@ -120,7 +121,7 @@ tbody tr:last-child td { border-bottom:none; }
             <tr>
               <td><span style="font-weight:700;color:var(--primary)">{{ $clearance->clearance_no }}</span></td>
               <td>{{ $clearance->resident_name }}</td>
-              <td>{{ $clearance->purpose }}</td>
+              <td><span class="badge">{{ $clearance->certificate_type }}</span></td>
               <td>{{ \Carbon\Carbon::parse($clearance->date_issued)->format('M d, Y') }}</td>
              <td>
 <div class="action-btns">
@@ -151,7 +152,7 @@ tbody tr:last-child td { border-bottom:none; }
 </td>
             </tr>
             @empty
-            <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">
+            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">
               <i class="fas fa-file-alt" style="font-size:32px;opacity:.3;display:block;margin-bottom:8px"></i>
               No clearances issued yet.
             </td></tr>
