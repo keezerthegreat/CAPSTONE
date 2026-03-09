@@ -24,8 +24,10 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
 .btn-primary { background:var(--primary); color:#fff; width:100%; justify-content:center; }
 .btn-primary:hover { background:var(--primary-light); }
 .btn-print  { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:5px 10px; font-size:12px; }
+.btn-edit   { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:5px 10px; font-size:12px; }
 .btn-delete { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; padding:5px 10px; font-size:12px; }
 .btn-print:hover  { background:#dbeafe; }
+.btn-edit:hover   { background:#dcfce7; }
 .btn-delete:hover { background:#ffe4e6; }
 .action-btns { display:flex; gap:5px; }
 .table-wrap { overflow-x:auto; }
@@ -129,7 +131,7 @@ tbody tr:last-child td { border-bottom:none; }
 
 @if(auth()->user()->role === 'admin')
 
-<a href="{{ route('clearance.edit', $clearance->id) }}" class="btn btn-print">
+<a href="{{ route('clearance.edit', $clearance->id) }}" class="btn btn-edit">
 <i class="fas fa-edit"></i> Edit
 </a>
 
