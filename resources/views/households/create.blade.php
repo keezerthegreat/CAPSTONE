@@ -31,6 +31,23 @@ input::placeholder { color:#94a3b8; }
 .alert-error { background:#fee2e2; border:1px solid #fecaca; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; }
 .map-hint { font-size:12px; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
 #map { height:320px; border-radius:10px; border:1.5px solid var(--border); margin-top:4px; }
+/* Resident search widget */
+.res-search-wrap { position:relative; }
+.res-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--primary); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:100; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+.res-dropdown.open { display:block; }
+.res-option { padding:9px 14px; cursor:pointer; font-size:14px; color:var(--text); border-bottom:1px solid var(--border); }
+.res-option:last-child { border-bottom:none; }
+.res-option:hover { background:#eff6ff; }
+.res-selected { display:none; align-items:center; gap:8px; margin-top:8px; padding:8px 12px; background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:8px; font-size:13px; color:#0369a1; }
+.res-selected.show { display:flex; }
+.res-clear { background:none; border:none; cursor:pointer; color:#64748b; font-size:18px; line-height:1; margin-left:auto; padding:0; }
+/* Members list */
+.member-list { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+.member-item { display:flex; align-items:center; gap:10px; padding:7px 12px; background:#f8fafc; border:1px solid var(--border); border-radius:8px; font-size:13px; }
+.member-item .m-name { flex:1; font-weight:600; color:var(--text); }
+.member-item .m-remove { background:none; border:none; cursor:pointer; color:#94a3b8; font-size:16px; padding:0; line-height:1; transition:color .15s; }
+.member-item .m-remove:hover { color:#be123c; }
+.member-empty { font-size:13px; color:var(--muted); font-style:italic; padding:6px 0; }
 </style>
 
 <div class="bidb-wrap">
@@ -59,7 +76,7 @@ input::placeholder { color:#94a3b8; }
       <div class="card-header"><div class="card-title"><i class="fas fa-home"></i> Household Information</div></div>
       <div class="card-body">
         <div class="form-grid">
-          <div class="form-group">
+          <div class="form-group half">
             <label>Household Number <span class="req">*</span></label>
             <input type="text" name="household_number" value="{{ old('household_number') }}" placeholder="e.g. HH-2026-001" required>
           </div>
@@ -67,35 +84,47 @@ input::placeholder { color:#94a3b8; }
             <label>Classification <span class="req">*</span></label>
             <select name="residency_type" required>
               <option value="">Select...</option>
-              @foreach(['Residential','Mixed Use','Rented'] as $rt)
+              @foreach(['Residency','Commercial','Rented'] as $rt)
                 <option value="{{ $rt }}" {{ old('residency_type')==$rt ? 'selected':'' }}>{{ $rt }}</option>
               @endforeach
             </select>
-          </div>
-          <div class="form-group">
-            <label>Number of Members</label>
-            <input type="number" name="member_count" value="{{ old('member_count', 1) }}" min="1">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Household Head -->
+    <!-- Household Head & Members -->
     <div class="card">
-      <div class="card-header"><div class="card-title"><i class="fas fa-user"></i> Household Head</div></div>
+      <div class="card-header"><div class="card-title"><i class="fas fa-users"></i> Household Head &amp; Members</div></div>
       <div class="card-body">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Last Name <span class="req">*</span></label>
-            <input type="text" name="head_last_name" value="{{ old('head_last_name') }}" placeholder="e.g. Dela Cruz" required>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div>
+            <div class="form-group">
+              <label>Household Head <span class="req">*</span></label>
+              <div class="res-search-wrap">
+                <input type="text" id="residentSearch" placeholder="Type name to search..." autocomplete="off">
+                <div class="res-dropdown" id="resDropdown"></div>
+              </div>
+              <input type="hidden" name="head_resident_id" id="headResidentId" value="{{ old('head_resident_id') }}">
+              <div class="res-selected" id="resSelected">
+                <i class="fas fa-user-check"></i>
+                <span id="resSelectedName"></span>
+                <button type="button" class="res-clear" onclick="clearResident()" title="Clear">×</button>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label>First Name <span class="req">*</span></label>
-            <input type="text" name="head_first_name" value="{{ old('head_first_name') }}" placeholder="e.g. Juan" required>
-          </div>
-          <div class="form-group">
-            <label>Middle Name</label>
-            <input type="text" name="head_middle_name" value="{{ old('head_middle_name') }}" placeholder="e.g. Santos">
+          <div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label>Add Member</label>
+              <div class="res-search-wrap">
+                <input type="text" id="memberSearch" placeholder="Search resident to add..." autocomplete="off">
+                <div class="res-dropdown" id="memberDropdown"></div>
+              </div>
+            </div>
+            <div class="member-list" id="memberList">
+              <div class="member-empty" id="memberEmpty">No members added yet.</div>
+            </div>
+            <div id="memberInputs"></div>
           </div>
         </div>
       </div>
@@ -170,6 +199,7 @@ input::placeholder { color:#94a3b8; }
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+// Map
 const map = L.map('map').setView([11.0064, 124.6076], 15);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let marker;
@@ -179,5 +209,121 @@ map.on('click', function(e) {
   if (marker) map.removeLayer(marker);
   marker = L.marker(e.latlng).addTo(map);
 });
+
+// Resident data
+const residents    = @json($residents);
+
+// ── Member search ──────────────────────────────────────────────
+const memberSearch   = document.getElementById('memberSearch');
+const memberDropdown = document.getElementById('memberDropdown');
+const memberList     = document.getElementById('memberList');
+const memberEmpty    = document.getElementById('memberEmpty');
+const memberInputs   = document.getElementById('memberInputs');
+const addedMembers   = {};
+
+memberSearch.addEventListener('input', function() {
+  buildMemberDropdown(this.value, memberDropdown, addMember);
+});
+memberSearch.addEventListener('blur', () => setTimeout(() => memberDropdown.classList.remove('open'), 150));
+
+function addMember(r) {
+  memberSearch.value = '';
+  memberDropdown.classList.remove('open');
+  if (addedMembers[r.id]) return;
+  addedMembers[r.id] = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
+  renderMembers();
+}
+function removeMember(id) {
+  delete addedMembers[id];
+  renderMembers();
+}
+function renderMembers() {
+  const ids = Object.keys(addedMembers);
+  memberEmpty.style.display = ids.length ? 'none' : '';
+  memberList.querySelectorAll('.member-item').forEach(el => el.remove());
+  memberInputs.innerHTML = '';
+  ids.forEach(id => {
+    const item = document.createElement('div');
+    item.className = 'member-item';
+    item.innerHTML = `<i class="fas fa-user" style="color:var(--muted)"></i>
+      <span class="m-name">${addedMembers[id]}</span>
+      <button type="button" class="m-remove" onclick="removeMember(${id})">×</button>`;
+    memberList.appendChild(item);
+    const inp = document.createElement('input');
+    inp.type = 'hidden'; inp.name = 'members[]'; inp.value = id;
+    memberInputs.appendChild(inp);
+  });
+}
+function buildMemberDropdown(query, dropdownEl, onSelect) {
+  dropdownEl.innerHTML = '';
+  const q = query.toLowerCase().trim();
+  if (!q) { dropdownEl.classList.remove('open'); return; }
+  const matches = residents.filter(r =>
+    (r.last_name + ' ' + r.first_name + ' ' + (r.middle_name || '')).toLowerCase().includes(q)
+  ).slice(0, 10);
+  if (!matches.length) {
+    dropdownEl.innerHTML = '<div class="res-option" style="color:#94a3b8;cursor:default">No residents found</div>';
+  } else {
+    matches.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'res-option';
+      div.textContent = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
+      div.addEventListener('mousedown', (e) => { e.preventDefault(); onSelect(r); });
+      dropdownEl.appendChild(div);
+    });
+  }
+  dropdownEl.classList.add('open');
+}
+
+// ── Head search ──────────────────────────────────────────────
+const searchInput  = document.getElementById('residentSearch');
+const dropdown     = document.getElementById('resDropdown');
+const hiddenInput  = document.getElementById('headResidentId');
+const selectedBox  = document.getElementById('resSelected');
+const selectedName = document.getElementById('resSelectedName');
+
+const oldId = "{{ old('head_resident_id') }}";
+if (oldId) {
+  const r = residents.find(x => x.id == oldId);
+  if (r) selectResident(r);
+}
+
+searchInput.addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  dropdown.innerHTML = '';
+  if (!q) { dropdown.classList.remove('open'); return; }
+  const matches = residents.filter(r =>
+    (r.last_name + ' ' + r.first_name + ' ' + (r.middle_name || '')).toLowerCase().includes(q)
+  ).slice(0, 10);
+  if (!matches.length) {
+    dropdown.innerHTML = '<div class="res-option" style="color:#94a3b8;cursor:default">No residents found</div>';
+  } else {
+    matches.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'res-option';
+      div.textContent = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
+      div.addEventListener('mousedown', (e) => { e.preventDefault(); selectResident(r); });
+      dropdown.appendChild(div);
+    });
+  }
+  dropdown.classList.add('open');
+});
+
+searchInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('open'), 150));
+
+function selectResident(r) {
+  hiddenInput.value = r.id;
+  searchInput.value = '';
+  dropdown.classList.remove('open');
+  selectedName.textContent = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
+  selectedBox.classList.add('show');
+}
+
+function clearResident() {
+  hiddenInput.value = '';
+  selectedBox.classList.remove('show');
+  searchInput.value = '';
+  searchInput.focus();
+}
 </script>
 @endsection

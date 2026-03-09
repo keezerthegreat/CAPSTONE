@@ -11,7 +11,7 @@ class ResidentController extends Controller
 {
     public function index()
     {
-        $residents = Resident::latest()->get();
+        $residents = Resident::with('household')->latest()->get();
         return view('residents.index', compact('residents'));
     }
 

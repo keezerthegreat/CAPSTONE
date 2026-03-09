@@ -4,7 +4,6 @@
 
 @section('content')
 <style>
-:root { --primary:#1a3a6b; --primary-light:#2554a0; --bg:#f0f4f8; --card:#fff; --text:#1e293b; --muted:#64748b; --border:#e2e8f0; }
 .bidb-wrap { background:var(--bg); min-height:100vh; padding:28px; }
 .page-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
 .page-hdr h1 { font-size:22px; font-weight:700; color:var(--primary); margin:0; }
@@ -122,7 +121,7 @@ tbody tr:last-child td { border-bottom:none; }
                 <a href="{{ route('workers.edit', $worker->id) }}" class="btn btn-edit">
                   <i class="fas fa-edit"></i> Edit
                 </a>
-                <form action="{{ route('workers.destroy', $worker->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this worker?')">
+                <form action="{{ route('workers.destroy', $worker->id) }}" method="POST" style="display:inline" onsubmit="return confirmDelete(this,'Delete {{ $worker->first_name }} {{ $worker->last_name }}? This action cannot be undone.')">
                   @csrf
                   @method('DELETE')
                   <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i></button>

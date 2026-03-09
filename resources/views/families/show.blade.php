@@ -4,7 +4,6 @@
 
 @section('content')
 <style>
-
 .bidb-wrap { background:var(--bg); min-height:100vh; padding:28px; }
 .page-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
 .page-hdr h1 { font-size:22px; font-weight:700; color:var(--primary); margin:0; }
@@ -24,6 +23,15 @@
 .btn-primary:hover { background:var(--primary-light); }
 .btn-outline { background:#fff; color:var(--primary); border:1.5px solid var(--primary); }
 .btn-outline:hover { background:#f0f4f8; }
+/* Members table */
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead tr { background:#f8fafc; }
+th { padding:10px 16px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); border-bottom:1.5px solid var(--border); }
+td { padding:11px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:#f8fafc; }
+.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-head { background:#fef3c7; color:#92400e; }
 </style>
 
 <div class="bidb-wrap">
@@ -38,6 +46,7 @@
     </div>
   </div>
 
+  <!-- Family Info -->
   <div class="card">
     <div class="card-header">
       <div class="card-title"><i class="fas fa-people-roof"></i> Family Information</div>
@@ -52,30 +61,22 @@
           <div class="value" style="font-size:18px;font-weight:700;color:var(--primary)">{{ $family->family_name }}</div>
         </div>
         <div class="info-item">
-          <div class="label">Head Last Name</div>
-          <div class="value">{{ $family->head_last_name }}</div>
-        </div>
-        <div class="info-item">
-          <div class="label">Head First Name</div>
-          <div class="value">{{ $family->head_first_name }}</div>
-        </div>
-        <div class="info-item">
-          <div class="label">Head Middle Name</div>
-          <div class="value">{{ $family->head_middle_name ?? '—' }}</div>
+          <div class="label">Head of Family</div>
+          <div class="value">{{ $family->head_last_name }}, {{ $family->head_first_name }}{{ $family->head_middle_name ? ' '.$family->head_middle_name : '' }}</div>
         </div>
         <div class="info-item">
           <div class="label">Number of Members</div>
           <div class="value">{{ $family->member_count }}</div>
         </div>
-        <div class="info-item half">
+        <div class="info-item">
           <div class="label">Linked Household</div>
           <div class="value">
             @if($family->household)
               <span style="background:#eff6ff;color:#1d4ed8;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">
-                HH #{{ $family->household->household_number }} — {{ $family->household->head_last_name }}, {{ $family->household->head_first_name }} ({{ $family->household->sitio }})
+                HH #{{ $family->household->household_number }} — {{ $family->household->sitio }}
               </span>
             @else
-              <span style="color:var(--muted)">Not linked to any household</span>
+              <span style="color:var(--muted)">Not linked</span>
             @endif
           </div>
         </div>
@@ -87,6 +88,52 @@
         @endif
       </div>
     </div>
+  </div>
+
+  <!-- Members List -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-users"></i> Family Members</div>
+      <span style="font-size:12px;color:var(--muted)">{{ $family->members->count() }} {{ $family->members->count() == 1 ? 'member' : 'members' }}</span>
+    </div>
+    @if($family->members->count())
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Full Name</th>
+          <th>Sex / Age</th>
+          <th>Civil Status</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($family->members as $i => $member)
+        <tr>
+          <td style="color:var(--muted);font-size:12px">{{ $i + 1 }}</td>
+          <td>
+            <div style="font-weight:600">{{ $member->last_name }}, {{ $member->first_name }} {{ $member->middle_name }}</div>
+            <div style="font-size:11px;color:var(--muted)">ID #{{ $member->id }}</div>
+          </td>
+          <td>{{ $member->gender }} / {{ $member->age }} yrs</td>
+          <td>{{ $member->civil_status ?? '—' }}</td>
+          <td>
+            @if($member->id === $family->head_resident_id)
+              <span class="badge badge-head"><i class="fas fa-crown" style="margin-right:4px;font-size:10px"></i> Head</span>
+            @else
+              <span style="color:var(--muted);font-size:12px">Member</span>
+            @endif
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+    @else
+    <div class="card-body" style="text-align:center;color:var(--muted);padding:32px">
+      <i class="fas fa-users" style="font-size:28px;opacity:.3;display:block;margin-bottom:8px"></i>
+      No members linked yet. <a href="{{ route('families.edit', $family->id) }}" style="color:var(--primary)">Edit the family</a> to add members.
+    </div>
+    @endif
   </div>
 
 </div>

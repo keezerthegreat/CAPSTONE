@@ -16,37 +16,19 @@ class AuthController extends Controller
 
     public function authenticate(Request $request)
     {
-        // Validate input
         $request->validate([
             'email'    => 'required|email',
             'password' => 'required',
-            'role'     => 'required|in:admin,employee',
         ]);
 
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-
-            // Block login if selected role doesn't match the user's actual role
-            if ($user->role !== $request->role) {
-                Auth::logout();
-                Session::flush();
-
-                return back()
-                    ->withInput($request->only('email', 'role'))
-                    ->withErrors([
-                        'email' => 'Access denied. Your account is not registered as "' . ucfirst($request->role) . '".',
-                    ]);
-            }
-
+        if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
             ActivityLog::log('logged_in', 'Auth', 'User logged in');
             return redirect()->route('dashboard');
         }
 
         return back()
-            ->withInput($request->only('email', 'role'))
+            ->withInput($request->only('email'))
             ->withErrors([
                 'email' => 'Invalid email or password.',
             ]);

@@ -49,5 +49,22 @@ class Resident extends Model
         // Deceased
         'is_deceased',
         'date_of_death',
+
+        // Family link
+        'family_id',
+        'family_role',
+
+        // Household link
+        'household_id',
     ];
+
+    public function family()
+    {
+        return $this->belongsTo(Family::class);
+    }
+
+    public function household()
+    {
+        return $this->belongsTo(Household::class);
+    }
 }

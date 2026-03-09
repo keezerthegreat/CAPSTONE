@@ -104,10 +104,11 @@
     }
 
     .login-title {
-        font-family: 'Playfair Display', serif;
+        font-family: 'DM Sans', sans-serif;
         font-size: 1.45rem;
         font-weight: 700;
-        color: var(--white);
+        color: #ffffff !important;
+        opacity: 1 !important;
         text-align: center;
         line-height: 1.3;
         letter-spacing: 0.01em;
@@ -129,98 +130,6 @@
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
         margin-bottom: 1.8rem;
-    }
-
-    /* Role Cards */
-    .role-label {
-        font-size: 0.75rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--gray-soft);
-        margin-bottom: 0.75rem;
-    }
-
-    .role-cards {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
-        margin-bottom: 1.6rem;
-    }
-
-    .role-card {
-        position: relative;
-        cursor: pointer;
-    }
-
-    .role-card input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .role-card-inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1rem 0.75rem;
-        border-radius: 12px;
-        border: 1.5px solid rgba(255,255,255,0.08);
-        background: rgba(255,255,255,0.03);
-        transition: all 0.2s ease;
-        user-select: none;
-    }
-
-    .role-card:hover .role-card-inner {
-        border-color: rgba(201,168,76,0.35);
-        background: rgba(201,168,76,0.05);
-    }
-
-    .role-card input:checked + .role-card-inner {
-        border-color: var(--gold);
-        background: rgba(201,168,76,0.1);
-        box-shadow: 0 0 0 1px rgba(201,168,76,0.2), 0 4px 16px rgba(201,168,76,0.1);
-    }
-
-    .role-card-icon {
-        font-size: 1.5rem;
-        line-height: 1;
-    }
-
-    .role-card-name {
-        font-size: 0.82rem;
-        font-weight: 500;
-        color: var(--white);
-        letter-spacing: 0.04em;
-    }
-
-    .role-card input:checked + .role-card-inner .role-card-name {
-        color: var(--gold-light);
-    }
-
-    .role-check {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--gold);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.55rem;
-        color: var(--navy);
-        opacity: 0;
-        transform: scale(0.5);
-        transition: all 0.2s ease;
-    }
-
-    .role-card input:checked ~ .role-check {
-        opacity: 1;
-        transform: scale(1);
     }
 
     /* Form Fields */
@@ -363,30 +272,6 @@
 
         <form method="POST" action="{{ route('login.submit') }}">
             @csrf
-
-            {{-- Role Selection --}}
-            <p class="role-label">Login as</p>
-            <div class="role-cards">
-
-                <label class="role-card">
-                    <input type="radio" name="role" value="admin" checked>
-                    <div class="role-card-inner">
-                        <span class="role-card-icon">🛡️</span>
-                        <span class="role-card-name">Admin</span>
-                    </div>
-                    <div class="role-check">✓</div>
-                </label>
-
-                <label class="role-card">
-                    <input type="radio" name="role" value="employee">
-                    <div class="role-card-inner">
-                        <span class="role-card-icon">👤</span>
-                        <span class="role-card-name">Employee</span>
-                    </div>
-                    <div class="role-check">✓</div>
-                </label>
-
-            </div>
 
             {{-- Email --}}
             <div class="field-group">

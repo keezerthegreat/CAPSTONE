@@ -4,31 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Household;
+use App\Models\Resident;
 use Illuminate\Http\Request;
 
 class HouseholdController extends Controller
 {
     public function index()
     {
-        $households = Household::latest()->get();
+        $households = Household::with('members')->latest()->get();
         return view('households.index', compact('households'));
     }
 
     public function create()
     {
-        return view('households.create');
+        $residents = Resident::orderBy('last_name')->get(['id', 'last_name', 'first_name', 'middle_name']);
+        return view('households.create', compact('residents'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'household_number' => 'required|unique:households',
-            'head_last_name'   => 'required',
-            'head_first_name'  => 'required',
-            'sitio'            => 'required',
+            'household_number'  => 'required|unique:households',
+            'head_resident_id'  => 'required|exists:residents,id',
+            'sitio'             => 'required',
+            'members'           => 'nullable|array',
+            'members.*'         => 'exists:residents,id',
         ]);
 
-        $household = Household::create($request->all());
+        $resident    = Resident::findOrFail($request->head_resident_id);
+        $memberCount = count($request->members ?? []) + 1;
+
+        $data = $request->only([
+            'household_number', 'head_resident_id', 'sitio', 'street',
+            'barangay', 'city', 'province', 'residency_type', 'latitude', 'longitude', 'notes',
+        ]);
+        $data['head_last_name']   = $resident->last_name;
+        $data['head_first_name']  = $resident->first_name;
+        $data['head_middle_name'] = $resident->middle_name;
+        $data['member_count']     = $memberCount;
+
+        $household = Household::create($data);
+
+        if ($request->filled('members')) {
+            Resident::whereIn('id', $request->members)->update(['household_id' => $household->id]);
+        }
+
         ActivityLog::log('created', 'Household', "Added household: #{$household->household_number}");
 
         return redirect()->route('households.index')
@@ -43,8 +63,9 @@ class HouseholdController extends Controller
 
     public function edit($id)
     {
-        $household = Household::findOrFail($id);
-        return view('households.edit', compact('household'));
+        $household = Household::with('members')->findOrFail($id);
+        $residents = Resident::orderBy('last_name')->get(['id', 'last_name', 'first_name', 'middle_name']);
+        return view('households.edit', compact('household', 'residents'));
     }
 
     public function update(Request $request, $id)
@@ -53,12 +74,31 @@ class HouseholdController extends Controller
 
         $request->validate([
             'household_number' => 'required|unique:households,household_number,' . $id,
-            'head_last_name'   => 'required',
-            'head_first_name'  => 'required',
+            'head_resident_id' => 'required|exists:residents,id',
             'sitio'            => 'required',
+            'members'          => 'nullable|array',
+            'members.*'        => 'exists:residents,id',
         ]);
 
-        $household->update($request->all());
+        $resident    = Resident::findOrFail($request->head_resident_id);
+        $memberCount = count($request->members ?? []) + 1;
+
+        // Clear old member links then reassign
+        Resident::where('household_id', $household->id)->update(['household_id' => null]);
+        if ($request->filled('members')) {
+            Resident::whereIn('id', $request->members)->update(['household_id' => $household->id]);
+        }
+
+        $data = $request->only([
+            'household_number', 'head_resident_id', 'sitio', 'street',
+            'barangay', 'city', 'province', 'residency_type', 'latitude', 'longitude', 'notes',
+        ]);
+        $data['head_last_name']   = $resident->last_name;
+        $data['head_first_name']  = $resident->first_name;
+        $data['head_middle_name'] = $resident->middle_name;
+        $data['member_count']     = $memberCount;
+
+        $household->update($data);
         ActivityLog::log('updated', 'Household', "Updated household: #{$household->household_number}");
 
         return redirect()->route('households.index')
@@ -68,18 +108,20 @@ class HouseholdController extends Controller
     public function destroy($id)
     {
         $household = Household::findOrFail($id);
+        Resident::where('household_id', $household->id)->update(['household_id' => null]);
         ActivityLog::log('deleted', 'Household', "Deleted household: #{$household->household_number}");
         $household->delete();
 
         return redirect()->route('households.index')
             ->with('success', 'Household deleted successfully.');
     }
-    public function map()
-{
-    $households = \App\Models\Household::whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->get();
 
-    return view('households.map', compact('households'));
-}
+    public function map()
+    {
+        $households = Household::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get();
+
+        return view('households.map', compact('households'));
+    }
 }
