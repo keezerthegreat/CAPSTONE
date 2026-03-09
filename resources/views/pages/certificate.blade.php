@@ -153,12 +153,11 @@ tbody tr:last-child td { border-bottom:none; }
 <i class="fas fa-edit"></i> Edit
 </a>
 
-<form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this certificate?')">
+<form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" style="display:inline">
 @csrf
 @method('DELETE')
 <button type="submit" class="btn btn-delete">
-<i class="fas fa-trash"></i>
-</button>
+<i class="fas fa-trash"></i> Delete</button>
 </form>
 
 @endif

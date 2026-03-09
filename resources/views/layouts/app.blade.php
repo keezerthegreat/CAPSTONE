@@ -297,6 +297,70 @@
 
 </div>
 
+<!-- ── GLOBAL DELETE CONFIRMATION MODAL ── -->
+<div id="delete-modal" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  align-items:center; justify-content:center;
+">
+  <!-- Backdrop -->
+  <div id="delete-backdrop" style="
+    position:absolute; inset:0;
+    background:rgba(0,0,0,0.45);
+    backdrop-filter:blur(2px);
+  "></div>
+
+  <!-- Modal Box -->
+  <div style="
+    position:relative; z-index:1;
+    background:var(--card,#fff);
+    border:1px solid var(--border,#e2e8f0);
+    border-radius:16px;
+    padding:28px 32px;
+    width:100%; max-width:380px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.2);
+    text-align:center;
+    animation: modalIn .18s ease;
+  ">
+    <!-- Icon -->
+    <div style="
+      width:56px; height:56px; border-radius:50%;
+      background:#fff1f2; border:2px solid #fecdd3;
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto 16px; font-size:22px;
+    ">🗑️</div>
+
+    <h3 style="font-size:16px; font-weight:700; color:var(--text,#1e293b); margin:0 0 8px;">Delete this record?</h3>
+    <p style="font-size:13px; color:var(--muted,#64748b); margin:0 0 24px; line-height:1.5;">
+      This action <strong>cannot be undone</strong>. The record will be permanently removed.
+    </p>
+
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button id="delete-cancel" style="
+        flex:1; padding:10px; border-radius:9px;
+        border:1.5px solid var(--border,#e2e8f0);
+        background:var(--card,#fff); color:var(--text,#1e293b);
+        font-size:13px; font-weight:600; cursor:pointer;
+        font-family:inherit; transition:background .15s;
+      ">Cancel</button>
+
+      <button id="delete-confirm" style="
+        flex:1; padding:10px; border-radius:9px;
+        border:none; background:#dc2626; color:#fff;
+        font-size:13px; font-weight:600; cursor:pointer;
+        font-family:inherit; transition:opacity .15s;
+      ">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.92) translateY(10px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+[data-theme="dark"] #delete-modal > div:last-child { /* modal box already uses var(--card) */ }
+</style>
+
 <script>
   // Apply saved theme immediately on load (before paint)
   (function() {
@@ -307,6 +371,44 @@
   // Live date in topbar
   const d = new Date();
   document.getElementById('topbar-date').textContent = d.toLocaleDateString('en-PH', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+
+  // ── DELETE MODAL LOGIC ──
+  let pendingDeleteForm = null;
+
+  // Intercept ALL delete forms on the page
+  document.addEventListener('submit', function(e) {
+    const form = e.target;
+    // Only intercept forms that contain a DELETE method spoofing input
+    const method = form.querySelector('input[name="_method"]');
+    if (method && method.value === 'DELETE') {
+      e.preventDefault();
+      pendingDeleteForm = form;
+      const modal = document.getElementById('delete-modal');
+      modal.style.display = 'flex';
+    }
+  });
+
+  // Confirm delete
+  document.getElementById('delete-confirm').addEventListener('click', function() {
+    if (pendingDeleteForm) {
+      document.getElementById('delete-modal').style.display = 'none';
+      pendingDeleteForm.submit();
+      pendingDeleteForm = null;
+    }
+  });
+
+  // Cancel
+  function closeDeleteModal() {
+    document.getElementById('delete-modal').style.display = 'none';
+    pendingDeleteForm = null;
+  }
+  document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-backdrop').addEventListener('click', closeDeleteModal);
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
 </script>
 
 </body>

@@ -128,12 +128,11 @@ tbody tr:last-child td { border-bottom:none; }
 <i class="fas fa-edit"></i> Edit
 </a>
 
-<form method="POST" action="{{ route('families.destroy', $family->id) }}" style="display:inline" onsubmit="return confirm('Delete this family?')">
+<form method="POST" action="{{ route('families.destroy', $family->id) }}" style="display:inline">
 @csrf
 @method('DELETE')
 <button type="submit" class="btn btn-sm btn-delete">
-<i class="fas fa-trash"></i>
-</button>
+<i class="fas fa-trash"></i> Delete</button>
 </form>
 
 @endif

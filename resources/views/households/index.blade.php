@@ -187,15 +187,13 @@ tbody tr:last-child td { border-bottom:none; }
 
       <form method="POST"
             action="{{ route('households.destroy', $hh->id) }}"
-            style="display:inline"
-            onsubmit="return confirm('Delete this household?')">
+            style="display:inline">
 
         @csrf
         @method('DELETE')
 
         <button type="submit" class="btn btn-sm btn-delete">
-          <i class="fas fa-trash"></i>
-        </button>
+          <i class="fas fa-trash"></i> Delete</button>
 
       </form>
 
