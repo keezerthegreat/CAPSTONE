@@ -66,10 +66,15 @@ input:focus, select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rg
           <div class="form-group">
             <label>Certificate Type <span class="req">*</span></label>
             <select name="certificate_type" required>
-              <option value="Good Moral Character Clearance" {{ $clearance->certificate_type == 'Good Moral Character Clearance' ? 'selected' : '' }}>Good Moral Character</option>
-              <option value="Residency Certificate"         {{ $clearance->certificate_type == 'Residency Certificate'         ? 'selected' : '' }}>Residency Certificate</option>
-              <option value="Indigency Certificate"         {{ $clearance->certificate_type == 'Indigency Certificate'         ? 'selected' : '' }}>Indigency Certificate</option>
-              <option value="Business Operation"            {{ $clearance->certificate_type == 'Business Operation'            ? 'selected' : '' }}>Business Operation</option>
+              <option value="Barangay Clearance"               {{ $clearance->certificate_type == 'Barangay Clearance'               ? 'selected' : '' }}>Barangay Clearance</option>
+              <option value="Residency Clearance"              {{ $clearance->certificate_type == 'Residency Clearance'              ? 'selected' : '' }}>Residency Clearance</option>
+              <option value="Good Moral Clearance"             {{ $clearance->certificate_type == 'Good Moral Clearance'             ? 'selected' : '' }}>Good Moral Clearance</option>
+              <option value="Police Clearance Endorsement"     {{ $clearance->certificate_type == 'Police Clearance Endorsement'     ? 'selected' : '' }}>Police Clearance Endorsement</option>
+              <option value="First Time Job Seeker Clearance"  {{ $clearance->certificate_type == 'First Time Job Seeker Clearance'  ? 'selected' : '' }}>First Time Job Seeker Clearance</option>
+              {{-- Legacy values fallback --}}
+              @if(!in_array($clearance->certificate_type, ['Barangay Clearance','Residency Clearance','Good Moral Clearance','Police Clearance Endorsement','First Time Job Seeker Clearance']))
+              <option value="{{ $clearance->certificate_type }}" selected>{{ $clearance->certificate_type }}</option>
+              @endif
             </select>
           </div>
 

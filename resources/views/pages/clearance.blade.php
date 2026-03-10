@@ -112,11 +112,11 @@ tbody tr:last-child td { border-bottom:none; }
             <label>Clearance Type <span class="req">*</span></label>
             <select name="certificate_type" required>
               <option value="">Select type...</option>
-              <option value="Good Moral Character Clearance">Barangay Clearance</option>
-              <option value="Indigency Certificate">Residency Clearance</option>
-              <option value="Business Operation">Good Moral Clearance</option>
-              <option value="Business Operation">Police Clearance Endorsement</option>
-              <option value="Business Operation">First Time Job Seeker Clearance</option>
+              <option value="Barangay Clearance">Barangay Clearance</option>
+              <option value="Residency Clearance">Residency Clearance</option>
+              <option value="Good Moral Clearance">Good Moral Clearance</option>
+              <option value="Police Clearance Endorsement">Police Clearance Endorsement</option>
+              <option value="First Time Job Seeker Clearance">First Time Job Seeker Clearance</option>
             </select>
           </div>
 

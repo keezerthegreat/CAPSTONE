@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('page-title', 'Certificate Forms')
+@section('page-title', 'Barangay Certificate Forms')
 
 @section('content')
 <style>
@@ -111,12 +111,12 @@ tbody tr:last-child td { border-bottom:none; }
 <label>Certificate Type <span class="req">*</span></label>
 <select name="certificate_type" required>
 <option value="">Select type...</option>
-<option value="Good Moral Character Clearance">Certificate of Residency</option>
-<option value="Residency Certificate">Certificate of Indigency</option>
-<option value="Indigency Certificate">Certificate of Unemployment</option>
-<option value="Business Operation">Certificate of Residency for Voters</option>
-<option value="Business Operation">Certificate of Guardianship</option>
-
+<option value="Good Moral Character Clearance">Good Moral Character Clearance</option>
+<option value="Certificate of Residency">Certificate of Residency</option>
+<option value="Certificate of Indigency">Certificate of Indigency</option>
+<option value="Certificate of Unemployment">Certificate of Unemployment</option>
+<option value="Certificate of Residency for Voters">Certificate of Residency for Voters</option>
+<option value="Certificate of Guardianship">Certificate of Guardianship</option>
 </select>
 </div>
 

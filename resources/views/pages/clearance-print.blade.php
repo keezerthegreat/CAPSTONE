@@ -52,11 +52,60 @@
         <h2>Barangay Clearance</h2>
     </div>
 
-    <p>
-        This is to certify that <strong>{{ $clearance->resident_name }}</strong>
-        is a bona fide resident of Barangay Cogon and is hereby cleared
-        for the purpose stated below.
-    </p>
+    {{-- BARANGAY CLEARANCE --}}
+    @if($clearance->certificate_type === 'Barangay Clearance')
+        <p>
+            This is to certify that <strong>{{ $clearance->resident_name }}</strong>
+            is a bona fide resident of Barangay Cogon and is hereby granted
+            <strong>Barangay Clearance</strong>. They have no derogatory record on file
+            and are known to be of good standing in the community.
+        </p>
+
+    {{-- RESIDENCY CLEARANCE --}}
+    @elseif($clearance->certificate_type === 'Residency Clearance')
+        <p>
+            This is to certify that <strong>{{ $clearance->resident_name }}</strong>
+            is a bona fide resident of Barangay Cogon and is hereby cleared
+            for the purpose stated below.
+        </p>
+
+    {{-- GOOD MORAL CLEARANCE --}}
+    @elseif($clearance->certificate_type === 'Good Moral Clearance')
+        <p>
+            This is to certify that <strong>{{ $clearance->resident_name }}</strong>
+            is a resident of Barangay Cogon and is known to be of
+            <strong>good moral character</strong>, law-abiding, and has no derogatory
+            record on file as of this date.
+        </p>
+
+    {{-- POLICE CLEARANCE ENDORSEMENT --}}
+    @elseif($clearance->certificate_type === 'Police Clearance Endorsement')
+        <p>
+            This is to certify that <strong>{{ $clearance->resident_name }}</strong>
+            is a bona fide resident of Barangay Cogon. This barangay hereby
+            <strong>endorses</strong> the above-named person for the issuance of a
+            Police Clearance, as they have no pending complaints or derogatory
+            record in this barangay as of this date.
+        </p>
+
+    {{-- FIRST TIME JOB SEEKER CLEARANCE --}}
+    @elseif($clearance->certificate_type === 'First Time Job Seeker Clearance')
+        <p>
+            This is to certify that <strong>{{ $clearance->resident_name }}</strong>
+            is a bona fide resident of Barangay Cogon and is a
+            <strong>first time job seeker</strong> pursuant to Republic Act No. 11261
+            (First Time Jobseekers Assistance Act). They are entitled to the exemption
+            from payment of fees for the issuance of this clearance.
+        </p>
+
+    {{-- LEGACY / FALLBACK --}}
+    @else
+        <p>
+            This is to certify that <strong>{{ $clearance->resident_name }}</strong>
+            is a bona fide resident of Barangay Cogon and is hereby cleared
+            for the purpose stated below.
+        </p>
+    @endif
 
     <p>
         <strong>Purpose:</strong> {{ $clearance->purpose }}

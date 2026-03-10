@@ -67,7 +67,7 @@
         </p>
 
     {{-- RESIDENCY --}}
-    @elseif($certificate->certificate_type === 'Residency Certificate')
+    @elseif($certificate->certificate_type === 'Certificate of Residency' || $certificate->certificate_type === 'Residency Certificate')
         <p>
             This is to certify that <strong>{{ $certificate->resident_name }}</strong>
             is a bona fide resident of this barangay.
@@ -79,7 +79,7 @@
         </p>
 
     {{-- INDIGENCY --}}
-    @elseif($certificate->certificate_type === 'Indigency Certificate')
+    @elseif($certificate->certificate_type === 'Certificate of Indigency' || $certificate->certificate_type === 'Indigency Certificate')
         <p>
             This is to certify that <strong>{{ $certificate->resident_name }}</strong>
             is a resident of this barangay and belongs to an
@@ -91,7 +91,46 @@
             financial or medical assistance.
         </p>
 
-    {{-- BUSINESS OPERATION --}}
+    {{-- UNEMPLOYMENT --}}
+    @elseif($certificate->certificate_type === 'Certificate of Unemployment')
+        <p>
+            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
+            is a resident of this barangay and is currently
+            <strong>unemployed</strong> as of this date.
+        </p>
+
+        <p>
+            This certification is issued upon the request of the above-named person
+            for whatever legal purpose it may serve.
+        </p>
+
+    {{-- RESIDENCY FOR VOTERS --}}
+    @elseif($certificate->certificate_type === 'Certificate of Residency for Voters')
+        <p>
+            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
+            is a bona fide resident of this barangay and is qualified to
+            <strong>register as a voter</strong> within this jurisdiction.
+        </p>
+
+        <p>
+            This certification is issued in connection with the voter registration
+            requirements of the Commission on Elections (COMELEC).
+        </p>
+
+    {{-- GUARDIANSHIP --}}
+    @elseif($certificate->certificate_type === 'Certificate of Guardianship')
+        <p>
+            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
+            is a resident of this barangay and is recognized as the
+            <strong>legal guardian</strong> of the minor/dependent under their care.
+        </p>
+
+        <p>
+            This certification is issued upon the request of the above-named person
+            for whatever legal purpose it may serve.
+        </p>
+
+    {{-- BUSINESS OPERATION (legacy) --}}
     @elseif($certificate->certificate_type === 'Business Operation')
         <p>
             This is to certify that <strong>{{ $certificate->resident_name }}</strong>
