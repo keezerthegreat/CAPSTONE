@@ -17,7 +17,7 @@ class HouseholdController extends Controller
 
     public function create()
     {
-        $residents = Resident::orderBy('last_name')->get(['id', 'last_name', 'first_name', 'middle_name']);
+        $residents = Resident::where('status', 'approved')->orderBy('last_name')->get(['id', 'last_name', 'first_name', 'middle_name']);
         return view('households.create', compact('residents'));
     }
 
@@ -33,6 +33,14 @@ class HouseholdController extends Controller
 
         $resident    = Resident::findOrFail($request->head_resident_id);
         $memberCount = count($request->members ?? []) + 1;
+
+        // Duplicate check: same head resident already heads a household
+        $headDuplicate = Household::where('head_resident_id', $resident->id)->first();
+        if ($headDuplicate) {
+            return back()->withInput()->withErrors([
+                'head_resident_id' => "{$resident->first_name} {$resident->last_name} is already the head of household #{$headDuplicate->household_number}.",
+            ]);
+        }
 
         $data = $request->only([
             'household_number', 'head_resident_id', 'sitio', 'street',
@@ -57,14 +65,14 @@ class HouseholdController extends Controller
 
     public function show($id)
     {
-        $household = Household::findOrFail($id);
+        $household = Household::with('members')->findOrFail($id);
         return view('households.show', compact('household'));
     }
 
     public function edit($id)
     {
         $household = Household::with('members')->findOrFail($id);
-        $residents = Resident::orderBy('last_name')->get(['id', 'last_name', 'first_name', 'middle_name']);
+        $residents = Resident::where('status', 'approved')->orderBy('last_name')->get(['id', 'last_name', 'first_name', 'middle_name']);
         return view('households.edit', compact('household', 'residents'));
     }
 
@@ -114,6 +122,19 @@ class HouseholdController extends Controller
 
         return redirect()->route('households.index')
             ->with('success', 'Household deleted successfully.');
+    }
+
+    public function search(Request $request)
+    {
+        $barangay = trim($request->input('barangay', ''));
+        if (strlen($barangay) < 2) {
+            return response()->json([]);
+        }
+
+        $households = Household::whereRaw('LOWER(barangay) LIKE ?', ['%' . strtolower($barangay) . '%'])
+            ->get(['id', 'household_number', 'head_first_name', 'head_last_name', 'sitio', 'street', 'barangay', 'member_count']);
+
+        return response()->json($households);
     }
 
     public function map()

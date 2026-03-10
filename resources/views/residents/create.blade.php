@@ -35,6 +35,20 @@ input::placeholder { color:#94a3b8; }
 .alert-success { background:#dcfce7; border:1px solid #bbf7d0; color:#166534; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; display:flex; align-items:center; gap:8px; }
 .map-hint { font-size:12px; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
 #map { height:320px; border-radius:10px; border:1.5px solid var(--border); margin-top:4px; }
+/* Household suggestion panel */
+.hh-suggestion { margin-top:16px; display:none; }
+.hh-suggestion-label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.hh-list { display:flex; flex-direction:column; gap:8px; }
+.hh-card { border:1.5px solid var(--border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all .15s; background:#fff; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.hh-card:hover { border-color:var(--primary); background:#eff6ff; }
+.hh-card.selected { border-color:var(--primary); background:#eff6ff; box-shadow:0 0 0 3px rgba(26,58,107,.08); }
+.hh-card-info { display:flex; flex-direction:column; gap:2px; }
+.hh-card-title { font-size:13px; font-weight:700; color:var(--primary); }
+.hh-card-sub { font-size:12px; color:var(--muted); }
+.hh-card-badge { font-size:11px; font-weight:600; background:#e0e7ff; color:#3730a3; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+.hh-card.selected .hh-card-badge { background:var(--primary); color:#fff; }
+.hh-none { font-size:13px; color:var(--muted); padding:10px 0; display:flex; align-items:center; gap:6px; }
+.hh-loading { font-size:13px; color:var(--muted); padding:8px 0; display:flex; align-items:center; gap:6px; }
 </style>
 
 <div class="bidb-wrap">
@@ -145,21 +159,44 @@ input::placeholder { color:#94a3b8; }
       <div class="card-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Province <span class="req">*</span></label>
-            <input type="text" name="province" value="{{ old('province') }}" placeholder="e.g. Leyte" required>
+            <label>Province</label>
+            <input type="text" value="Leyte" disabled style="background:#f1f5f9;color:var(--muted);cursor:not-allowed;">
+            <input type="hidden" name="province" value="Leyte">
           </div>
           <div class="form-group">
-            <label>City / Municipality <span class="req">*</span></label>
-            <input type="text" name="city" value="{{ old('city') }}" placeholder="e.g. Ormoc City" required>
+            <label>City / Municipality</label>
+            <input type="text" value="Ormoc City" disabled style="background:#f1f5f9;color:var(--muted);cursor:not-allowed;">
+            <input type="hidden" name="city" value="Ormoc City">
           </div>
           <div class="form-group">
-            <label>Barangay <span class="req">*</span></label>
-            <input type="text" name="barangay" value="{{ old('barangay') }}" placeholder="e.g. Cogon" required>
+            <label>Barangay</label>
+            <input type="text" value="Cogon" disabled style="background:#f1f5f9;color:var(--muted);cursor:not-allowed;">
+            <input type="hidden" name="barangay" value="Cogon">
+          </div>
+          <div class="form-group">
+            <label>Sitio <span class="req">*</span></label>
+            <select name="sitio_name" required>
+              <option value="">Select sitio...</option>
+              @foreach($sitios as $sitio)
+                <option value="{{ $sitio }}" {{ old('sitio_name') === $sitio ? 'selected' : '' }}>{{ $sitio }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Purok</label>
+            <input type="text" name="purok" value="{{ old('purok') }}" placeholder="e.g. Sampaguita">
           </div>
           <div class="form-group full">
-            <label>House No., Street / Purok / Sitio <span class="req">*</span></label>
-            <textarea name="address" rows="2" placeholder="e.g. 123 Rizal St., Purok Sampaguita" required>{{ old('address') }}</textarea>
+            <label>Street / House No.</label>
+            <input type="text" name="street_no" value="{{ old('street_no') }}" placeholder="e.g. 123 Rizal St.">
           </div>
+        </div>
+
+        {{-- Household suggestion panel --}}
+        <input type="hidden" name="household_id" id="household_id" value="{{ old('household_id') }}">
+        <div class="hh-suggestion" id="hhSuggestion">
+          <div class="hh-suggestion-label"><i class="fas fa-home"></i> Matching Households in this Barangay <span style="font-weight:400;color:#94a3b8">(optional — click to assign)</span></div>
+          <div class="hh-list" id="hhList"></div>
         </div>
       </div>
     </div>
@@ -203,8 +240,8 @@ input::placeholder { color:#94a3b8; }
       </div>
       <div class="card-body">
         <div class="check-group">
-          <label class="check-item">
-            <input type="checkbox" name="is_senior" value="1" {{ old('is_senior') ? 'checked':'' }}>
+          <label class="check-item" id="senior-label">
+            <input type="checkbox" name="is_senior" id="is_senior" value="1" {{ old('is_senior') ? 'checked':'' }}>
             <span>Senior Citizen (60+)</span>
           </label>
           <label class="check-item">
@@ -243,6 +280,23 @@ map.on('click', function(e) {
 </script>
 
 <script>
+function updateSeniorCheckbox(age) {
+  const cb    = document.getElementById('is_senior');
+  const label = document.getElementById('senior-label');
+  if (age < 60) {
+    cb.checked  = false;
+    cb.disabled = true;
+    label.style.opacity = '0.4';
+    label.style.cursor  = 'not-allowed';
+    label.title = 'Resident must be 60 or older to qualify as Senior Citizen';
+  } else {
+    cb.disabled = false;
+    label.style.opacity = '1';
+    label.style.cursor  = 'pointer';
+    label.title = '';
+  }
+}
+
 document.getElementById('birthdate').addEventListener('change', function() {
   const birthdate = new Date(this.value);
   const today = new Date();
@@ -250,7 +304,127 @@ document.getElementById('birthdate').addEventListener('change', function() {
   const m = today.getMonth() - birthdate.getMonth();
   if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) age--;
   document.getElementById('age').value = age;
+  updateSeniorCheckbox(age);
 });
+
+// Run on page load in case of validation bounce-back
+(function() {
+  const val = document.getElementById('age').value;
+  if (val !== '') updateSeniorCheckbox(parseInt(val, 10));
+})();
+</script>
+
+<script>
+(function() {
+  const barangayInput = document.querySelector('input[name="barangay"][type="hidden"]');
+  const panel         = document.getElementById('hhSuggestion');
+  const list          = document.getElementById('hhList');
+  const hiddenId      = document.getElementById('household_id');
+  let selectedId      = '{{ old('household_id') }}';
+  let debounceTimer;
+
+  const hhMap = {};
+
+  function renderHouseholds(households) {
+    panel.style.display = 'block';
+    if (households.length === 0) {
+      list.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle"></i> No households found in this barangay yet.</div>';
+      return;
+    }
+    households.forEach(h => { hhMap[h.id] = h; });
+    list.innerHTML = households.map(h => {
+      const isSelected = String(h.id) === String(selectedId);
+      const sitio = h.sitio ? h.sitio : (h.street || '—');
+      return `<div class="hh-card${isSelected ? ' selected' : ''}" data-id="${h.id}" onclick="selectHousehold(${h.id}, this)">
+        <div class="hh-card-info">
+          <div class="hh-card-title">Household #${h.household_number}</div>
+          <div class="hh-card-sub">Head: ${h.head_first_name} ${h.head_last_name} &nbsp;·&nbsp; Sitio: ${sitio}</div>
+        </div>
+        <span class="hh-card-badge">${isSelected ? '<i class="fas fa-check"></i> Assigned' : h.member_count + ' member(s)'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function fetchHouseholds(barangay) {
+    if (!barangay || barangay.trim().length < 2) {
+      panel.style.display = 'none';
+      return;
+    }
+    list.innerHTML = '<div class="hh-loading"><i class="fas fa-spinner fa-spin"></i> Looking up households…</div>';
+    panel.style.display = 'block';
+
+    fetch(`{{ route('households.search') }}?barangay=${encodeURIComponent(barangay)}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(renderHouseholds)
+    .catch(() => { list.innerHTML = '<div class="hh-none"><i class="fas fa-exclamation-circle"></i> Could not load households.</div>'; });
+  }
+
+  const sitioSelect  = document.querySelector('select[name="sitio_name"]');
+  const streetInput  = document.querySelector('input[name="street_no"]');
+
+  function autofillFromHousehold(h) {
+    if (h.sitio && !sitioSelect.value) {
+      // Try to match the sitio value exactly in the select options
+      for (const opt of sitioSelect.options) {
+        if (opt.value.toLowerCase() === h.sitio.toLowerCase()) {
+          sitioSelect.value = opt.value;
+          break;
+        }
+      }
+    }
+    if (h.street && !streetInput.value) {
+      streetInput.value = h.street;
+    }
+  }
+
+  function clearAutofill(h) {
+    // Only clear if the value still matches what we auto-filled
+    if (h.sitio) {
+      for (const opt of sitioSelect.options) {
+        if (opt.value.toLowerCase() === h.sitio.toLowerCase() && sitioSelect.value === opt.value) {
+          sitioSelect.value = '';
+          break;
+        }
+      }
+    }
+    if (h.street && streetInput.value === h.street) {
+      streetInput.value = '';
+    }
+  }
+
+  window.selectHousehold = function(id, el) {
+    if (String(id) === String(selectedId)) {
+      // Deselect
+      const prev = hhMap[id];
+      if (prev) clearAutofill(prev);
+      selectedId = '';
+      hiddenId.value = '';
+      el.classList.remove('selected');
+      el.querySelector('.hh-card-badge').textContent = el.querySelector('.hh-card-badge').textContent.replace(' Assigned', '');
+    } else {
+      selectedId = id;
+      hiddenId.value = id;
+      document.querySelectorAll('.hh-card').forEach(c => {
+        c.classList.remove('selected');
+        const badge = c.querySelector('.hh-card-badge');
+        if (badge.innerHTML.includes('fa-check')) {
+          badge.innerHTML = badge.dataset.count || badge.textContent;
+        }
+      });
+      el.classList.add('selected');
+      el.querySelector('.hh-card-badge').innerHTML = '<i class="fas fa-check"></i> Assigned';
+      const h = hhMap[id];
+      if (h) autofillFromHousehold(h);
+    }
+  };
+
+  // Barangay is fixed to "Cogon" — fetch households immediately on page load
+  fetchHouseholds(barangayInput.value);
+})();
+
+
 </script>
 
 @endsection

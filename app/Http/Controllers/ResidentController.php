@@ -20,12 +20,14 @@ class ResidentController extends Controller
 
     public function create()
     {
-        return view('residents.create');
+        $sitios = ['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'];
+        return view('residents.create', compact('sitios'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'household_id'    => 'nullable|exists:households,id',
             'last_name'       => 'required|string|max:255',
             'first_name'      => 'required|string|max:255',
             'middle_name'     => 'nullable|string|max:255',
@@ -40,7 +42,9 @@ class ResidentController extends Controller
             'province'        => 'required|string|max:255',
             'city'            => 'required|string|max:255',
             'barangay'        => 'required|string|max:255',
-            'address'         => 'required|string|max:255',
+            'sitio_name'      => 'required|string|max:255',
+            'purok'           => 'nullable|string|max:100',
+            'street_no'       => 'nullable|string|max:255',
             'occupation'      => 'nullable|string|max:255',
             'employer'        => 'nullable|string|max:255',
             'monthly_income'  => 'nullable|numeric|min:0',
@@ -52,12 +56,38 @@ class ResidentController extends Controller
             'longitude'       => 'nullable|numeric',
         ]);
 
-        $validated['is_senior'] = $request->has('is_senior') ? 1 : 0;
+        // Build address from sub-fields then remove them from $validated
+        $parts = array_filter([
+            $validated['sitio_name'],
+            !empty($validated['purok'])    ? 'Purok ' . $validated['purok'] : null,
+            $validated['street_no'] ?? null,
+        ]);
+        $validated['address'] = implode(', ', $parts);
+        unset($validated['sitio_name'], $validated['purok'], $validated['street_no']);
+
+        $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd']    = $request->has('is_pwd')    ? 1 : 0;
         $validated['is_voter']  = $request->has('is_voter')  ? 1 : 0;
         $validated['status']    = 'pending';
 
+        // Duplicate check: same name + birthdate already in the system
+        $duplicate = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($validated['first_name'])])
+            ->whereRaw('LOWER(last_name) = ?', [strtolower($validated['last_name'])])
+            ->where('birthdate', $validated['birthdate'])
+            ->first();
+
+        if ($duplicate) {
+            return back()->withInput()->withErrors([
+                'first_name' => "A resident named {$duplicate->first_name} {$duplicate->last_name} with the same birthdate already exists in the system (ID #{$duplicate->id}).",
+            ]);
+        }
+
         $resident = Resident::create($validated);
+
+        if (!empty($validated['household_id'])) {
+            Household::where('id', $validated['household_id'])->increment('member_count');
+        }
+
         ActivityLog::log('submitted', 'Resident', "Submitted for verification: {$resident->first_name} {$resident->last_name} — awaiting admin approval");
 
         return redirect()->route('residents.index')
@@ -73,7 +103,8 @@ class ResidentController extends Controller
     public function edit($id)
     {
         $resident = Resident::findOrFail($id);
-        return view('residents.edit', compact('resident'));
+        $sitios = ['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'];
+        return view('residents.edit', compact('resident', 'sitios'));
     }
 
     public function update(Request $request, $id)
@@ -95,7 +126,9 @@ class ResidentController extends Controller
             'province'        => 'required|string|max:255',
             'city'            => 'required|string|max:255',
             'barangay'        => 'required|string|max:255',
-            'address'         => 'required|string|max:255',
+            'sitio_name'      => 'required|string|max:255',
+            'purok'           => 'nullable|string|max:100',
+            'street_no'       => 'nullable|string|max:255',
             'occupation'      => 'nullable|string|max:255',
             'employer'        => 'nullable|string|max:255',
             'monthly_income'  => 'nullable|numeric|min:0',
@@ -109,7 +142,16 @@ class ResidentController extends Controller
             'date_of_death'   => 'nullable|date',
         ]);
 
-        $validated['is_senior']   = $request->has('is_senior')   ? 1 : 0;
+        // Build address from sub-fields
+        $parts = array_filter([
+            $validated['sitio_name'],
+            !empty($validated['purok']) ? 'Purok ' . $validated['purok'] : null,
+            $validated['street_no'] ?? null,
+        ]);
+        $validated['address'] = implode(', ', $parts);
+        unset($validated['sitio_name'], $validated['purok'], $validated['street_no']);
+
+        $validated['is_senior']   = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd']      = $request->has('is_pwd')      ? 1 : 0;
         $validated['is_voter']    = $request->has('is_voter')    ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
@@ -178,6 +220,7 @@ class ResidentController extends Controller
     {
         $resident = Resident::where('status', 'pending')->findOrFail($id);
         $resident->update(['status' => 'approved']);
+
         ActivityLog::log('approved', 'Resident', "Approved resident record: {$resident->first_name} {$resident->last_name} (ID #{$resident->id})");
 
         return redirect()->route('residents.index')

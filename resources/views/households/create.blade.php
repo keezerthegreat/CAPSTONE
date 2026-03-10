@@ -11,7 +11,7 @@
 .breadcrumb { font-size:13px; color:var(--muted); margin-top:2px; }
 .breadcrumb a { color:var(--primary); text-decoration:none; }
 .breadcrumb span { color:var(--primary); font-weight:500; }
-.card { background:var(--card); border-radius:14px; border:1px solid var(--border); box-shadow:0 1px 6px rgba(0,0,0,.06); margin-bottom:20px; overflow:hidden; }
+.card { background:var(--card); border-radius:14px; border:1px solid var(--border); box-shadow:0 1px 6px rgba(0,0,0,.06); margin-bottom:20px; }
 .card-header { padding:16px 20px; border-bottom:1px solid var(--border); background:#f8fafc; }
 .card-title { font-weight:700; color:var(--primary); font-size:14px; display:flex; align-items:center; gap:8px; }
 .card-body { padding:24px; }
@@ -33,7 +33,7 @@ input::placeholder { color:#94a3b8; }
 #map { height:320px; border-radius:10px; border:1.5px solid var(--border); margin-top:4px; }
 /* Resident search widget */
 .res-search-wrap { position:relative; }
-.res-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--primary); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:100; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+.res-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--primary); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:1000; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
 .res-dropdown.open { display:block; }
 .res-option { padding:9px 14px; cursor:pointer; font-size:14px; color:var(--text); border-bottom:1px solid var(--border); }
 .res-option:last-child { border-bottom:none; }

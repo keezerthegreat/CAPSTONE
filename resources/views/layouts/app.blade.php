@@ -179,6 +179,10 @@
     [data-theme="dark"] .confirm-icon { background: rgba(220,38,38,.15) !important; border-color: rgba(220,38,38,.3) !important; }
     [data-theme="dark"] .confirm-title { color: var(--text) !important; }
     [data-theme="dark"] .confirm-cancel { background: var(--input-bg) !important; color: var(--muted) !important; border-color: var(--border) !important; }
+    /* Reject modal dark mode */
+    [data-theme="dark"] #rejectBackdrop > div { background: #161b27 !important; }
+    [data-theme="dark"] #rejectBackdrop #rejectCancel { background: var(--input-bg) !important; color: var(--muted) !important; border-color: var(--border) !important; }
+    [data-theme="dark"] #rejectBackdrop > div > div:first-child { background: rgba(190,18,60,.15) !important; border-color: rgba(220,38,38,.3) !important; }
     /* Toast */
     [data-theme="dark"] .toast { background: #1a2236 !important; border-color: var(--border) !important; }
     [data-theme="dark"] .toast-info::before { background: var(--primary) !important; }

@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
 
     // Households (EMPLOYEE + ADMIN — delete is admin-only below)
     Route::get('/households/map', [HouseholdController::class, 'map'])->name('households.map');
+    Route::get('/households/search', [HouseholdController::class, 'search'])->name('households.search');
     Route::resource('households', HouseholdController::class)->except(['destroy']);
 
     // Resident edit & update — employees submit for review, admins apply directly

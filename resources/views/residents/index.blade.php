@@ -140,9 +140,7 @@ tbody tr:last-child td { border-bottom: none; }
             <th>Civil Status</th>
             <th>Address</th>
             <th>Submitted</th>
-            @if(auth()->user()->role === 'admin')
             <th>Actions</th>
-            @endif
           </tr>
         </thead>
         <tbody>
@@ -166,21 +164,24 @@ tbody tr:last-child td { border-bottom: none; }
               <div style="font-size:11px;color:var(--muted)">{{ $pr->barangay }}, {{ $pr->city }}</div>
             </td>
             <td style="font-size:12px;color:var(--muted)">{{ $pr->created_at->format('M d, Y') }}</td>
-            @if(auth()->user()->role === 'admin')
             <td>
               <div class="action-btns">
+                <button type="button" onclick='openResidentModal(@json($pr), "new")' class="btn btn-sm btn-view">
+                  <i class="fas fa-eye"></i> View
+                </button>
+                @if(auth()->user()->role === 'admin')
                 <form method="POST" action="{{ route('residents.approve', $pr->id) }}" style="display:inline">
                   @csrf
                   <button type="submit" class="btn btn-sm btn-approve"><i class="fas fa-check"></i> Approve</button>
                 </form>
                 <form method="POST" action="{{ route('residents.reject', $pr->id) }}" style="display:inline"
-                  onsubmit="return confirm('Reject and remove this pending record for {{ addslashes($pr->first_name) }} {{ addslashes($pr->last_name) }}?')">
+                  onsubmit="return confirmReject(this, 'Reject and remove the pending record for {{ addslashes($pr->first_name) }} {{ addslashes($pr->last_name) }}? This cannot be undone.')">
                   @csrf
                   <button type="submit" class="btn btn-sm btn-reject"><i class="fas fa-times"></i> Reject</button>
                 </form>
+                @endif
               </div>
             </td>
-            @endif
           </tr>
           @endforeach
 
@@ -224,21 +225,24 @@ tbody tr:last-child td { border-bottom: none; }
               <div style="font-size:11px;color:var(--muted)">{{ $pr->barangay }}, {{ $pr->city }}</div>
             </td>
             <td style="font-size:12px;color:var(--muted)">{{ $pe->created_at->format('M d, Y') }}</td>
-            @if(auth()->user()->role === 'admin')
             <td>
               <div class="action-btns">
+                <button type="button" onclick='openResidentModal(@json($pr), "edit")' class="btn btn-sm btn-view">
+                  <i class="fas fa-eye"></i> View
+                </button>
+                @if(auth()->user()->role === 'admin')
                 <form method="POST" action="{{ route('residents.approveEdit', $pe->id) }}" style="display:inline">
                   @csrf
                   <button type="submit" class="btn btn-sm btn-approve"><i class="fas fa-check"></i> Approve</button>
                 </form>
                 <form method="POST" action="{{ route('residents.rejectEdit', $pe->id) }}" style="display:inline"
-                  onsubmit="return confirm('Reject this proposed edit for {{ addslashes($pr->first_name) }} {{ addslashes($pr->last_name) }}?')">
+                  onsubmit="return confirmReject(this, 'Reject the proposed edit for {{ addslashes($pr->first_name) }} {{ addslashes($pr->last_name) }}? The current record will remain unchanged.')">
                   @csrf
                   <button type="submit" class="btn btn-sm btn-reject"><i class="fas fa-times"></i> Reject</button>
                 </form>
+                @endif
               </div>
             </td>
-            @endif
           </tr>
           @endforeach
 
@@ -286,6 +290,7 @@ tbody tr:last-child td { border-bottom: none; }
             <div class="flt-option" data-val="widowed" onclick="setFlt('civil','widowed','Widowed')">Widowed</div>
             <div class="flt-option" data-val="separated" onclick="setFlt('civil','separated','Separated')">Separated</div>
             <div class="flt-option" data-val="annulled" onclick="setFlt('civil','annulled','Annulled')">Annulled</div>
+            <div class="flt-option" data-val="live-in" onclick="setFlt('civil','live-in','Live-in')">Live-in</div>
           </div>
         </div>
 
@@ -437,12 +442,35 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
 </div>
 
+<!-- Reject Confirm Modal -->
+<div id="rejectBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:32px 28px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;z-index:601">
+    <div style="width:64px;height:64px;border-radius:50%;background:#fff1f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:2px solid #fecdd3">
+      <i class="fas fa-ban" style="font-size:26px;color:#be123c"></i>
+    </div>
+    <div style="font-size:17px;font-weight:700;color:var(--primary);margin-bottom:8px">Reject this record?</div>
+    <p id="rejectMsg" style="font-size:13px;color:var(--muted);margin:0 0 24px;line-height:1.5"></p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button id="rejectCancel" style="flex:1;padding:10px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      <button id="rejectOk" style="flex:1;padding:10px 16px;border-radius:8px;border:none;background:#be123c;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
+        <i class="fas fa-ban"></i> Reject
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Resident View Modal -->
 <div id="residentModal" class="modal-backdrop">
   <div class="modal">
-    <div class="modal-header">
-      <h2><i class="fas fa-user" style="margin-right:8px"></i>Resident Profile</h2>
+    <div class="modal-header" id="rm-header">
+      <h2 id="rm-title"><i class="fas fa-user" style="margin-right:8px"></i>Resident Profile</h2>
       <button class="modal-close" onclick="closeResidentModal()">×</button>
+    </div>
+    <div id="rm-pending-banner" style="display:none;padding:10px 24px;background:#fffbeb;border-bottom:1px solid #fcd34d;font-size:12px;font-weight:600;color:#92400e;display:none;align-items:center;gap:8px">
+      <i class="fas fa-clock"></i>
+      <span id="rm-pending-text"></span>
     </div>
     <div class="modal-body">
 
@@ -505,8 +533,34 @@ function toggleEditDiff(id) {
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
-function openResidentModal(r) {
+function openResidentModal(r, pendingStatus) {
   document.getElementById('residentModal').classList.add('open');
+  const header  = document.getElementById('rm-header');
+  const banner  = document.getElementById('rm-pending-banner');
+  const bannerText = document.getElementById('rm-pending-text');
+  const title   = document.getElementById('rm-title');
+
+  if (pendingStatus === 'new') {
+    header.style.background = '#fffbeb';
+    header.style.borderBottomColor = '#fcd34d';
+    title.innerHTML = '<i class="fas fa-user-clock" style="margin-right:8px;color:#d97706"></i>Resident Profile <span style="font-size:11px;font-weight:600;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle">Pending Verification</span>';
+    banner.style.display = 'flex';
+    bannerText.textContent = 'This is a new resident record awaiting admin verification. It has not been officially added to the system yet.';
+  } else if (pendingStatus === 'edit') {
+    header.style.background = '#f5f3ff';
+    header.style.borderBottomColor = '#ddd6fe';
+    title.innerHTML = '<i class="fas fa-user-edit" style="margin-right:8px;color:#6d28d9"></i>Resident Profile <span style="font-size:11px;font-weight:600;background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle">Pending Edit Request</span>';
+    banner.style.display = 'flex';
+    banner.style.background = '#f5f3ff';
+    banner.style.borderBottomColor = '#ddd6fe';
+    bannerText.style.color = '#6d28d9';
+    bannerText.innerHTML = '<i class="fas fa-info-circle" style="margin-right:4px"></i>Showing current data on record. Use "View proposed changes" in the table to see what will change upon approval.';
+  } else {
+    header.style.background = '';
+    header.style.borderBottomColor = '';
+    title.innerHTML = '<i class="fas fa-user" style="margin-right:8px"></i>Resident Profile';
+    banner.style.display = 'none';
+  }
   document.getElementById('rm-last').textContent    = r.last_name   || '—';
   document.getElementById('rm-first').textContent   = r.first_name  || '—';
   document.getElementById('rm-middle').textContent  = r.middle_name || '—';
@@ -663,6 +717,27 @@ function filterTable() {
 }
 
 document.getElementById('searchInput').addEventListener('input', filterTable);
+
+// ── REJECT CONFIRM ──
+var _rejectForm = null;
+function confirmReject(form, msg) {
+  _rejectForm = form;
+  document.getElementById('rejectMsg').textContent = msg;
+  const backdrop = document.getElementById('rejectBackdrop');
+  backdrop.style.display = 'flex';
+  return false;
+}
+document.getElementById('rejectOk').addEventListener('click', function() {
+  if (_rejectForm) _rejectForm.submit();
+  document.getElementById('rejectBackdrop').style.display = 'none';
+});
+document.getElementById('rejectCancel').addEventListener('click', function() {
+  document.getElementById('rejectBackdrop').style.display = 'none';
+  _rejectForm = null;
+});
+document.getElementById('rejectBackdrop').addEventListener('click', function(e) {
+  if (e.target === this) { this.style.display = 'none'; _rejectForm = null; }
+});
 </script>
 
 @endsection

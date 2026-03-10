@@ -31,6 +31,6 @@ class Household extends Model
 
     public function members()
     {
-        return $this->hasMany(\App\Models\Resident::class, 'household_id');
+        return $this->hasMany(\App\Models\Resident::class, 'household_id')->where('status', 'approved');
     }
 }

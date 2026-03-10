@@ -40,6 +40,22 @@ class FamilyController extends Controller
         $memberData  = $request->input('member_data', []); // [id => role]
         $memberCount = count($memberData) + 1;
 
+        // Duplicate check: same head resident already heads a family
+        $headDuplicate = Family::where('head_resident_id', $resident->id)->first();
+        if ($headDuplicate) {
+            return back()->withInput()->withErrors([
+                'head_resident_id' => "{$resident->first_name} {$resident->last_name} is already the head of family \"{$headDuplicate->family_name}\".",
+            ]);
+        }
+
+        // Duplicate check: same family name already exists
+        $nameDuplicate = Family::whereRaw('LOWER(family_name) = ?', [strtolower($request->family_name)])->first();
+        if ($nameDuplicate) {
+            return back()->withInput()->withErrors([
+                'family_name' => "A family named \"{$nameDuplicate->family_name}\" already exists in the system.",
+            ]);
+        }
+
         $family = Family::create([
             'family_name'      => $request->family_name,
             'head_resident_id' => $resident->id,
