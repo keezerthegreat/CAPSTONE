@@ -24,6 +24,7 @@ class Resident extends Model
         // Contact
         'contact_number',
         'email',
+        'philsys_number',
 
         // Address
         'province',

@@ -72,6 +72,57 @@ tbody tr:last-child td { border-bottom: none; }
 .mi.span2 { grid-column:span 2; }
 .mi.span3 { grid-column:span 3; }
 .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+/* ── RBI Print Frame ── */
+#rbi-print-frame { display:none; }
+@media print {
+  body * { visibility:hidden !important; }
+  #rbi-print-frame, #rbi-print-frame * { visibility:visible !important; }
+  #rbi-print-frame {
+    display:block !important;
+    position:fixed; top:0; left:0;
+    width:100%; padding:15mm 15mm 15mm 15mm;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif; font-size:10pt; color:#000; background:#fff;
+    z-index:99999;
+  }
+  @page { size:A4; margin:0; }
+}
+/* RBI form inner styles */
+.rp-formid { font-size:9pt; font-weight:bold; margin-bottom:2px; }
+.rp-title  { font-size:12pt; font-weight:bold; text-align:center; text-transform:uppercase; margin-bottom:10px; letter-spacing:.04em; }
+.rp-top-grid { display:grid; grid-template-columns:1fr 1fr; border:1px solid #000; margin-bottom:8px; }
+.rp-top-cell { display:flex; align-items:center; border-bottom:1px solid #000; padding:3px 6px; gap:6px; }
+.rp-top-cell:nth-child(odd) { border-right:1px solid #000; }
+.rp-top-cell:last-child, .rp-top-cell:nth-last-child(2) { border-bottom:none; }
+.rp-top-lbl { font-size:8pt; font-weight:bold; white-space:nowrap; min-width:70px; }
+.rp-top-val { flex:1; border-bottom:1px solid #000; font-size:9pt; padding:1px 2px; min-height:14px; }
+.rp-section-box { border:1.5px solid #000; padding:10px 12px; margin-bottom:8px; }
+.rp-section-title { font-size:9pt; font-weight:bold; text-transform:uppercase; margin-bottom:8px; border-bottom:1px solid #000; padding-bottom:3px; }
+.rp-field-row { display:flex; align-items:flex-end; gap:6px; margin-bottom:8px; }
+.rp-field-lbl { font-size:8pt; font-weight:bold; white-space:nowrap; min-width:90px; }
+.rp-uline { flex:1; border-bottom:1px solid #000; font-size:9.5pt; min-height:16px; padding:1px 3px; }
+.rp-uline.sm { flex:0 0 60px; }
+.rp-uline.md { flex:0 0 110px; }
+.rp-name-cols { display:grid; grid-template-columns:1fr 1fr 1fr 50px; gap:8px; flex:1; }
+.rp-named-col { display:flex; flex-direction:column; }
+.rp-col-sub { font-size:7.5pt; text-align:center; color:#333; margin-top:1px; }
+.rp-dob-cols { display:flex; gap:8px; align-items:flex-end; }
+.rp-dob-box { display:flex; flex-direction:column; align-items:center; }
+.rp-check-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; flex:1; }
+.rp-check-item { display:flex; align-items:center; gap:4px; font-size:9pt; }
+.rp-cb { width:11px; height:11px; border:1px solid #000; display:inline-flex; align-items:center; justify-content:center; font-size:9pt; line-height:1; flex-shrink:0; }
+.rp-cb.on::after { content:'✓'; }
+.rp-sign-row { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:10px; }
+.rp-sign-line { border-top:1px solid #000; margin-top:28px; }
+.rp-sign-lbl { font-size:7.5pt; text-align:center; margin-top:3px; color:#333; }
+.rp-thumb-area { display:flex; gap:16px; justify-content:center; margin-top:8px; }
+.rp-thumb-box { display:flex; flex-direction:column; align-items:center; }
+.rp-thumb-rect { width:62px; height:75px; border:1px solid #000; }
+.rp-thumb-lbl { font-size:7.5pt; margin-top:3px; text-align:center; }
+.rp-attest-row { display:flex; align-items:flex-end; gap:12px; margin-top:14px; }
+.rp-hh-box { border:1px solid #000; width:100px; min-height:22px; padding:2px 4px; font-size:9pt; }
+.rp-note { font-size:7.5pt; font-style:italic; margin-top:14px; border-top:1px solid #ccc; padding-top:5px; color:#444; }
+.rp-income-row { display:flex; align-items:flex-end; gap:4px; }
 /* Age range popup */
 .age-popup { display:none; position:fixed; top:0; left:0; background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:14px 16px; z-index:9000; box-shadow:0 8px 24px rgba(0,0,0,.12); min-width:230px; }
 .age-popup.open { display:block; }
@@ -298,12 +349,12 @@ tbody tr:last-child td { border-bottom: none; }
         <div class="flt-wrap" id="wrap-sitio">
           <button class="flt-btn" id="btn-sitio" onclick="toggleFlt('sitio')">
             <i class="fas fa-map-pin"></i>
-            <span id="lbl-sitio">Sitio</span>
+            <span id="lbl-sitio">Purok</span>
             <i class="fas fa-chevron-down flt-caret" id="caret-sitio"></i>
             <span class="flt-x" id="x-sitio" style="display:none" onclick="event.stopPropagation();clearFlt('sitio')">×</span>
           </button>
           <div class="flt-dropdown" id="dd-sitio">
-            <div class="flt-option selected" data-val="" onclick="setFlt('sitio','','Sitio')">All</div>
+            <div class="flt-option selected" data-val="" onclick="setFlt('sitio','','Purok')">All</div>
             @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $s)
             <div class="flt-option" data-val="{{ strtolower($s) }}" onclick="setFlt('sitio','{{ strtolower($s) }}','{{ $s }}')">{{ $s }}</div>
             @endforeach
@@ -461,6 +512,149 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
 </div>
 
+<!-- RBI Print Frame (hidden; only visible on print) -->
+<div id="rbi-print-frame">
+  <div class="rp-formid">RBI FORM B</div>
+  <div class="rp-title">Individual Record of Barangay Inhabitant</div>
+  <div class="rp-top-grid">
+    <div class="rp-top-cell"><span class="rp-top-lbl">REGION:</span><span class="rp-top-val">VIII (Eastern Visayas)</span></div>
+    <div class="rp-top-cell"><span class="rp-top-lbl">CITY / MUN.:</span><span id="rp-city" class="rp-top-val"></span></div>
+    <div class="rp-top-cell"><span class="rp-top-lbl">PROVINCE:</span><span id="rp-prov" class="rp-top-val"></span></div>
+    <div class="rp-top-cell"><span class="rp-top-lbl">BARANGAY:</span><span id="rp-brgy" class="rp-top-val"></span></div>
+  </div>
+  <div class="rp-section-box">
+    <div class="rp-section-title">I. Personal Information</div>
+    <!-- Name -->
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">NAME:</span>
+      <div class="rp-name-cols">
+        <div class="rp-named-col"><div id="rp-last" class="rp-uline"></div><div class="rp-col-sub">Last Name</div></div>
+        <div class="rp-named-col"><div id="rp-first" class="rp-uline"></div><div class="rp-col-sub">First Name</div></div>
+        <div class="rp-named-col"><div id="rp-middle" class="rp-uline"></div><div class="rp-col-sub">Middle Name</div></div>
+        <div class="rp-named-col"><div class="rp-uline"> </div><div class="rp-col-sub">Ext.</div></div>
+      </div>
+    </div>
+    <!-- DOB + Age -->
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">DATE OF BIRTH:</span>
+      <div class="rp-dob-cols">
+        <div class="rp-dob-box"><div id="rp-dob-mm" class="rp-uline" style="width:40px;text-align:center"></div><div class="rp-col-sub" style="width:40px">MM</div></div>
+        <div class="rp-dob-box"><div id="rp-dob-dd" class="rp-uline" style="width:40px;text-align:center"></div><div class="rp-col-sub" style="width:40px">DD</div></div>
+        <div class="rp-dob-box"><div id="rp-dob-yy" class="rp-uline" style="width:65px;text-align:center"></div><div class="rp-col-sub" style="width:65px">YYYY</div></div>
+      </div>
+      <span class="rp-field-lbl" style="margin-left:24px">AGE:</span>
+      <div id="rp-age" class="rp-uline sm"></div>
+    </div>
+    <!-- Sex + Civil Status -->
+    <div class="rp-field-row" style="align-items:flex-start">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <span class="rp-field-lbl">SEX:</span>
+        <div class="rp-check-row">
+          <span class="rp-check-item"><span id="rp-sex-m" class="rp-cb"></span> Male</span>
+          <span class="rp-check-item"><span id="rp-sex-f" class="rp-cb"></span> Female</span>
+          <span class="rp-check-item"><span id="rp-sex-o" class="rp-cb"></span> Other</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:2">
+        <span class="rp-field-lbl">CIVIL STATUS:</span>
+        <div class="rp-check-row">
+          <span class="rp-check-item"><span id="rp-cs-single" class="rp-cb"></span> Single</span>
+          <span class="rp-check-item"><span id="rp-cs-married" class="rp-cb"></span> Married</span>
+          <span class="rp-check-item"><span id="rp-cs-widow" class="rp-cb"></span> Widow/er</span>
+          <span class="rp-check-item"><span id="rp-cs-sep" class="rp-cb"></span> Separated</span>
+          <span class="rp-check-item"><span id="rp-cs-livein" class="rp-cb"></span> Live-in</span>
+        </div>
+      </div>
+    </div>
+    <!-- Nationality + Religion -->
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">NATIONALITY:</span>
+      <div id="rp-nat" class="rp-uline md"></div>
+      <span class="rp-field-lbl" style="margin-left:20px">RELIGION:</span>
+      <div id="rp-rel" class="rp-uline"></div>
+    </div>
+    <!-- Occupation -->
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">OCCUPATION:</span>
+      <div id="rp-occ" class="rp-uline"></div>
+    </div>
+    <!-- Employer + Income -->
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">EMPLOYER:</span>
+      <div id="rp-emp" class="rp-uline"></div>
+      <span class="rp-field-lbl" style="margin-left:20px;white-space:nowrap">MONTHLY INCOME:</span>
+      <div class="rp-income-row"><span style="font-size:9pt;padding-bottom:2px">₱</span><div id="rp-inc" class="rp-uline md"></div></div>
+    </div>
+    <!-- Education -->
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">EDUCATION:</span>
+      <div id="rp-edu" class="rp-uline"></div>
+    </div>
+    <!-- Contact + Email -->
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">CONTACT NO.:</span>
+      <div id="rp-contact" class="rp-uline md"></div>
+      <span class="rp-field-lbl" style="margin-left:20px">EMAIL:</span>
+      <div id="rp-email" class="rp-uline"></div>
+    </div>
+    <div class="rp-field-row">
+      <span class="rp-field-lbl">PHILSYS NO.:</span>
+      <div id="rp-philsys" class="rp-uline md"></div>
+    </div>
+    <!-- Address -->
+    <div class="rp-field-row" style="align-items:flex-start">
+      <span class="rp-field-lbl" style="margin-top:2px">RESIDENCE<br>ADDRESS:</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <div><div id="rp-addr" class="rp-uline"></div><div class="rp-col-sub" style="text-align:left">Purok / Sitio / Street / House No.</div></div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1"><div id="rp-brgy2" class="rp-uline"></div><div class="rp-col-sub" style="text-align:left">Barangay</div></div>
+          <div style="flex:1"><div id="rp-city2" class="rp-uline"></div><div class="rp-col-sub" style="text-align:left">City / Municipality</div></div>
+          <div style="flex:1"><div id="rp-prov2" class="rp-uline"></div><div class="rp-col-sub" style="text-align:left">Province</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Section II -->
+  <div class="rp-section-box">
+    <div class="rp-section-title">II. Special Classifications</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <span class="rp-check-item"><span id="rp-senior" class="rp-cb"></span> Senior Citizen (60+)</span>
+      <span class="rp-check-item"><span id="rp-pwd" class="rp-cb"></span> Person with Disability (PWD)</span>
+      <span class="rp-check-item"><span id="rp-voter" class="rp-cb"></span> Registered Voter</span>
+      <span class="rp-check-item"><span id="rp-deceased" class="rp-cb"></span> Deceased</span>
+    </div>
+  </div>
+  <!-- Certification -->
+  <div class="rp-section-box">
+    <p style="font-size:8.5pt;font-style:italic;margin:0 0 14px">I hereby certify that the above information is true and correct to the best of my knowledge.</p>
+    <div class="rp-sign-row">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div><div id="rp-today" class="rp-uline"></div><div class="rp-sign-lbl">Date Accomplished</div></div>
+          <div><div class="rp-uline"> </div><div class="rp-sign-lbl">Signature of Resident / Person Accomplishing the Form</div></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:8pt;text-align:center;margin-bottom:6px">Thumbprints</div>
+        <div class="rp-thumb-area">
+          <div class="rp-thumb-box"><div class="rp-thumb-rect"></div><div class="rp-thumb-lbl">Left Thumbmark</div></div>
+          <div class="rp-thumb-box"><div class="rp-thumb-rect"></div><div class="rp-thumb-lbl">Right Thumbmark</div></div>
+        </div>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid #000;margin:8px 0">
+    <div class="rp-attest-row">
+      <span style="font-size:8.5pt;font-weight:bold">Attested by:</span>
+      <div style="flex:1"><div class="rp-uline"> </div><div class="rp-sign-lbl">Barangay Secretary</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div id="rp-hhno" class="rp-hh-box"></div>
+        <div style="font-size:7.5pt;margin-top:3px;text-align:center">Household Number</div>
+      </div>
+    </div>
+  </div>
+  <div class="rp-note">Note: The Household No. shall be filled up by the Barangay Secretary. &nbsp;|&nbsp; Resident ID #<span id="rp-rid"></span> &nbsp;|&nbsp; Printed: <span id="rp-today2"></span></div>
+</div>
+
 <!-- Resident View Modal -->
 <div id="residentModal" class="modal-backdrop">
   <div class="modal">
@@ -494,7 +688,8 @@ tbody tr:last-child td { border-bottom: none; }
         <div class="modal-section-title"><i class="fas fa-phone"></i> Contact Information</div>
         <div class="mgrid">
           <div class="mi"><span class="ml">Contact Number</span><span class="mv" id="rm-contact"></span></div>
-          <div class="mi span2"><span class="ml">Email</span><span class="mv" id="rm-email"></span></div>
+          <div class="mi"><span class="ml">Email</span><span class="mv" id="rm-email"></span></div>
+          <div class="mi"><span class="ml">PhilSys Card No.</span><span class="mv" id="rm-philsys"></span></div>
         </div>
       </div>
 
@@ -520,6 +715,9 @@ tbody tr:last-child td { border-bottom: none; }
 
     </div>
     <div class="modal-footer">
+      <button id="rm-print-btn" type="button" onclick="printRBIForm()" class="btn btn-sm" style="background:#fff;color:#374151;border:1.5px solid #d1d5db;display:none">
+        <i class="fas fa-print"></i> Print RBI Form
+      </button>
       <button onclick="closeResidentModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
         <i class="fas fa-times"></i> Close
       </button>
@@ -528,6 +726,75 @@ tbody tr:last-child td { border-bottom: none; }
 </div>
 
 <script>
+var _rbiResident = null;
+
+function printRBIForm() {
+  var r = _rbiResident;
+  if (!r) return;
+
+  // Parse DOB
+  var dobMM = '', dobDD = '', dobYYYY = '';
+  if (r.birthdate) {
+    var d = new Date(r.birthdate);
+    dobMM   = String(d.getMonth()+1).padStart(2,'0');
+    dobDD   = String(d.getDate()).padStart(2,'0');
+    dobYYYY = d.getFullYear();
+  }
+  var cs = (r.civil_status || '').toLowerCase().trim();
+  var today = new Date().toLocaleDateString('en-US',{month:'long',day:'2-digit',year:'numeric'});
+  var hhNo  = (r.household && r.household.household_no) ? r.household.household_no : '';
+
+  // Text fields
+  function t(id, val) { var e = document.getElementById(id); if(e) e.textContent = val || ''; }
+  t('rp-last',    r.last_name);
+  t('rp-first',   r.first_name);
+  t('rp-middle',  r.middle_name);
+  t('rp-dob-mm',  dobMM);
+  t('rp-dob-dd',  dobDD);
+  t('rp-dob-yy',  dobYYYY);
+  t('rp-age',     r.age || '');
+  t('rp-nat',     r.nationality);
+  t('rp-rel',     r.religion);
+  t('rp-occ',     r.occupation);
+  t('rp-emp',     r.employer);
+  t('rp-inc',     r.monthly_income ? parseFloat(r.monthly_income).toLocaleString('en-PH',{minimumFractionDigits:2}) : '');
+  t('rp-edu',     r.education_level);
+  t('rp-contact', r.contact_number);
+  t('rp-email',   r.email);
+  t('rp-philsys', r.philsys_number);
+  t('rp-addr',    r.address);
+  t('rp-brgy',    r.barangay);
+  t('rp-city',    r.city);
+  t('rp-prov',    r.province);
+  t('rp-brgy2',   r.barangay);
+  t('rp-city2',   r.city);
+  t('rp-prov2',   r.province);
+  t('rp-hhno',    hhNo);
+  t('rp-today',   today);
+  t('rp-rid',     r.id);
+  t('rp-today2',  today);
+
+  // Checkboxes
+  function cb(id, on) {
+    var e = document.getElementById(id);
+    if (e) { if(on) e.classList.add('on'); else e.classList.remove('on'); }
+  }
+  cb('rp-sex-m',   r.gender === 'Male');
+  cb('rp-sex-f',   r.gender === 'Female');
+  cb('rp-sex-o',   r.gender === 'Other');
+  cb('rp-cs-single', cs === 'single');
+  cb('rp-cs-married', cs === 'married');
+  cb('rp-cs-widow', cs === 'widow' || cs === 'widower' || cs === 'widow/er');
+  cb('rp-cs-sep',  cs === 'separated');
+  cb('rp-cs-livein', cs === 'live-in');
+  cb('rp-senior',  !!r.is_senior);
+  cb('rp-pwd',     !!r.is_pwd);
+  cb('rp-voter',   !!r.is_voter);
+  cb('rp-deceased',!!r.is_deceased);
+
+  window.print();
+}
+
 function toggleEditDiff(id) {
   const el = document.getElementById('edit-diff-' + id);
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
@@ -561,6 +828,8 @@ function openResidentModal(r, pendingStatus) {
     title.innerHTML = '<i class="fas fa-user" style="margin-right:8px"></i>Resident Profile';
     banner.style.display = 'none';
   }
+  _rbiResident = r;
+  document.getElementById('rm-print-btn').style.display = (!pendingStatus && r.id) ? 'inline-flex' : 'none';
   document.getElementById('rm-last').textContent    = r.last_name   || '—';
   document.getElementById('rm-first').textContent   = r.first_name  || '—';
   document.getElementById('rm-middle').textContent  = r.middle_name || '—';
@@ -570,8 +839,9 @@ function openResidentModal(r, pendingStatus) {
   document.getElementById('rm-civil').textContent   = r.civil_status  || '—';
   document.getElementById('rm-nat').textContent     = r.nationality   || '—';
   document.getElementById('rm-rel').textContent     = r.religion      || '—';
-  document.getElementById('rm-contact').textContent = r.contact_number || '—';
-  document.getElementById('rm-email').textContent   = r.email         || '—';
+  document.getElementById('rm-contact').textContent  = r.contact_number  || '—';
+  document.getElementById('rm-email').textContent    = r.email           || '—';
+  document.getElementById('rm-philsys').textContent  = r.philsys_number  || '—';
   document.getElementById('rm-prov').textContent    = r.province  || '—';
   document.getElementById('rm-city').textContent    = r.city      || '—';
   document.getElementById('rm-brgy').textContent    = r.barangay  || '—';
@@ -596,7 +866,7 @@ document.getElementById('residentModal').addEventListener('click', function(e) {
 
 // Filter state
 const fltState   = { gender: '', civil: '', sitio: '', class: '' };
-const fltDefault = { gender: 'Sex', civil: 'Civil Status', sitio: 'Sitio', class: 'Classification' };
+const fltDefault = { gender: 'Sex', civil: 'Civil Status', sitio: 'Purok', class: 'Classification' };
 const fltKeys    = ['gender', 'civil', 'sitio', 'class'];
 
 function positionDropdown(el, btn) {

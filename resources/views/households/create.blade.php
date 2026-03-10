@@ -136,16 +136,16 @@ input::placeholder { color:#94a3b8; }
       <div class="card-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Sitio <span class="req">*</span></label>
+            <label>Purok <span class="req">*</span></label>
             <select name="sitio" required>
-              <option value="">Select Sitio...</option>
+              <option value="">Select Purok...</option>
               @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $sitio)
                 <option value="{{ $sitio }}" {{ old('sitio')==$sitio ? 'selected':'' }}>{{ $sitio }}</option>
               @endforeach
             </select>
           </div>
           <div class="form-group half">
-            <label>Street / Purok</label>
+            <label>Street / Sitio</label>
             <input type="text" name="street" value="{{ old('street') }}" placeholder="e.g. Rizal St.">
           </div>
           <div class="form-group">

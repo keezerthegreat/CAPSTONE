@@ -119,6 +119,10 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             <label>Email Address</label>
             <input type="email" name="email" value="{{ old('email', $resident->email) }}">
           </div>
+          <div class="form-group">
+            <label>PhilSys Card Number</label>
+            <input type="text" name="philsys_number" value="{{ old('philsys_number', $resident->philsys_number) }}" placeholder="e.g. 1234-5678-9012">
+          </div>
         </div>
       </div>
     </div>
@@ -153,16 +157,16 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             <input type="hidden" name="barangay" value="Cogon">
           </div>
           <div class="form-group">
-            <label>Sitio *</label>
+            <label>Purok *</label>
             <select name="sitio_name" required>
-              <option value="">Select sitio...</option>
+              <option value="">Select purok...</option>
               @foreach($sitios as $sitio)
                 <option value="{{ $sitio }}" {{ $oldSitio === $sitio ? 'selected' : '' }}>{{ $sitio }}</option>
               @endforeach
             </select>
           </div>
           <div class="form-group">
-            <label>Purok</label>
+            <label>Sitio</label>
             <input type="text" name="purok" value="{{ old('purok') }}" placeholder="e.g. Sampaguita">
           </div>
           <div class="form-group full">

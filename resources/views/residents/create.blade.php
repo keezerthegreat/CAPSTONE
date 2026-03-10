@@ -147,6 +147,10 @@ input::placeholder { color:#94a3b8; }
             <label>Email Address</label>
             <input type="email" name="email" value="{{ old('email') }}" placeholder="e.g. juan@email.com">
           </div>
+          <div class="form-group">
+            <label>PhilSys Card Number</label>
+            <input type="text" name="philsys_number" value="{{ old('philsys_number') }}" placeholder="e.g. 1234-5678-9012">
+          </div>
         </div>
       </div>
     </div>
@@ -174,16 +178,16 @@ input::placeholder { color:#94a3b8; }
             <input type="hidden" name="barangay" value="Cogon">
           </div>
           <div class="form-group">
-            <label>Sitio <span class="req">*</span></label>
+            <label>Purok <span class="req">*</span></label>
             <select name="sitio_name" required>
-              <option value="">Select sitio...</option>
+              <option value="">Select purok...</option>
               @foreach($sitios as $sitio)
                 <option value="{{ $sitio }}" {{ old('sitio_name') === $sitio ? 'selected' : '' }}>{{ $sitio }}</option>
               @endforeach
             </select>
           </div>
           <div class="form-group">
-            <label>Purok</label>
+            <label>Sitio</label>
             <input type="text" name="purok" value="{{ old('purok') }}" placeholder="e.g. Sampaguita">
           </div>
           <div class="form-group full">
@@ -338,7 +342,7 @@ document.getElementById('birthdate').addEventListener('change', function() {
       return `<div class="hh-card${isSelected ? ' selected' : ''}" data-id="${h.id}" onclick="selectHousehold(${h.id}, this)">
         <div class="hh-card-info">
           <div class="hh-card-title">Household #${h.household_number}</div>
-          <div class="hh-card-sub">Head: ${h.head_first_name} ${h.head_last_name} &nbsp;·&nbsp; Sitio: ${sitio}</div>
+          <div class="hh-card-sub">Head: ${h.head_first_name} ${h.head_last_name} &nbsp;·&nbsp; Purok: ${sitio}</div>
         </div>
         <span class="hh-card-badge">${isSelected ? '<i class="fas fa-check"></i> Assigned' : h.member_count + ' member(s)'}</span>
       </div>`;

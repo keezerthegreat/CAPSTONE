@@ -55,6 +55,41 @@ tbody tr:last-child td { border-bottom:none; }
 .mi .mv { font-size:13px; color:var(--text); font-weight:500; background:#f8fafc; border:1px solid var(--border); border-radius:7px; padding:6px 10px; }
 .mi.span2 { grid-column:span 2; }
 .mi.span3 { grid-column:span 3; }
+/* ── Family Print Frame ── */
+#fam-print-frame { display:none; }
+@media print {
+  body * { visibility:hidden !important; }
+  #fam-print-frame, #fam-print-frame * { visibility:visible !important; }
+  #fam-print-frame {
+    display:block !important;
+    position:fixed; top:0; left:0;
+    width:100%; padding:15mm;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif; font-size:10pt; color:#000; background:#fff;
+    z-index:99999;
+  }
+  @page { size:A4; margin:0; }
+}
+.fp-header { text-align:center; margin-bottom:10px; border-bottom:2.5px solid #000; padding-bottom:8px; }
+.fp-brgy-name { font-size:13pt; font-weight:bold; text-transform:uppercase; letter-spacing:.04em; }
+.fp-brgy-sub  { font-size:9pt; color:#444; margin-top:1px; }
+.fp-doc-title { font-size:14pt; font-weight:bold; text-transform:uppercase; letter-spacing:.08em; margin-top:6px; }
+.fp-doc-sub   { font-size:8.5pt; color:#555; margin-top:2px; }
+.fp-section   { border:1.5px solid #000; padding:10px 12px; margin-bottom:8px; }
+.fp-section-title { font-size:9pt; font-weight:bold; text-transform:uppercase; border-bottom:1px solid #000; padding-bottom:3px; margin-bottom:8px; }
+.fp-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.fp-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.fp-field { display:flex; flex-direction:column; margin-bottom:4px; }
+.fp-lbl   { font-size:7.5pt; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px; }
+.fp-val   { border-bottom:1px solid #000; font-size:9.5pt; min-height:16px; padding:1px 2px; }
+.fp-mem-table { width:100%; border-collapse:collapse; font-size:9pt; margin-top:4px; }
+.fp-mem-table th { padding:5px 8px; background:#f0f0f0; text-align:left; font-size:8pt; font-weight:bold; text-transform:uppercase; border:1px solid #000; }
+.fp-mem-table td { padding:6px 8px; border:1px solid #000; }
+.fp-sign-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:32px; margin-top:16px; }
+.fp-sign-block { display:flex; flex-direction:column; align-items:center; }
+.fp-sign-line  { border-top:1px solid #000; width:100%; margin-top:36px; }
+.fp-sign-lbl   { font-size:7.5pt; text-align:center; margin-top:3px; color:#333; }
+.fp-note { font-size:7.5pt; font-style:italic; margin-top:10px; border-top:1px solid #ccc; padding-top:5px; color:#444; }
 /* Members table inside modal */
 .mem-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:4px; }
 .mem-table th { padding:7px 10px; background:#f8fafc; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); border-bottom:1.5px solid var(--border); }
@@ -97,12 +132,12 @@ tbody tr:last-child td { border-bottom:none; }
         <div class="flt-wrap" id="fam-wrap-sitio">
           <button class="flt-btn" id="fam-btn-sitio" onclick="toggleFamFlt('sitio')">
             <i class="fas fa-map-pin"></i>
-            <span id="fam-lbl-sitio">Sitio</span>
+            <span id="fam-lbl-sitio">Purok</span>
             <i class="fas fa-chevron-down flt-caret" id="fam-caret-sitio"></i>
             <span class="flt-x" id="fam-x-sitio" style="display:none" onclick="event.stopPropagation();clearFamFlt('sitio')">×</span>
           </button>
           <div class="flt-dropdown" id="fam-dd-sitio">
-            <div class="flt-option selected" data-val="" onclick="setFamFlt('sitio','','Sitio')">All Sitios</div>
+            <div class="flt-option selected" data-val="" onclick="setFamFlt('sitio','','Purok')">All Puroks</div>
             @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $s)
             <div class="flt-option" data-val="{{ $s }}" onclick="setFamFlt('sitio','{{ $s }}','{{ $s }}')">{{ $s }}</div>
             @endforeach
@@ -201,7 +236,7 @@ function toggleFamFlt(key) {
 }
 function setFamFlt(key, val, label) {
   famFlt[key] = val;
-  document.getElementById('fam-lbl-' + key).textContent = val ? label : (key === 'sitio' ? 'Sitio' : key);
+  document.getElementById('fam-lbl-' + key).textContent = val ? label : (key === 'sitio' ? 'Purok' : key);
   document.getElementById('fam-btn-' + key).classList.toggle('active', !!val);
   document.getElementById('fam-caret-' + key).style.display = val ? 'none' : '';
   document.getElementById('fam-x-' + key).style.display = val ? '' : 'none';
@@ -211,7 +246,7 @@ function setFamFlt(key, val, label) {
   document.getElementById('fam-dd-' + key).classList.remove('open');
   applyFilters();
 }
-function clearFamFlt(key) { setFamFlt(key, '', key === 'sitio' ? 'Sitio' : key); }
+function clearFamFlt(key) { setFamFlt(key, '', key === 'sitio' ? 'Purok' : key); }
 
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('fam-wrap-sitio');
@@ -249,6 +284,75 @@ function applyFilters() {
 document.getElementById('searchInput').addEventListener('keyup', applyFilters);
 </script>
 
+<!-- Family Print Frame -->
+<div id="fam-print-frame">
+  <div class="fp-header">
+    <div class="fp-brgy-name">Barangay Cogon</div>
+    <div class="fp-brgy-sub">Ormoc City, Leyte &nbsp;|&nbsp; Region VIII (Eastern Visayas)</div>
+    <div class="fp-doc-title">Family Record</div>
+    <div class="fp-doc-sub">Family Name: <span id="fp-fname" style="font-weight:bold"></span></div>
+  </div>
+
+  <!-- Section I: Family Information -->
+  <div class="fp-section">
+    <div class="fp-section-title">I. Family Information</div>
+    <div class="fp-grid3">
+      <div class="fp-field"><span class="fp-lbl">Family Name</span><span id="fp-fname2" class="fp-val" style="font-weight:bold"></span></div>
+      <div class="fp-field"><span class="fp-lbl">No. of Members</span><span id="fp-fcount" class="fp-val"></span></div>
+      <div class="fp-field"><span class="fp-lbl">Linked Household</span><span id="fp-fhh" class="fp-val"></span></div>
+    </div>
+    <div class="fp-field" style="margin-top:6px"><span class="fp-lbl">Notes / Remarks</span><span id="fp-fnotes" class="fp-val" style="min-height:20px"></span></div>
+  </div>
+
+  <!-- Section II: Head of Family -->
+  <div class="fp-section">
+    <div class="fp-section-title">II. Head of Family</div>
+    <div class="fp-grid3">
+      <div class="fp-field"><span class="fp-lbl">Full Name</span><span id="fp-fhead" class="fp-val" style="font-weight:bold"></span></div>
+      <div class="fp-field"><span class="fp-lbl">Sex</span><span id="fp-hgender" class="fp-val"></span></div>
+      <div class="fp-field"><span class="fp-lbl">Age</span><span id="fp-hage" class="fp-val"></span></div>
+      <div class="fp-field"><span class="fp-lbl">Civil Status</span><span id="fp-hcivil" class="fp-val"></span></div>
+      <div class="fp-field"><span class="fp-lbl">Occupation</span><span id="fp-hocc" class="fp-val"></span></div>
+    </div>
+  </div>
+
+  <!-- Section III: Members -->
+  <div class="fp-section">
+    <div class="fp-section-title">III. Family Members</div>
+    <table class="fp-mem-table">
+      <thead>
+        <tr>
+          <th style="width:30px">#</th>
+          <th>Full Name</th>
+          <th>Sex / Age</th>
+          <th>Civil Status</th>
+          <th>Role</th>
+          <th>Relationship</th>
+        </tr>
+      </thead>
+      <tbody id="fp-mem-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Signatures -->
+  <div class="fp-sign-row">
+    <div class="fp-sign-block">
+      <div class="fp-sign-line"></div>
+      <div class="fp-sign-lbl">Head of Family Signature</div>
+    </div>
+    <div class="fp-sign-block">
+      <div class="fp-sign-line"></div>
+      <div class="fp-sign-lbl">Barangay Secretary</div>
+    </div>
+    <div class="fp-sign-block">
+      <div class="fp-sign-line"></div>
+      <div class="fp-sign-lbl">Barangay Captain</div>
+    </div>
+  </div>
+
+  <div class="fp-note">Printed: <span id="fp-today"></span> &nbsp;|&nbsp; This document is an official record of Barangay Cogon, Ormoc City.</div>
+</div>
+
 <!-- Family Profile Modal -->
 <div id="familyModal" class="modal-backdrop">
   <div class="modal">
@@ -277,15 +381,71 @@ document.getElementById('searchInput').addEventListener('keyup', applyFilters);
     </div>
     <div class="modal-footer">
       <span style="font-size:12px;color:var(--muted)" id="fm-edit-link"></span>
-      <button onclick="closeFamilyModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
-        <i class="fas fa-times"></i> Close
-      </button>
+      <div style="display:flex;gap:8px">
+        <button type="button" onclick="printFamilyForm()" class="btn btn-sm" style="background:#fff;color:#374151;border:1.5px solid #d1d5db">
+          <i class="fas fa-print"></i> Print Record
+        </button>
+        <button onclick="closeFamilyModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+var _famData = null;
+
+function printFamilyForm() {
+  var f = _famData;
+  if (!f) return;
+  var today = new Date().toLocaleDateString('en-US',{month:'long',day:'2-digit',year:'numeric'});
+  var hr = f.head_resident || {};
+  var members = f.members || [];
+
+  function t(id, val) { var e = document.getElementById(id); if(e) e.textContent = val || ''; }
+  t('fp-fname',   f.family_name);
+  t('fp-fname2',  f.family_name);
+  t('fp-fhead',   (f.head_last_name||'') + ', ' + (f.head_first_name||'') + (f.head_middle_name ? ' '+f.head_middle_name : ''));
+  t('fp-fcount',  (f.member_count || 0) + ' member(s)');
+  t('fp-fhh',     f.household ? 'HH #' + f.household.household_number + ' — ' + (f.household.sitio||'') : 'Not linked');
+  t('fp-fnotes',  f.notes);
+  t('fp-hgender', hr.gender);
+  t('fp-hage',    hr.age ? hr.age + ' yrs old' : '');
+  t('fp-hcivil',  hr.civil_status);
+  t('fp-hocc',    hr.occupation);
+  t('fp-today',   today);
+
+  // Members table (head first, then others)
+  var tbody = document.getElementById('fp-mem-tbody');
+  var headName = (f.head_last_name||'') + ', ' + (f.head_first_name||'') + (f.head_middle_name ? ' '+f.head_middle_name : '');
+  var headRow = '<tr>'
+    + '<td style="text-align:center">1</td>'
+    + '<td style="font-weight:600">' + headName + '</td>'
+    + '<td>' + (hr.gender||'—') + ' / ' + (hr.age||'—') + ' yrs</td>'
+    + '<td>' + (hr.civil_status||'—') + '</td>'
+    + '<td>Head</td>'
+    + '<td>' + (f.head_role||'—') + '</td>'
+    + '</tr>';
+  var others = members.filter(function(m){ return m.id !== f.head_resident_id; });
+  var otherRows = others.map(function(m, i) {
+    var name = (m.last_name||'') + ', ' + (m.first_name||'') + (m.middle_name ? ' '+m.middle_name : '');
+    return '<tr>'
+      + '<td style="text-align:center">' + (i+2) + '</td>'
+      + '<td style="font-weight:600">' + name + '</td>'
+      + '<td>' + (m.gender||'—') + ' / ' + (m.age||'—') + ' yrs</td>'
+      + '<td>' + (m.civil_status||'—') + '</td>'
+      + '<td>Member</td>'
+      + '<td>' + (m.family_role||'—') + '</td>'
+      + '</tr>';
+  }).join('');
+  tbody.innerHTML = headRow + otherRows;
+
+  window.print();
+}
+
 function openFamilyModal(f) {
+  _famData = f;
   document.getElementById('familyModal').classList.add('open');
   document.getElementById('fm-name').textContent    = f.family_name || '—';
   document.getElementById('fm-head').textContent    = (f.head_last_name || '—') + ', ' + (f.head_first_name || '') + (f.head_middle_name ? ' ' + f.head_middle_name : '');

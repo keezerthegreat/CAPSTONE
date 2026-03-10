@@ -4,7 +4,6 @@
 
 @section('content')
 <style>
-
 .bidb-wrap { background:var(--bg); min-height:100vh; padding:28px; }
 .page-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
 .page-hdr h1 { font-size:22px; font-weight:700; color:var(--primary); margin:0; }
@@ -29,11 +28,92 @@
 .btn-primary:hover { background:var(--primary-light); }
 .btn-outline { background:#fff; color:var(--primary); border:1.5px solid var(--primary); }
 .btn-outline:hover { background:#f0f4f8; }
+.btn-print { background:#fff; color:#374151; border:1.5px solid #d1d5db; }
+.btn-print:hover { background:#f9fafb; }
 .deceased-banner { background:#fff1f2; border:1.5px solid #fecdd3; border-radius:12px; padding:14px 20px; margin-bottom:20px; display:flex; align-items:center; gap:12px; }
 .deceased-banner i { color:#be123c; font-size:20px; }
 .deceased-banner .title { font-weight:700; color:#be123c; font-size:15px; }
 .deceased-banner .sub { font-size:13px; color:#64748b; margin-top:2px; }
+
+/* ── RBI Print Form (hidden on screen, visible on print) ── */
+#rbi-print { display:none; }
+
+@media print {
+  .bidb-wrap { display:none !important; }
+  #rbi-print  { display:block !important; }
+  @page { size:A4; margin:15mm 15mm 15mm 15mm; }
+}
+
+/* RBI Form Styles */
+#rbi-print {
+  font-family: Arial, sans-serif;
+  font-size: 10pt;
+  color: #000;
+  background: #fff;
+  padding: 0;
+  line-height: 1.4;
+}
+.rbi-formid { font-size:9pt; font-weight:bold; margin-bottom:2px; }
+.rbi-title  { font-size:12pt; font-weight:bold; text-align:center; text-transform:uppercase; margin-bottom:10px; letter-spacing:.04em; }
+.rbi-top-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid #000; margin-bottom:8px; }
+.rbi-top-cell { display:flex; align-items:center; border-bottom:1px solid #000; padding:3px 6px; gap:6px; }
+.rbi-top-cell:nth-child(odd) { border-right:1px solid #000; }
+.rbi-top-cell:last-child, .rbi-top-cell:nth-last-child(2) { border-bottom:none; }
+.rbi-top-lbl { font-size:8pt; font-weight:bold; white-space:nowrap; min-width:65px; }
+.rbi-top-val { flex:1; border-bottom:1px solid #000; font-size:9pt; padding:1px 2px; min-height:14px; }
+.rbi-section-box { border:1.5px solid #000; padding:10px 12px; margin-bottom:8px; }
+.rbi-section-title { font-size:9pt; font-weight:bold; text-transform:uppercase; margin-bottom:8px; border-bottom:1px solid #000; padding-bottom:3px; }
+.rbi-field-row { display:flex; align-items:flex-end; gap:6px; margin-bottom:8px; }
+.rbi-field-lbl { font-size:8pt; font-weight:bold; white-space:nowrap; min-width:90px; }
+.rbi-underline { flex:1; border-bottom:1px solid #000; font-size:9.5pt; min-height:16px; padding:1px 3px; }
+.rbi-underline.sm { flex:0 0 60px; }
+.rbi-underline.md { flex:0 0 110px; }
+.rbi-name-cols { display:grid; grid-template-columns:1fr 1fr 1fr 50px; gap:8px; flex:1; }
+.rbi-named-col { display:flex; flex-direction:column; }
+.rbi-named-col .rbi-underline { margin-bottom:1px; }
+.rbi-col-sub { font-size:7.5pt; text-align:center; color:#333; margin-top:1px; }
+.rbi-dob-cols { display:flex; gap:8px; align-items:flex-end; }
+.rbi-dob-box { display:flex; flex-direction:column; align-items:center; }
+.rbi-dob-box .rbi-underline { width:40px; text-align:center; }
+.rbi-dob-box .rbi-col-sub { width:40px; }
+.rbi-dob-box.yr .rbi-underline { width:65px; }
+.rbi-dob-box.yr .rbi-col-sub { width:65px; }
+.rbi-check-row { display:flex; align-items:center; gap:18px; flex-wrap:wrap; flex:1; }
+.rbi-check-item { display:flex; align-items:center; gap:4px; font-size:9pt; }
+.rbi-checkbox { width:11px; height:11px; border:1px solid #000; display:inline-flex; align-items:center; justify-content:center; font-size:9pt; line-height:1; flex-shrink:0; }
+.rbi-checkbox.checked::after { content:'✓'; font-size:9pt; line-height:1; }
+.rbi-addr-cols { display:grid; grid-template-columns:80px 1fr; gap:8px; flex:1; }
+.rbi-addr-full { display:flex; flex-direction:column; }
+.rbi-two-col { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; }
+.rbi-col { display:flex; flex-direction:column; }
+.rbi-divider { border:none; border-top:1px solid #000; margin:8px 0; }
+.rbi-cert-text { font-size:8.5pt; font-style:italic; margin:6px 0 14px; }
+.rbi-sign-row { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:10px; }
+.rbi-sign-block { display:flex; flex-direction:column; }
+.rbi-sign-line { border-top:1px solid #000; margin-top:28px; }
+.rbi-sign-label { font-size:7.5pt; text-align:center; margin-top:3px; color:#333; }
+.rbi-thumb-area { display:flex; gap:16px; justify-content:center; margin-top:8px; }
+.rbi-thumb-box { display:flex; flex-direction:column; align-items:center; }
+.rbi-thumb-rect { width:62px; height:75px; border:1px solid #000; }
+.rbi-thumb-lbl { font-size:7.5pt; margin-top:3px; text-align:center; }
+.rbi-attest-row { display:flex; align-items:flex-end; gap:12px; margin-top:14px; }
+.rbi-hh-box { border:1px solid #000; width:100px; min-height:22px; padding:2px 4px; font-size:9pt; }
+.rbi-note { font-size:7.5pt; font-style:italic; margin-top:14px; border-top:1px solid #ccc; padding-top:5px; color:#444; }
+.rbi-special-checks { display:flex; gap:20px; flex-wrap:wrap; margin-top:4px; }
+.rbi-income-field { display:flex; align-items:flex-end; gap:4px; }
+.rbi-peso { font-size:9pt; padding-bottom:2px; }
 </style>
+
+@php
+  $dob     = $resident->birthdate ? \Carbon\Carbon::parse($resident->birthdate) : null;
+  $dobMM   = $dob ? $dob->format('m') : '';
+  $dobDD   = $dob ? $dob->format('d') : '';
+  $dobYYYY = $dob ? $dob->format('Y') : '';
+  $cs      = strtolower(trim($resident->civil_status ?? ''));
+  $hh      = $resident->household;
+  $hhNo    = $hh ? $hh->household_no : '';
+  $today   = \Carbon\Carbon::now()->format('F d, Y');
+@endphp
 
 <div class="bidb-wrap">
   <div class="page-hdr">
@@ -42,6 +122,7 @@
       <div class="breadcrumb">Home › <a href="{{ route('residents.index') }}">Residents</a> › <span>{{ $resident->first_name }} {{ $resident->last_name }}</span></div>
     </div>
     <div style="display:flex;gap:8px">
+      <button type="button" onclick="window.print()" class="btn btn-print"><i class="fas fa-print"></i> Print RBI Form</button>
       <a href="{{ route('residents.edit', $resident->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</a>
       <a href="{{ route('residents.index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
@@ -93,6 +174,7 @@
       <div class="info-grid">
         <div class="info-item"><div class="label">Contact Number</div><div class="value">{{ $resident->contact_number ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Email Address</div><div class="value">{{ $resident->email ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">PhilSys Card No.</div><div class="value">{{ $resident->philsys_number ?? '—' }}</div></div>
       </div>
     </div>
   </div>
@@ -124,4 +206,268 @@
   </div>
 
 </div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!--  RBI PRINT FORM — only visible when printing        -->
+<!-- ════════════════════════════════════════════════════ -->
+<div id="rbi-print">
+
+  <div class="rbi-formid">RBI FORM B</div>
+  <div class="rbi-title">Individual Record of Barangay Inhabitant</div>
+
+  <!-- Location header -->
+  <div class="rbi-top-grid">
+    <div class="rbi-top-cell">
+      <span class="rbi-top-lbl">REGION:</span>
+      <span class="rbi-top-val">VIII (Eastern Visayas)</span>
+    </div>
+    <div class="rbi-top-cell">
+      <span class="rbi-top-lbl">CITY / MUN.:</span>
+      <span class="rbi-top-val">{{ $resident->city }}</span>
+    </div>
+    <div class="rbi-top-cell">
+      <span class="rbi-top-lbl">PROVINCE:</span>
+      <span class="rbi-top-val">{{ $resident->province }}</span>
+    </div>
+    <div class="rbi-top-cell">
+      <span class="rbi-top-lbl">BARANGAY:</span>
+      <span class="rbi-top-val">{{ $resident->barangay }}</span>
+    </div>
+  </div>
+
+  <!-- Section I: Personal Information -->
+  <div class="rbi-section-box">
+    <div class="rbi-section-title">I. Personal Information</div>
+
+    <!-- Name -->
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">NAME:</span>
+      <div class="rbi-name-cols">
+        <div class="rbi-named-col">
+          <div class="rbi-underline">{{ $resident->last_name }}</div>
+          <div class="rbi-col-sub">Last Name</div>
+        </div>
+        <div class="rbi-named-col">
+          <div class="rbi-underline">{{ $resident->first_name }}</div>
+          <div class="rbi-col-sub">First Name</div>
+        </div>
+        <div class="rbi-named-col">
+          <div class="rbi-underline">{{ $resident->middle_name ?? '' }}</div>
+          <div class="rbi-col-sub">Middle Name</div>
+        </div>
+        <div class="rbi-named-col">
+          <div class="rbi-underline"> </div>
+          <div class="rbi-col-sub">Ext.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date of Birth + Age -->
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">DATE OF BIRTH:</span>
+      <div class="rbi-dob-cols">
+        <div class="rbi-dob-box">
+          <div class="rbi-underline" style="width:40px;text-align:center">{{ $dobMM }}</div>
+          <div class="rbi-col-sub" style="width:40px">MM</div>
+        </div>
+        <div class="rbi-dob-box">
+          <div class="rbi-underline" style="width:40px;text-align:center">{{ $dobDD }}</div>
+          <div class="rbi-col-sub" style="width:40px">DD</div>
+        </div>
+        <div class="rbi-dob-box">
+          <div class="rbi-underline" style="width:65px;text-align:center">{{ $dobYYYY }}</div>
+          <div class="rbi-col-sub" style="width:65px">YYYY</div>
+        </div>
+      </div>
+      <span class="rbi-field-lbl" style="margin-left:24px">AGE:</span>
+      <div class="rbi-underline sm">{{ $resident->age }}</div>
+    </div>
+
+    <!-- Sex & Civil Status -->
+    <div class="rbi-field-row" style="align-items:flex-start;gap:0">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <span class="rbi-field-lbl">SEX:</span>
+        <div class="rbi-check-row">
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ $resident->gender === 'Male' ? 'checked' : '' }}"></span> Male
+          </span>
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ $resident->gender === 'Female' ? 'checked' : '' }}"></span> Female
+          </span>
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ $resident->gender === 'Other' ? 'checked' : '' }}"></span> Other
+          </span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:2">
+        <span class="rbi-field-lbl">CIVIL STATUS:</span>
+        <div class="rbi-check-row">
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ $cs === 'single' ? 'checked' : '' }}"></span> Single
+          </span>
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ $cs === 'married' ? 'checked' : '' }}"></span> Married
+          </span>
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ in_array($cs, ['widow','widower','widow/er']) ? 'checked' : '' }}"></span> Widow/er
+          </span>
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ $cs === 'separated' ? 'checked' : '' }}"></span> Separated
+          </span>
+          <span class="rbi-check-item">
+            <span class="rbi-checkbox {{ $cs === 'live-in' ? 'checked' : '' }}"></span> Live-in
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nationality & Religion -->
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">NATIONALITY:</span>
+      <div class="rbi-underline md">{{ $resident->nationality ?? '' }}</div>
+      <span class="rbi-field-lbl" style="margin-left:20px">RELIGION:</span>
+      <div class="rbi-underline">{{ $resident->religion ?? '' }}</div>
+    </div>
+
+    <!-- Occupation -->
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">OCCUPATION:</span>
+      <div class="rbi-underline">{{ $resident->occupation ?? '' }}</div>
+    </div>
+
+    <!-- Employer + Monthly Income -->
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">EMPLOYER:</span>
+      <div class="rbi-underline">{{ $resident->employer ?? '' }}</div>
+      <span class="rbi-field-lbl" style="margin-left:20px;white-space:nowrap">MONTHLY INCOME:</span>
+      <div class="rbi-income-field">
+        <span class="rbi-peso">₱</span>
+        <div class="rbi-underline md">{{ $resident->monthly_income ? number_format($resident->monthly_income, 2) : '' }}</div>
+      </div>
+    </div>
+
+    <!-- Education -->
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">EDUCATION:</span>
+      <div class="rbi-underline">{{ $resident->education_level ?? '' }}</div>
+    </div>
+
+    <!-- Contact + Email -->
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">CONTACT NO.:</span>
+      <div class="rbi-underline md">{{ $resident->contact_number ?? '' }}</div>
+      <span class="rbi-field-lbl" style="margin-left:20px">EMAIL:</span>
+      <div class="rbi-underline">{{ $resident->email ?? '' }}</div>
+    </div>
+    <div class="rbi-field-row">
+      <span class="rbi-field-lbl">PHILSYS NO.:</span>
+      <div class="rbi-underline md">{{ $resident->philsys_number ?? '' }}</div>
+    </div>
+
+    <!-- Address -->
+    <div class="rbi-field-row" style="align-items:flex-start">
+      <span class="rbi-field-lbl" style="margin-top:2px">RESIDENCE<br>ADDRESS:</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:10px">
+          <div style="flex:2">
+            <div class="rbi-underline">{{ $resident->address ?? '' }}</div>
+            <div class="rbi-col-sub" style="text-align:left">Sitio / Purok / Street / House No.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1">
+            <div class="rbi-underline">{{ $resident->barangay ?? '' }}</div>
+            <div class="rbi-col-sub" style="text-align:left">Barangay</div>
+          </div>
+          <div style="flex:1">
+            <div class="rbi-underline">{{ $resident->city ?? '' }}</div>
+            <div class="rbi-col-sub" style="text-align:left">City / Municipality</div>
+          </div>
+          <div style="flex:1">
+            <div class="rbi-underline">{{ $resident->province ?? '' }}</div>
+            <div class="rbi-col-sub" style="text-align:left">Province</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section II: Special Classifications -->
+  <div class="rbi-section-box">
+    <div class="rbi-section-title">II. Special Classifications</div>
+    <div class="rbi-special-checks">
+      <span class="rbi-check-item">
+        <span class="rbi-checkbox {{ $resident->is_senior ? 'checked' : '' }}"></span> Senior Citizen (60+)
+      </span>
+      <span class="rbi-check-item">
+        <span class="rbi-checkbox {{ $resident->is_pwd ? 'checked' : '' }}"></span> Person with Disability (PWD)
+      </span>
+      <span class="rbi-check-item">
+        <span class="rbi-checkbox {{ $resident->is_voter ? 'checked' : '' }}"></span> Registered Voter
+      </span>
+      <span class="rbi-check-item">
+        <span class="rbi-checkbox {{ $resident->is_deceased ? 'checked' : '' }}"></span> Deceased
+        @if($resident->is_deceased && $resident->date_of_death)
+          <span style="margin-left:6px;font-size:8.5pt">({{ \Carbon\Carbon::parse($resident->date_of_death)->format('M d, Y') }})</span>
+        @endif
+      </span>
+    </div>
+  </div>
+
+  <!-- Certification + Thumbprints -->
+  <div class="rbi-section-box">
+    <p class="rbi-cert-text">I hereby certify that the above information is true and correct to the best of my knowledge.</p>
+
+    <div class="rbi-sign-row">
+      <!-- Left: Date + Signature -->
+      <div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div>
+            <div class="rbi-underline">{{ $today }}</div>
+            <div class="rbi-sign-label">Date Accomplished</div>
+          </div>
+          <div>
+            <div class="rbi-underline"> </div>
+            <div class="rbi-sign-label">Signature of Resident / Person Accomplishing the Form</div>
+          </div>
+        </div>
+      </div>
+      <!-- Right: Thumbprints -->
+      <div>
+        <div style="font-size:8pt;text-align:center;margin-bottom:6px">Thumbprints</div>
+        <div class="rbi-thumb-area">
+          <div class="rbi-thumb-box">
+            <div class="rbi-thumb-rect"></div>
+            <div class="rbi-thumb-lbl">Left Thumbmark</div>
+          </div>
+          <div class="rbi-thumb-box">
+            <div class="rbi-thumb-rect"></div>
+            <div class="rbi-thumb-lbl">Right Thumbmark</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="rbi-divider">
+
+    <div class="rbi-attest-row">
+      <span style="font-size:8.5pt;font-weight:bold">Attested by:</span>
+      <div style="flex:1">
+        <div class="rbi-underline"> </div>
+        <div class="rbi-sign-label">Barangay Secretary</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="rbi-hh-box">{{ $hhNo }}</div>
+        <div style="font-size:7.5pt;margin-top:3px;text-align:center">Household Number</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rbi-note">Note: The Household No. shall be filled up by the Barangay Secretary. &nbsp;|&nbsp; Resident ID #{{ $resident->id }} &nbsp;|&nbsp; Printed: {{ $today }}</div>
+
+</div>
+
+@if(request('print') == '1')
+<script>window.addEventListener('load', function() { window.print(); });</script>
+@endif
 @endsection

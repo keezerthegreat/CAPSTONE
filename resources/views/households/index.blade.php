@@ -62,6 +62,41 @@ tbody tr:last-child td { border-bottom:none; }
 .mi.span2 { grid-column:span 2; }
 .mi.span3 { grid-column:span 3; }
 .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+/* ── Household Print Frame ── */
+#hh-print-frame { display:none; }
+@media print {
+  body * { visibility:hidden !important; }
+  #hh-print-frame, #hh-print-frame * { visibility:visible !important; }
+  #hh-print-frame {
+    display:block !important;
+    position:fixed; top:0; left:0;
+    width:100%; padding:15mm;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif; font-size:10pt; color:#000; background:#fff;
+    z-index:99999;
+  }
+  @page { size:A4; margin:0; }
+}
+.hp-header { text-align:center; margin-bottom:10px; border-bottom:2.5px solid #000; padding-bottom:8px; }
+.hp-brgy-name { font-size:13pt; font-weight:bold; text-transform:uppercase; letter-spacing:.04em; }
+.hp-brgy-sub  { font-size:9pt; color:#444; margin-top:1px; }
+.hp-doc-title { font-size:14pt; font-weight:bold; text-transform:uppercase; letter-spacing:.08em; margin-top:6px; }
+.hp-doc-no    { font-size:8.5pt; color:#555; margin-top:2px; }
+.hp-section   { border:1.5px solid #000; padding:10px 12px; margin-bottom:8px; }
+.hp-section-title { font-size:9pt; font-weight:bold; text-transform:uppercase; border-bottom:1px solid #000; padding-bottom:3px; margin-bottom:8px; }
+.hp-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.hp-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.hp-field { display:flex; flex-direction:column; margin-bottom:4px; }
+.hp-lbl   { font-size:7.5pt; font-weight:bold; color:#555; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px; }
+.hp-val   { border-bottom:1px solid #000; font-size:9.5pt; min-height:16px; padding:1px 2px; }
+.hp-mem-table { width:100%; border-collapse:collapse; font-size:9pt; margin-top:4px; }
+.hp-mem-table th { padding:5px 8px; background:#f0f0f0; text-align:left; font-size:8pt; font-weight:bold; text-transform:uppercase; border:1px solid #000; }
+.hp-mem-table td { padding:6px 8px; border:1px solid #000; }
+.hp-sign-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:32px; margin-top:16px; }
+.hp-sign-block { display:flex; flex-direction:column; align-items:center; }
+.hp-sign-line { border-top:1px solid #000; width:100%; margin-top:36px; }
+.hp-sign-lbl  { font-size:7.5pt; text-align:center; margin-top:3px; color:#333; }
+.hp-note { font-size:7.5pt; font-style:italic; margin-top:10px; border-top:1px solid #ccc; padding-top:5px; color:#444; }
 /* Members table inside modal */
 .mem-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:4px; }
 .mem-table th { padding:7px 10px; background:#f8fafc; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); border-bottom:1.5px solid var(--border); }
@@ -119,7 +154,7 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="filter-row">
       <div class="search-wrap">
         <span class="si"><i class="fas fa-search"></i></span>
-        <input type="text" id="searchInput" placeholder="Search by household head or sitio...">
+        <input type="text" id="searchInput" placeholder="Search by household head or purok...">
       </div>
       <div class="filter-controls">
 
@@ -143,12 +178,12 @@ tbody tr:last-child td { border-bottom:none; }
         <div class="flt-wrap" id="hh-wrap-sitio">
           <button class="flt-btn" id="hh-btn-sitio" onclick="toggleHhFlt('sitio')">
             <i class="fas fa-map-pin"></i>
-            <span id="hh-lbl-sitio">Sitio</span>
+            <span id="hh-lbl-sitio">Purok</span>
             <i class="fas fa-chevron-down flt-caret" id="hh-caret-sitio"></i>
             <span class="flt-x" id="hh-x-sitio" style="display:none" onclick="event.stopPropagation();clearHhFlt('sitio')">×</span>
           </button>
           <div class="flt-dropdown" id="hh-dd-sitio">
-            <div class="flt-option selected" data-val="" onclick="setHhFlt('sitio','','Sitio')">All</div>
+            <div class="flt-option selected" data-val="" onclick="setHhFlt('sitio','','Purok')">All</div>
             @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $sitio)
             <div class="flt-option" data-val="{{ $sitio }}" onclick="setHhFlt('sitio','{{ $sitio }}','{{ $sitio }}')">{{ $sitio }}</div>
             @endforeach
@@ -165,7 +200,7 @@ tbody tr:last-child td { border-bottom:none; }
             <th>#</th>
             <th>Household No.</th>
             <th>Household Head</th>
-            <th>Sitio</th>
+            <th>Purok</th>
             <th>Members</th>
             <th>Classification</th>
             <th>Location</th>
@@ -253,7 +288,7 @@ tbody tr:last-child td { border-bottom:none; }
 
 <script>
 const hhFlt = { residency: '', sitio: '' };
-const hhFltDefault = { residency: 'Classification', sitio: 'Sitio' };
+const hhFltDefault = { residency: 'Classification', sitio: 'Purok' };
 const hhFltKeys = ['residency', 'sitio'];
 
 function positionDropdown(el, btn) {
@@ -307,6 +342,85 @@ function filterTable() {
 document.getElementById('searchInput').addEventListener('keyup', filterTable);
 </script>
 
+<!-- Household Print Frame -->
+<div id="hh-print-frame">
+  <div class="hp-header">
+    <div class="hp-brgy-name">Barangay Cogon</div>
+    <div class="hp-brgy-sub">Ormoc City, Leyte &nbsp;|&nbsp; Region VIII (Eastern Visayas)</div>
+    <div class="hp-doc-title">Household Record</div>
+    <div class="hp-doc-no">Household No.: <span id="hp-hhno" style="font-weight:bold"></span></div>
+  </div>
+
+  <!-- Section I: Household Information -->
+  <div class="hp-section">
+    <div class="hp-section-title">I. Household Information</div>
+    <div class="hp-grid3">
+      <div class="hp-field"><span class="hp-lbl">Household Number</span><span id="hp-num" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">Residency / Classification</span><span id="hp-type" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">No. of Members</span><span id="hp-count" class="hp-val"></span></div>
+    </div>
+    <div class="hp-field" style="margin-top:6px"><span class="hp-lbl">Notes / Remarks</span><span id="hp-notes" class="hp-val" style="min-height:20px"></span></div>
+  </div>
+
+  <!-- Section II: Household Head -->
+  <div class="hp-section">
+    <div class="hp-section-title">II. Household Head</div>
+    <div class="hp-grid3">
+      <div class="hp-field"><span class="hp-lbl">Last Name</span><span id="hp-hlast" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">First Name</span><span id="hp-hfirst" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">Middle Name</span><span id="hp-hmid" class="hp-val"></span></div>
+    </div>
+  </div>
+
+  <!-- Section III: Address -->
+  <div class="hp-section">
+    <div class="hp-section-title">III. Complete Address</div>
+    <div class="hp-grid3">
+      <div class="hp-field"><span class="hp-lbl">Purok</span><span id="hp-sitio" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">Street / Sitio</span><span id="hp-street" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">Barangay</span><span id="hp-brgy" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">City / Municipality</span><span id="hp-city" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">Province</span><span id="hp-prov" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">GPS Coordinates</span><span id="hp-gps" class="hp-val"></span></div>
+    </div>
+  </div>
+
+  <!-- Section IV: Members -->
+  <div class="hp-section">
+    <div class="hp-section-title">IV. Household Members</div>
+    <table class="hp-mem-table">
+      <thead>
+        <tr>
+          <th style="width:30px">#</th>
+          <th>Full Name</th>
+          <th>Sex / Age</th>
+          <th>Civil Status</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody id="hp-mem-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Signatures -->
+  <div class="hp-sign-row">
+    <div class="hp-sign-block">
+      <div class="hp-sign-line"></div>
+      <div class="hp-sign-lbl">Household Head Signature</div>
+    </div>
+    <div class="hp-sign-block">
+      <div class="hp-sign-line"></div>
+      <div class="hp-sign-lbl">Barangay Secretary</div>
+    </div>
+    <div class="hp-sign-block">
+      <div class="hp-sign-line"></div>
+      <div class="hp-sign-lbl">Barangay Captain</div>
+    </div>
+  </div>
+
+  <div class="hp-note">Printed: <span id="hp-today"></span> &nbsp;|&nbsp; This document is an official record of Barangay Cogon, Ormoc City.</div>
+</div>
+
 <!-- Household View Modal -->
 <div id="householdModal" class="modal-backdrop">
   <div class="modal">
@@ -337,8 +451,8 @@ document.getElementById('searchInput').addEventListener('keyup', filterTable);
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
         <div class="mgrid">
-          <div class="mi"><span class="ml">Sitio</span><span class="mv" id="hm-sitio"></span></div>
-          <div class="mi"><span class="ml">Street / Purok</span><span class="mv" id="hm-street"></span></div>
+          <div class="mi"><span class="ml">Purok</span><span class="mv" id="hm-sitio"></span></div>
+          <div class="mi"><span class="ml">Street / Sitio</span><span class="mv" id="hm-street"></span></div>
           <div class="mi"><span class="ml">Barangay</span><span class="mv" id="hm-brgy"></span></div>
           <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="hm-city"></span></div>
           <div class="mi"><span class="ml">Province</span><span class="mv" id="hm-prov"></span></div>
@@ -354,15 +468,71 @@ document.getElementById('searchInput').addEventListener('keyup', filterTable);
     </div>
     <div class="modal-footer">
       <span style="font-size:12px;color:var(--muted)" id="hm-edit-link"></span>
-      <button onclick="closeHouseholdModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
-        <i class="fas fa-times"></i> Close
-      </button>
+      <div style="display:flex;gap:8px">
+        <button type="button" onclick="printHouseholdForm()" class="btn btn-sm" style="background:#fff;color:#374151;border:1.5px solid #d1d5db">
+          <i class="fas fa-print"></i> Print Record
+        </button>
+        <button onclick="closeHouseholdModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+var _hhData = null;
+
+function printHouseholdForm() {
+  var h = _hhData;
+  if (!h) return;
+  var today = new Date().toLocaleDateString('en-US',{month:'long',day:'2-digit',year:'numeric'});
+  var members = h.members || [];
+
+  function t(id, val) { var e = document.getElementById(id); if(e) e.textContent = val || ''; }
+  t('hp-num',    h.household_number);
+  t('hp-type',   h.residency_type);
+  t('hp-count',  h.member_count ? h.member_count + ' member(s)' : '—');
+  t('hp-notes',  h.notes);
+  t('hp-hlast',  h.head_last_name);
+  t('hp-hfirst', h.head_first_name);
+  t('hp-hmid',   h.head_middle_name);
+  t('hp-sitio',  h.sitio);
+  t('hp-street', h.street);
+  t('hp-brgy',   h.barangay);
+  t('hp-city',   h.city);
+  t('hp-prov',   h.province);
+  t('hp-gps',    (h.latitude && h.longitude) ? h.latitude + ', ' + h.longitude : 'Not recorded');
+  t('hp-today',  today);
+  t('hp-hhno',   h.household_number);
+
+  // Members table
+  var tbody = document.getElementById('hp-mem-tbody');
+  if (!members.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;font-style:italic;color:#666">No members linked.</td></tr>';
+  } else {
+    tbody.innerHTML = members.map(function(m, i) {
+      var name = (m.last_name||'') + ', ' + (m.first_name||'') + (m.middle_name ? ' '+m.middle_name : '');
+      var role = (m.id === h.head_resident_id) ? 'Head' : 'Member';
+      var badges = [];
+      if (m.is_senior) badges.push('Senior');
+      if (m.is_pwd)    badges.push('PWD');
+      if (m.is_voter)  badges.push('Voter');
+      return '<tr>'
+        + '<td style="text-align:center">' + (i+1) + '</td>'
+        + '<td style="font-weight:600">' + name + '</td>'
+        + '<td>' + (m.gender||'—') + ' / ' + (m.age||'—') + ' yrs</td>'
+        + '<td>' + (m.civil_status||'—') + '</td>'
+        + '<td>' + role + (badges.length ? ' <span style="font-size:8pt;color:#555">['+badges.join(', ')+']</span>' : '') + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  window.print();
+}
+
 function openHouseholdModal(h) {
+  _hhData = h;
   document.getElementById('householdModal').classList.add('open');
   document.getElementById('hm-num').textContent     = h.household_number || '—';
   document.getElementById('hm-type').textContent    = h.residency_type   || '—';

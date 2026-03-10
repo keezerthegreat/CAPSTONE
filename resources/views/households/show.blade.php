@@ -101,11 +101,11 @@
     <div class="card-body">
       <div class="info-grid">
         <div class="info-item">
-          <div class="label">Sitio</div>
+          <div class="label">Purok</div>
           <div class="value">{{ $household->sitio }}</div>
         </div>
         <div class="info-item">
-          <div class="label">Street / Purok</div>
+          <div class="label">Street / Sitio</div>
           <div class="value">{{ $household->street ?? '—' }}</div>
         </div>
         <div class="info-item">
