@@ -111,16 +111,18 @@ tbody tr:last-child td { border-bottom:none; }
 <label>Certificate Type <span class="req">*</span></label>
 <select name="certificate_type" required>
 <option value="">Select type...</option>
-<option value="Good Moral Character Clearance">Good Moral Character</option>
-<option value="Residency Certificate">Residency Certificate</option>
-<option value="Indigency Certificate">Indigency Certificate</option>
-<option value="Business Operation">Business Operation</option>
+<option value="Good Moral Character Clearance">Certificate of Residency</option>
+<option value="Residency Certificate">Certificate of Indigency</option>
+<option value="Indigency Certificate">Certificate of Unemployment</option>
+<option value="Business Operation">Certificate of Residency for Voters</option>
+<option value="Business Operation">Certificate of Guardianship</option>
+
 </select>
 </div>
 
 <div class="form-group">
 <label>Purpose <span class="req">*</span></label>
-<textarea name="purpose" rows="3" placeholder="e.g. For employment purposes" required></textarea>
+<textarea name="purpose" placeholder="e.g. For employment purposes" required></textarea>
 </div>
 
 <button type="submit" class="btn btn-primary">
@@ -140,7 +142,7 @@ tbody tr:last-child td { border-bottom:none; }
 <tr>
 <th>Certificate No.</th>
 <th>Resident Name</th>
-<th>Type</th>
+<th>Certificate Type</th>
 <th>Date Issued</th>
 <th>Actions</th>
 </tr>

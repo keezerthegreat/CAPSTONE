@@ -109,13 +109,14 @@ tbody tr:last-child td { border-bottom:none; }
           </div>
 
             <div class="form-group">
-            <label>Certificate Type <span class="req">*</span></label>
+            <label>Clearance Type <span class="req">*</span></label>
             <select name="certificate_type" required>
               <option value="">Select type...</option>
-              <option value="Good Moral Character Clearance">Good Moral Character</option>
-              <option value="Residency Certificate">Residency Certificate</option>
-              <option value="Indigency Certificate">Indigency Certificate</option>
-              <option value="Business Operation">Business Operation</option>
+              <option value="Good Moral Character Clearance">Barangay Clearance</option>
+              <option value="Indigency Certificate">Residency Clearance</option>
+              <option value="Business Operation">Good Moral Clearance</option>
+              <option value="Business Operation">Police Clearance Endorsement</option>
+              <option value="Business Operation">First Time Job Seeker Clearance</option>
             </select>
           </div>
 
@@ -123,6 +124,7 @@ tbody tr:last-child td { border-bottom:none; }
             <label>Purpose <span class="req">*</span></label>
             <input type="text" name="purpose" placeholder="e.g. Employment, Travel, Loan" required>
           </div>
+          
           <button type="submit" class="btn btn-primary"><i class="fas fa-file-alt"></i> Issue Clearance</button>
         </form>
       </div>
@@ -137,7 +139,7 @@ tbody tr:last-child td { border-bottom:none; }
             <tr>
               <th>Clearance No.</th>
               <th>Resident Name</th>
-              <th>Certificate Type</th>
+              <th>Clearance Type</th>
               <th>Date Issued</th>
               <th>Actions</th>
             </tr>
