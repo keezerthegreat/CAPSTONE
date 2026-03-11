@@ -512,8 +512,13 @@
       </a>
 
       <a href="{{ route('residents.index') }}"
-         class="nav-item {{ request()->is('residents*') ? 'active' : '' }}">
+         class="nav-item {{ request()->routeIs('residents.*') && !request()->routeIs('residents.import*') ? 'active' : '' }}">
         <i class="fas fa-users"></i> Residents
+      </a>
+
+      <a href="{{ route('residents.import.form') }}"
+         class="nav-item {{ request()->routeIs('residents.import*') ? 'active' : '' }}">
+        <i class="fas fa-file-import"></i> Import Data
       </a>
 
       <div class="nav-section">Documents</div>

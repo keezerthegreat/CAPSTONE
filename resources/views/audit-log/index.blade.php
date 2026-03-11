@@ -61,6 +61,10 @@ tr:hover td { background:#f8fafc; }
 }
 .pagination-links span.current { background:var(--primary); color:#fff; border-color:var(--primary); }
 .pagination-links a:hover { background:#f0f4f8; }
+
+/* Clear button */
+.btn-danger { padding:8px 16px; background:#dc2626; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .15s; display:inline-flex; align-items:center; gap:6px; }
+.btn-danger:hover { background:#b91c1c; }
 </style>
 
 <div class="wrap">
@@ -69,7 +73,17 @@ tr:hover td { background:#f8fafc; }
       <h1><i class="fas fa-history" style="margin-right:8px"></i>Audit Log</h1>
       <div class="breadcrumb">Home › Audit Log</div>
     </div>
+    <form method="POST" action="{{ route('audit.clear') }}" style="margin:0">
+      @csrf @method('DELETE')
+      <button type="submit" class="btn-danger"><i class="fas fa-trash"></i> Clear Log</button>
+    </form>
   </div>
+
+  @if(session('success'))
+  <div style="background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:13px;font-weight:600;">
+    <i class="fas fa-check-circle"></i> {{ session('success') }}
+  </div>
+  @endif
 
   <!-- Filters -->
   <div class="card">

@@ -2,74 +2,128 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\ResidentsImport;
 use App\Models\ActivityLog;
+use App\Models\Household;
 use App\Models\Resident;
 use App\Models\ResidentPendingEdit;
-use App\Models\Household;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ResidentController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $residents        = Resident::with('household')->where('status', 'approved')->latest()->get();
+        $gender = $request->get('gender', '');
+        $civil = $request->get('civil', '');
+        $purok = $request->get('purok', '');
+        $classification = $request->get('classification', '');
+        $ageMin = $request->filled('age_min') ? (int) $request->age_min : null;
+        $ageMax = $request->filled('age_max') ? (int) $request->age_max : null;
+        $search = $request->get('search', '');
+
+        $query = Resident::where('status', 'approved');
+
+        if ($gender) {
+            $query->where('gender', $gender);
+        }
+        if ($civil) {
+            $query->whereRaw('LOWER(civil_status) = ?', [strtolower($civil)]);
+        }
+        if ($purok) {
+            $query->where('address', 'like', ucfirst(strtolower($purok)).'%');
+        }
+        if ($classification === 'senior') {
+            $query->where('age', '>=', 60);
+        } elseif ($classification === 'pwd') {
+            $query->where('is_pwd', true);
+        } elseif ($classification === 'voter') {
+            $query->where('is_voter', true);
+        }
+        if ($ageMin !== null) {
+            $query->where('age', '>=', $ageMin);
+        }
+        if ($ageMax !== null) {
+            $query->where('age', '<=', $ageMax);
+        }
+        if ($search) {
+            $s = strtolower($search);
+            $query->where(function ($q) use ($s) {
+                $q->whereRaw('LOWER(first_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(last_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(address) like ?', ["%{$s}%"]);
+            });
+        }
+
+        $totalResidents = (clone $query)->where('is_deceased', false)->count();
+        $totalSeniors = (clone $query)->where('is_deceased', false)->where('age', '>=', 60)->count();
+        $totalPwd = (clone $query)->where('is_deceased', false)->where('is_pwd', true)->count();
+        $residents = (clone $query)->with('household')->latest()->paginate(50)->withQueryString();
+
         $pendingResidents = Resident::where('status', 'pending')->latest()->get();
-        $pendingEdits     = ResidentPendingEdit::with('resident')->latest()->get();
-        return view('residents.index', compact('residents', 'pendingResidents', 'pendingEdits'));
+        $pendingEdits = ResidentPendingEdit::with('resident')->latest()->get();
+
+        $filters = compact('gender', 'civil', 'purok', 'classification', 'ageMin', 'ageMax', 'search');
+
+        return view('residents.index', compact(
+            'residents', 'pendingResidents', 'pendingEdits',
+            'totalResidents', 'totalSeniors', 'totalPwd', 'filters'
+        ));
     }
 
     public function create()
     {
-        $sitios = ['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'];
+        $sitios = ['Chrysanthemum', 'Dahlia', 'Dama de Noche', 'Ilang-Ilang 1', 'Ilang-Ilang 2', 'Jasmin', 'Rosal', 'Sampaguita'];
+
         return view('residents.create', compact('sitios'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'household_id'    => 'nullable|exists:households,id',
-            'last_name'       => 'required|string|max:255',
-            'first_name'      => 'required|string|max:255',
-            'middle_name'     => 'nullable|string|max:255',
-            'gender'          => 'required|in:Male,Female,Other',
-            'birthdate'       => 'required|date',
-            'age'             => 'required|integer|min:0|max:120',
-            'civil_status'    => 'nullable|string|max:255',
-            'nationality'     => 'nullable|string|max:255',
-            'religion'        => 'nullable|string|max:255',
-            'contact_number'  => 'nullable|string|max:20',
-            'email'           => 'nullable|email|max:255',
-            'philsys_number'  => 'nullable|string|max:50',
-            'province'        => 'required|string|max:255',
-            'city'            => 'required|string|max:255',
-            'barangay'        => 'required|string|max:255',
-            'sitio_name'      => 'required|string|max:255',
-            'purok'           => 'nullable|string|max:100',
-            'street_no'       => 'nullable|string|max:255',
-            'occupation'      => 'nullable|string|max:255',
-            'employer'        => 'nullable|string|max:255',
-            'monthly_income'  => 'nullable|numeric|min:0',
+            'household_id' => 'nullable|exists:households,id',
+            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'gender' => 'required|in:Male,Female,Other',
+            'birthdate' => 'required|date',
+            'age' => 'required|integer|min:0|max:120',
+            'civil_status' => 'nullable|string|max:255',
+            'nationality' => 'nullable|string|max:255',
+            'religion' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'philsys_number' => 'nullable|string|max:50',
+            'province' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'barangay' => 'required|string|max:255',
+            'sitio_name' => 'required|string|max:255',
+            'purok' => 'nullable|string|max:100',
+            'street_no' => 'nullable|string|max:255',
+            'occupation' => 'nullable|string|max:255',
+            'employer' => 'nullable|string|max:255',
+            'monthly_income' => 'nullable|numeric|min:0',
             'education_level' => 'nullable|string|max:255',
-            'is_senior'       => 'nullable|boolean',
-            'is_pwd'          => 'nullable|boolean',
-            'is_voter'        => 'nullable|boolean',
-            'latitude'        => 'nullable|numeric',
-            'longitude'       => 'nullable|numeric',
+            'is_senior' => 'nullable|boolean',
+            'is_pwd' => 'nullable|boolean',
+            'is_voter' => 'nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // Build address from sub-fields then remove them from $validated
         $parts = array_filter([
             $validated['sitio_name'],
-            !empty($validated['purok'])    ? 'Purok ' . $validated['purok'] : null,
+            ! empty($validated['purok']) ? 'Purok '.$validated['purok'] : null,
             $validated['street_no'] ?? null,
         ]);
         $validated['address'] = implode(', ', $parts);
         unset($validated['sitio_name'], $validated['purok'], $validated['street_no']);
 
         $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
-        $validated['is_pwd']    = $request->has('is_pwd')    ? 1 : 0;
-        $validated['is_voter']  = $request->has('is_voter')  ? 1 : 0;
-        $validated['status']    = 'pending';
+        $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
+        $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
+        $validated['status'] = 'pending';
 
         // Duplicate check: same name + birthdate already in the system
         $duplicate = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($validated['first_name'])])
@@ -85,7 +139,7 @@ class ResidentController extends Controller
 
         $resident = Resident::create($validated);
 
-        if (!empty($validated['household_id'])) {
+        if (! empty($validated['household_id'])) {
             Household::where('id', $validated['household_id'])->increment('member_count');
         }
 
@@ -98,13 +152,15 @@ class ResidentController extends Controller
     public function show($id)
     {
         $resident = Resident::findOrFail($id);
+
         return view('residents.show', compact('resident'));
     }
 
     public function edit($id)
     {
         $resident = Resident::findOrFail($id);
-        $sitios = ['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'];
+        $sitios = ['Chrysanthemum', 'Dahlia', 'Dama de Noche', 'Ilang-Ilang 1', 'Ilang-Ilang 2', 'Jasmin', 'Rosal', 'Sampaguita'];
+
         return view('residents.edit', compact('resident', 'sitios'));
     }
 
@@ -113,52 +169,52 @@ class ResidentController extends Controller
         $resident = Resident::findOrFail($id);
 
         $validated = $request->validate([
-            'last_name'       => 'required|string|max:255',
-            'first_name'      => 'required|string|max:255',
-            'middle_name'     => 'nullable|string|max:255',
-            'gender'          => 'required|in:Male,Female,Other',
-            'birthdate'       => 'required|date',
-            'age'             => 'required|integer|min:0|max:120',
-            'civil_status'    => 'nullable|string|max:255',
-            'nationality'     => 'nullable|string|max:255',
-            'religion'        => 'nullable|string|max:255',
-            'contact_number'  => 'nullable|string|max:20',
-            'email'           => 'nullable|email|max:255',
-            'philsys_number'  => 'nullable|string|max:50',
-            'province'        => 'required|string|max:255',
-            'city'            => 'required|string|max:255',
-            'barangay'        => 'required|string|max:255',
-            'sitio_name'      => 'required|string|max:255',
-            'purok'           => 'nullable|string|max:100',
-            'street_no'       => 'nullable|string|max:255',
-            'occupation'      => 'nullable|string|max:255',
-            'employer'        => 'nullable|string|max:255',
-            'monthly_income'  => 'nullable|numeric|min:0',
+            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'gender' => 'required|in:Male,Female,Other',
+            'birthdate' => 'required|date',
+            'age' => 'required|integer|min:0|max:120',
+            'civil_status' => 'nullable|string|max:255',
+            'nationality' => 'nullable|string|max:255',
+            'religion' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'philsys_number' => 'nullable|string|max:50',
+            'province' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'barangay' => 'required|string|max:255',
+            'sitio_name' => 'required|string|max:255',
+            'purok' => 'nullable|string|max:100',
+            'street_no' => 'nullable|string|max:255',
+            'occupation' => 'nullable|string|max:255',
+            'employer' => 'nullable|string|max:255',
+            'monthly_income' => 'nullable|numeric|min:0',
             'education_level' => 'nullable|string|max:255',
-            'is_senior'       => 'nullable|boolean',
-            'is_pwd'          => 'nullable|boolean',
-            'is_voter'        => 'nullable|boolean',
-            'latitude'        => 'nullable|numeric',
-            'longitude'       => 'nullable|numeric',
-            'is_deceased'     => 'nullable|boolean',
-            'date_of_death'   => 'nullable|date',
+            'is_senior' => 'nullable|boolean',
+            'is_pwd' => 'nullable|boolean',
+            'is_voter' => 'nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'is_deceased' => 'nullable|boolean',
+            'date_of_death' => 'nullable|date',
         ]);
 
         // Build address from sub-fields
         $parts = array_filter([
             $validated['sitio_name'],
-            !empty($validated['purok']) ? 'Purok ' . $validated['purok'] : null,
+            ! empty($validated['purok']) ? 'Purok '.$validated['purok'] : null,
             $validated['street_no'] ?? null,
         ]);
         $validated['address'] = implode(', ', $parts);
         unset($validated['sitio_name'], $validated['purok'], $validated['street_no']);
 
-        $validated['is_senior']   = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
-        $validated['is_pwd']      = $request->has('is_pwd')      ? 1 : 0;
-        $validated['is_voter']    = $request->has('is_voter')    ? 1 : 0;
+        $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
+        $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
+        $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
 
-        if (!$validated['is_deceased']) {
+        if (! $validated['is_deceased']) {
             $validated['date_of_death'] = null;
         }
 
@@ -173,9 +229,9 @@ class ResidentController extends Controller
 
         // Employee: store as pending edit — live record is unchanged
         ResidentPendingEdit::create([
-            'resident_id'       => $resident->id,
-            'proposed_data'     => $validated,
-            'submitted_by_id'   => auth()->id(),
+            'resident_id' => $resident->id,
+            'proposed_data' => $validated,
+            'submitted_by_id' => auth()->id(),
             'submitted_by_name' => auth()->user()->name,
         ]);
         ActivityLog::log('proposed_edit', 'Resident', "Proposed edit submitted for: {$resident->first_name} {$resident->last_name} — awaiting admin approval");
@@ -187,7 +243,7 @@ class ResidentController extends Controller
     public function approveEdit($id)
     {
         $pendingEdit = ResidentPendingEdit::findOrFail($id);
-        $resident    = $pendingEdit->resident;
+        $resident = $pendingEdit->resident;
         $resident->update($pendingEdit->proposed_data);
         ActivityLog::log('approved_edit', 'Resident', "Approved proposed edit for: {$resident->first_name} {$resident->last_name} (submitted by {$pendingEdit->submitted_by_name})");
         $pendingEdit->delete();
@@ -199,8 +255,8 @@ class ResidentController extends Controller
     public function rejectEdit($id)
     {
         $pendingEdit = ResidentPendingEdit::findOrFail($id);
-        $resident    = $pendingEdit->resident;
-        $name        = "{$resident->first_name} {$resident->last_name}";
+        $resident = $pendingEdit->resident;
+        $name = "{$resident->first_name} {$resident->last_name}";
         ActivityLog::log('rejected_edit', 'Resident', "Rejected proposed edit for: {$name} (submitted by {$pendingEdit->submitted_by_name})");
         $pendingEdit->delete();
 
@@ -238,6 +294,30 @@ class ResidentController extends Controller
 
         return redirect()->route('residents.index')
             ->with('success', "Pending record for {$name} has been rejected and removed.");
+    }
+
+    public function importForm()
+    {
+        return view('residents.import');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate(['file' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+
+        $import = new ResidentsImport;
+
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Throwable $e) {
+            return redirect()->route('residents.import.form')
+                ->with('error', 'Import failed: '.$e->getMessage().' — Try re-saving the file as .xlsx in Excel or Google Sheets first.');
+        }
+
+        ActivityLog::log('created', 'Resident', "Bulk imported {$import->imported} resident(s) via Excel.");
+
+        return redirect()->route('residents.index')
+            ->with('success', "Import complete — {$import->imported} resident(s) added, {$import->skipped} row(s) skipped.");
     }
 
     public function location()

@@ -105,6 +105,8 @@ Route::middleware('auth')->group(function () {
         // Residents (edit/update handled outside admin for employee access)
         Route::resource('residents', ResidentController::class)->except(['edit', 'update']);
         Route::get('/resident-location', [ResidentController::class, 'location'])->name('residents.location');
+        Route::get('/residents-import', [ResidentController::class, 'importForm'])->name('residents.import.form');
+        Route::post('/residents-import', [ResidentController::class, 'import'])->name('residents.import');
         Route::post('/residents/{id}/approve', [ResidentController::class, 'approve'])->name('residents.approve');
         Route::post('/residents/{id}/reject', [ResidentController::class, 'reject'])->name('residents.reject');
         Route::post('/residents/edits/{id}/approve', [ResidentController::class, 'approveEdit'])->name('residents.approveEdit');
@@ -122,6 +124,7 @@ Route::middleware('auth')->group(function () {
 
         // Audit Log
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');
+        Route::delete('/audit-log/clear', [AuditLogController::class, 'clear'])->name('audit.clear');
 
     });
 

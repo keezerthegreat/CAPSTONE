@@ -49,6 +49,10 @@ input::placeholder { color:#94a3b8; }
 .hh-card.selected .hh-card-badge { background:var(--primary); color:#fff; }
 .hh-none { font-size:13px; color:var(--muted); padding:10px 0; display:flex; align-items:center; gap:6px; }
 .hh-loading { font-size:13px; color:var(--muted); padding:8px 0; display:flex; align-items:center; gap:6px; }
+[data-theme="dark"] .hh-card { background:var(--card); border-color:var(--border); }
+[data-theme="dark"] .hh-card:hover { background:var(--hover-bg); border-color:var(--primary); }
+[data-theme="dark"] .hh-card.selected { background:rgba(91,141,238,.12); border-color:var(--primary); }
+[data-theme="dark"] .hh-card-badge { background:rgba(91,141,238,.15); color:#93bbf7; }
 </style>
 
 <div class="bidb-wrap">
@@ -329,14 +333,17 @@ document.getElementById('birthdate').addEventListener('change', function() {
 
   const hhMap = {};
 
-  function renderHouseholds(households) {
-    panel.style.display = 'block';
-    if (households.length === 0) {
-      list.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle"></i> No households found in this barangay yet.</div>';
-      return;
-    }
-    households.forEach(h => { hhMap[h.id] = h; });
-    list.innerHTML = households.map(h => {
+  let allHouseholds = [];
+  let hhPage = 1;
+  const HH_PER_PAGE = 10;
+
+  function buildCards(page) {
+    const total = allHouseholds.length;
+    const totalPages = Math.ceil(total / HH_PER_PAGE);
+    const start = (page - 1) * HH_PER_PAGE;
+    const slice = allHouseholds.slice(start, start + HH_PER_PAGE);
+
+    const cards = slice.map(h => {
       const isSelected = String(h.id) === String(selectedId);
       const sitio = h.sitio ? h.sitio : (h.street || '—');
       return `<div class="hh-card${isSelected ? ' selected' : ''}" data-id="${h.id}" onclick="selectHousehold(${h.id}, this)">
@@ -347,6 +354,43 @@ document.getElementById('birthdate').addEventListener('change', function() {
         <span class="hh-card-badge">${isSelected ? '<i class="fas fa-check"></i> Assigned' : h.member_count + ' member(s)'}</span>
       </div>`;
     }).join('');
+
+    const pagination = totalPages > 1 ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--muted);">
+        <span>Showing ${start + 1}–${Math.min(start + HH_PER_PAGE, total)} of ${total}</span>
+        <div style="display:flex;gap:4px;">
+          <button type="button" onclick="hhGoPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}
+            style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:12px;color:var(--muted);${page <= 1 ? 'opacity:.4;cursor:default;' : ''}">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span style="padding:4px 8px;font-weight:600;color:var(--text);">${page} / ${totalPages}</span>
+          <button type="button" onclick="hhGoPage(${page + 1})" ${page >= totalPages ? 'disabled' : ''}
+            style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:12px;color:var(--muted);${page >= totalPages ? 'opacity:.4;cursor:default;' : ''}">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>` : '';
+
+    list.innerHTML = cards + pagination;
+  }
+
+  function hhGoPage(page) {
+    const totalPages = Math.ceil(allHouseholds.length / HH_PER_PAGE);
+    if (page < 1 || page > totalPages) { return; }
+    hhPage = page;
+    buildCards(hhPage);
+  }
+
+  function renderHouseholds(households) {
+    panel.style.display = 'block';
+    if (households.length === 0) {
+      list.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle"></i> No households found in this barangay yet.</div>';
+      return;
+    }
+    allHouseholds = households;
+    hhPage = 1;
+    households.forEach(h => { hhMap[h.id] = h; });
+    buildCards(hhPage);
   }
 
   function fetchHouseholds(barangay) {
@@ -423,6 +467,10 @@ document.getElementById('birthdate').addEventListener('change', function() {
       if (h) autofillFromHousehold(h);
     }
   };
+
+  // Expose functions needed by inline onclick handlers to global scope
+  window.hhGoPage = hhGoPage;
+  window.selectHousehold = selectHousehold;
 
   // Barangay is fixed to "Cogon" — fetch households immediately on page load
   fetchHouseholds(barangayInput.value);

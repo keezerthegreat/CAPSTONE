@@ -4,7 +4,6 @@
 
 @section('content')
 <style>
-:root { --primary:#1a3a6b; --primary-light:#2554a0; --bg:#f0f4f8; --card:#fff; --text:#1e293b; --muted:#64748b; --border:#e2e8f0; }
 .bidb-wrap { background:var(--bg); min-height:100vh; padding:28px; }
 .page-hdr { margin-bottom:24px; }
 .page-hdr h1 { font-size:22px; font-weight:700; color:var(--primary); margin:0; }
@@ -29,6 +28,7 @@ input:focus, select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rg
 .btn-secondary { background:#f1f5f9; color:var(--muted); border:1.5px solid var(--border); }
 .btn-secondary:hover { background:#e2e8f0; color:var(--text); }
 .info-box { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; color:#1d4ed8; display:flex; align-items:center; gap:8px; }
+[data-theme="dark"] .info-box { background:#1e2d4a; border-color:#2a4a7f; color:#7ba5f5; }
 </style>
 
 <div class="bidb-wrap">

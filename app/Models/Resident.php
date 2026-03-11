@@ -2,12 +2,41 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Resident extends Model
 {
     use HasFactory;
+
+    /**
+     * Always compute age from birthdate so it stays accurate over time.
+     * Falls back to the stored value if birthdate is unavailable.
+     */
+    public function getAgeAttribute(mixed $value): ?int
+    {
+        $birthdate = $this->attributes['birthdate'] ?? null;
+        if ($birthdate) {
+            return Carbon::parse($birthdate)->age;
+        }
+
+        return $value ? (int) $value : null;
+    }
+
+    /**
+     * Senior status is derived from age (60+) so it never goes stale.
+     * Falls back to the stored flag only when age is unknown.
+     */
+    public function getIsSeniorAttribute(mixed $value): bool
+    {
+        $age = $this->age;
+        if ($age !== null) {
+            return $age >= 60;
+        }
+
+        return (bool) $value;
+    }
 
     protected $fillable = [
         // Personal Info

@@ -134,6 +134,14 @@ tbody tr:last-child td { border-bottom: none; }
 .age-popup-actions { display:flex; gap:6px; justify-content:flex-end; }
 .btn-age-apply { background:var(--primary); color:#fff; border:none; padding:5px 13px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
 .btn-age-clear { background:#f1f5f9; color:var(--muted); border:1px solid var(--border); padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
+/* Pagination */
+.pg-bar { display:flex; align-items:center; justify-content:space-between; padding:14px 4px 4px; flex-wrap:wrap; gap:10px; }
+.pg-info { font-size:12px; color:var(--muted); }
+.pg-controls { display:flex; align-items:center; gap:4px; }
+.pg-btn { display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:34px; padding:0 10px; border-radius:7px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:13px; font-weight:600; text-decoration:none; cursor:pointer; transition:all .15s; font-family:inherit; }
+.pg-btn:hover:not([disabled]) { border-color:var(--primary); color:var(--primary); }
+.pg-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.pg-btn[disabled] { opacity:.35; cursor:default; }
 </style>
 
 <div class="bidb-wrap">
@@ -143,9 +151,11 @@ tbody tr:last-child td { border-bottom: none; }
       <div class="breadcrumb">Home › <span>Residents</span></div>
     </div>
 
-   <a href="{{ route('residents.create') }}" class="btn btn-primary">
-   <i class="fas fa-user-plus"></i> Add Resident
-  </a>
+  <div style="display:flex;gap:10px;align-items:center">
+    <a href="{{ route('residents.create') }}" class="btn btn-primary">
+      <i class="fas fa-user-plus"></i> Add Resident
+    </a>
+  </div>
 
   </div>
 
@@ -154,9 +164,9 @@ tbody tr:last-child td { border-bottom: none; }
   @endif
 
   <div class="res-stats">
-    <div class="res-stat"><div class="slabel">Total Residents</div><div class="svalue">{{ $residents->where('is_deceased', false)->count() }}</div></div>
-    <div class="res-stat"><div class="slabel">Senior Citizens</div><div class="svalue">{{ $residents->where('is_senior', true)->where('is_deceased', false)->count() }}</div></div>
-    <div class="res-stat"><div class="slabel">Persons w/ Disability</div><div class="svalue">{{ $residents->where('is_pwd', true)->where('is_deceased', false)->count() }}</div></div>
+    <div class="res-stat"><div class="slabel">Total Residents</div><div class="svalue">{{ $totalResidents }}</div></div>
+    <div class="res-stat"><div class="slabel">Senior Citizens</div><div class="svalue">{{ $totalSeniors }}</div></div>
+    <div class="res-stat"><div class="slabel">Persons w/ Disability</div><div class="svalue">{{ $totalPwd }}</div></div>
     @php $totalPendingCount = $pendingResidents->count() + $pendingEdits->count(); @endphp
     <div class="res-stat" style="{{ $totalPendingCount > 0 ? 'border-color:#fcd34d;background:#fffbeb;' : '' }}">
       <div class="slabel" style="{{ $totalPendingCount > 0 ? 'color:#92400e;' : '' }}">Pending Verification</div>
@@ -304,93 +314,108 @@ tbody tr:last-child td { border-bottom: none; }
   @endif
 
   <div class="card">
+    @php
+      $fGender = $filters['gender'] ?? '';
+      $fCivil  = $filters['civil']  ?? '';
+      $fPurok  = $filters['purok']  ?? '';
+      $fClass  = $filters['classification'] ?? '';
+      $fAgeMin = $filters['ageMin'] ?? null;
+      $fAgeMax = $filters['ageMax'] ?? null;
+      $fSearch = $filters['search'] ?? '';
+      $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
+      $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter',default=>'Classification' };
+    @endphp
     <div class="filter-area">
-      <div class="search-wrap">
-        <span class="si"><i class="fas fa-search"></i></span>
-        <input type="text" id="searchInput" placeholder="Search by name, address, or sitio...">
+      <div class="search-wrap" style="display:flex;gap:6px">
+        <div style="position:relative;flex:1">
+          <span class="si"><i class="fas fa-search"></i></span>
+          <input type="text" id="searchInput" placeholder="Search by name, address, or sitio..." value="{{ $fSearch }}">
+        </div>
+        @if($fSearch)
+        <a href="{{ request()->fullUrlWithQuery(['search'=>'','page'=>null]) }}" class="flt-btn" style="white-space:nowrap;text-decoration:none">
+          <i class="fas fa-times"></i> Clear search
+        </a>
+        @endif
       </div>
       <div class="filter-controls">
 
         <!-- Sex -->
         <div class="flt-wrap" id="wrap-gender">
-          <button class="flt-btn" id="btn-gender" onclick="toggleFlt('gender')">
+          <button class="flt-btn {{ $fGender ? 'active' : '' }}" id="btn-gender" onclick="toggleFlt('gender')">
             <i class="fas fa-venus-mars"></i>
-            <span id="lbl-gender">Sex</span>
-            <i class="fas fa-chevron-down flt-caret" id="caret-gender"></i>
-            <span class="flt-x" id="x-gender" style="display:none" onclick="event.stopPropagation();clearFlt('gender')">×</span>
+            <span id="lbl-gender">{{ $fGender ?: 'Sex' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-gender" style="{{ $fGender ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-gender" style="{{ $fGender ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('gender','')">×</span>
           </button>
           <div class="flt-dropdown" id="dd-gender">
-            <div class="flt-option selected" data-val="" onclick="setFlt('gender','','Sex')">All</div>
-            <div class="flt-option" data-val="male" onclick="setFlt('gender','male','Male')">Male</div>
-            <div class="flt-option" data-val="female" onclick="setFlt('gender','female','Female')">Female</div>
+            <div class="flt-option {{ !$fGender ? 'selected' : '' }}" onclick="applyFilter('gender','')">All</div>
+            <div class="flt-option {{ $fGender==='Male' ? 'selected' : '' }}" onclick="applyFilter('gender','Male')">Male</div>
+            <div class="flt-option {{ $fGender==='Female' ? 'selected' : '' }}" onclick="applyFilter('gender','Female')">Female</div>
           </div>
         </div>
 
         <!-- Civil Status -->
         <div class="flt-wrap" id="wrap-civil">
-          <button class="flt-btn" id="btn-civil" onclick="toggleFlt('civil')">
+          <button class="flt-btn {{ $fCivil ? 'active' : '' }}" id="btn-civil" onclick="toggleFlt('civil')">
             <i class="fas fa-heart"></i>
-            <span id="lbl-civil">Civil Status</span>
-            <i class="fas fa-chevron-down flt-caret" id="caret-civil"></i>
-            <span class="flt-x" id="x-civil" style="display:none" onclick="event.stopPropagation();clearFlt('civil')">×</span>
+            <span id="lbl-civil">{{ $fCivil ? ucfirst($fCivil) : 'Civil Status' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-civil" style="{{ $fCivil ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-civil" style="{{ $fCivil ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('civil','')">×</span>
           </button>
           <div class="flt-dropdown" id="dd-civil">
-            <div class="flt-option selected" data-val="" onclick="setFlt('civil','','Civil Status')">All</div>
-            <div class="flt-option" data-val="single" onclick="setFlt('civil','single','Single')">Single</div>
-            <div class="flt-option" data-val="married" onclick="setFlt('civil','married','Married')">Married</div>
-            <div class="flt-option" data-val="widowed" onclick="setFlt('civil','widowed','Widowed')">Widowed</div>
-            <div class="flt-option" data-val="separated" onclick="setFlt('civil','separated','Separated')">Separated</div>
-            <div class="flt-option" data-val="annulled" onclick="setFlt('civil','annulled','Annulled')">Annulled</div>
-            <div class="flt-option" data-val="live-in" onclick="setFlt('civil','live-in','Live-in')">Live-in</div>
+            <div class="flt-option {{ !$fCivil ? 'selected' : '' }}" onclick="applyFilter('civil','')">All</div>
+            @foreach(['single','married','widowed','separated','annulled','live-in'] as $cv)
+            <div class="flt-option {{ strtolower($fCivil)===$cv ? 'selected' : '' }}" onclick="applyFilter('civil','{{ $cv }}')">{{ ucfirst($cv) }}</div>
+            @endforeach
           </div>
         </div>
 
-        <!-- Sitio -->
+        <!-- Purok -->
         <div class="flt-wrap" id="wrap-sitio">
-          <button class="flt-btn" id="btn-sitio" onclick="toggleFlt('sitio')">
+          <button class="flt-btn {{ $fPurok ? 'active' : '' }}" id="btn-sitio" onclick="toggleFlt('sitio')">
             <i class="fas fa-map-pin"></i>
-            <span id="lbl-sitio">Purok</span>
-            <i class="fas fa-chevron-down flt-caret" id="caret-sitio"></i>
-            <span class="flt-x" id="x-sitio" style="display:none" onclick="event.stopPropagation();clearFlt('sitio')">×</span>
+            <span id="lbl-sitio">{{ $fPurok ?: 'Purok' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-sitio" style="{{ $fPurok ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-sitio" style="{{ $fPurok ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('purok','')">×</span>
           </button>
           <div class="flt-dropdown" id="dd-sitio">
-            <div class="flt-option selected" data-val="" onclick="setFlt('sitio','','Purok')">All</div>
+            <div class="flt-option {{ !$fPurok ? 'selected' : '' }}" onclick="applyFilter('purok','')">All</div>
             @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $s)
-            <div class="flt-option" data-val="{{ strtolower($s) }}" onclick="setFlt('sitio','{{ strtolower($s) }}','{{ $s }}')">{{ $s }}</div>
+            <div class="flt-option {{ strtolower($fPurok)===strtolower($s) ? 'selected' : '' }}" onclick="applyFilter('purok','{{ $s }}')">{{ $s }}</div>
             @endforeach
           </div>
         </div>
 
         <!-- Classification -->
         <div class="flt-wrap" id="wrap-class">
-          <button class="flt-btn" id="btn-class" onclick="toggleFlt('class')">
+          <button class="flt-btn {{ $fClass ? 'active' : '' }}" id="btn-class" onclick="toggleFlt('class')">
             <i class="fas fa-tag"></i>
-            <span id="lbl-class">Classification</span>
-            <i class="fas fa-chevron-down flt-caret" id="caret-class"></i>
-            <span class="flt-x" id="x-class" style="display:none" onclick="event.stopPropagation();clearFlt('class')">×</span>
+            <span id="lbl-class">{{ $classLabel }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-class" style="{{ $fClass ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-class" style="{{ $fClass ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('classification','')">×</span>
           </button>
           <div class="flt-dropdown" id="dd-class">
-            <div class="flt-option selected" data-val="" onclick="setFlt('class','','Classification')">All</div>
-            <div class="flt-option" data-val="senior" onclick="setFlt('class','senior','Senior Citizen')">Senior Citizen</div>
-            <div class="flt-option" data-val="pwd" onclick="setFlt('class','pwd','PWD')">PWD</div>
-            <div class="flt-option" data-val="voter" onclick="setFlt('class','voter','Registered Voter')">Registered Voter</div>
+            <div class="flt-option {{ !$fClass ? 'selected' : '' }}" onclick="applyFilter('classification','')">All</div>
+            <div class="flt-option {{ $fClass==='senior' ? 'selected' : '' }}" onclick="applyFilter('classification','senior')">Senior Citizen</div>
+            <div class="flt-option {{ $fClass==='pwd' ? 'selected' : '' }}" onclick="applyFilter('classification','pwd')">PWD</div>
+            <div class="flt-option {{ $fClass==='voter' ? 'selected' : '' }}" onclick="applyFilter('classification','voter')">Registered Voter</div>
           </div>
         </div>
 
         <!-- Age Range -->
         <div class="flt-wrap" id="wrap-age">
-          <button class="flt-btn" id="ageFilterBtn" onclick="toggleAgePopup()">
+          <button class="flt-btn {{ ($fAgeMin || $fAgeMax) ? 'active' : '' }}" id="ageFilterBtn" onclick="toggleAgePopup()">
             <i class="fas fa-sliders-h"></i>
-            <span id="lbl-age">Age Range</span>
-            <i class="fas fa-chevron-down flt-caret" id="caret-age"></i>
-            <span class="flt-x" id="x-age" style="display:none" onclick="event.stopPropagation();clearAge()">×</span>
+            <span id="lbl-age">{{ $ageLabel }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-age" style="{{ ($fAgeMin || $fAgeMax) ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-age" style="{{ ($fAgeMin || $fAgeMax) ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('age_min','');applyFilter('age_max','')">×</span>
           </button>
           <div class="age-popup" id="agePopup">
             <div class="age-popup-title">Filter by Age Range</div>
             <div class="age-range-row">
-              <input type="number" id="ageMin" placeholder="Min" min="0" max="150">
+              <input type="number" id="ageMin" placeholder="Min" min="0" max="150" value="{{ $fAgeMin ?? '' }}">
               <span>to</span>
-              <input type="number" id="ageMax" placeholder="Max" min="0" max="150">
+              <input type="number" id="ageMax" placeholder="Max" min="0" max="150" value="{{ $fAgeMax ?? '' }}">
               <span>yrs</span>
             </div>
             <div class="age-popup-actions">
@@ -399,6 +424,12 @@ tbody tr:last-child td { border-bottom: none; }
             </div>
           </div>
         </div>
+
+        @if($fGender || $fCivil || $fPurok || $fClass || $fAgeMin || $fAgeMax || $fSearch)
+        <a href="{{ route('residents.index') }}" class="flt-btn" style="margin-left:auto;text-decoration:none;color:var(--muted);border-color:var(--border);white-space:nowrap;">
+          <i class="fas fa-times"></i> Clear Filters
+        </a>
+        @endif
 
       </div>
     </div>
@@ -419,9 +450,17 @@ tbody tr:last-child td { border-bottom: none; }
 
         <tbody>
           @forelse($residents as $index => $resident)
-          <tr ondblclick='openResidentModal(@json($resident))' data-age="{{ $resident->age ?? '' }}" data-civil="{{ strtolower($resident->civil_status ?? '') }}" data-sitio="{{ strtolower($resident->household?->sitio ?? '') }}">
+          @php
+            $trSitio = strtolower($resident->household?->sitio ?? '');
+            if (! $trSitio) {
+                foreach (['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $_pn) {
+                    if (stripos($resident->address ?? '', $_pn) === 0) { $trSitio = strtolower($_pn); break; }
+                }
+            }
+          @endphp
+          <tr ondblclick='openResidentModal(@json($resident))' data-age="{{ $resident->age ?? '' }}" data-civil="{{ strtolower($resident->civil_status ?? '') }}" data-sitio="{{ $trSitio }}">
 
-            <td style="color:var(--muted);font-size:12px">{{ $index + 1 }}</td>
+            <td style="color:var(--muted);font-size:12px">{{ $residents->firstItem() + $loop->index }}</td>
 
             <td>
               <div style="font-weight:700">{{ $resident->last_name }}, {{ $resident->first_name }} {{ $resident->middle_name }}
@@ -490,6 +529,47 @@ tbody tr:last-child td { border-bottom: none; }
         </tbody>
       </table>
     </div>
+
+    @if($residents->hasPages())
+    <div class="pg-bar">
+      <span class="pg-info">
+        Showing {{ $residents->firstItem() }}–{{ $residents->lastItem() }} of {{ $residents->total() }} residents
+      </span>
+      <div class="pg-controls">
+        {{-- Previous --}}
+        @if($residents->onFirstPage())
+          <button class="pg-btn" disabled><i class="fas fa-chevron-left"></i></button>
+        @else
+          <a href="{{ $residents->previousPageUrl() }}" class="pg-btn"><i class="fas fa-chevron-left"></i></a>
+        @endif
+
+        {{-- Page numbers (window of 5 around current) --}}
+        @php
+          $start = max(1, $residents->currentPage() - 2);
+          $end   = min($residents->lastPage(), $residents->currentPage() + 2);
+        @endphp
+        @if($start > 1)
+          <a href="{{ $residents->url(1) }}" class="pg-btn">1</a>
+          @if($start > 2)<span class="pg-btn" style="border:none;cursor:default">…</span>@endif
+        @endif
+        @for($p = $start; $p <= $end; $p++)
+          <a href="{{ $residents->url($p) }}" class="pg-btn {{ $p == $residents->currentPage() ? 'active' : '' }}">{{ $p }}</a>
+        @endfor
+        @if($end < $residents->lastPage())
+          @if($end < $residents->lastPage() - 1)<span class="pg-btn" style="border:none;cursor:default">…</span>@endif
+          <a href="{{ $residents->url($residents->lastPage()) }}" class="pg-btn">{{ $residents->lastPage() }}</a>
+        @endif
+
+        {{-- Next --}}
+        @if($residents->hasMorePages())
+          <a href="{{ $residents->nextPageUrl() }}" class="pg-btn"><i class="fas fa-chevron-right"></i></a>
+        @else
+          <button class="pg-btn" disabled><i class="fas fa-chevron-right"></i></button>
+        @endif
+      </div>
+    </div>
+    @endif
+
   </div>
 </div>
 
@@ -699,6 +779,8 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="mi"><span class="ml">Province</span><span class="mv" id="rm-prov"></span></div>
           <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="rm-city"></span></div>
           <div class="mi"><span class="ml">Barangay</span><span class="mv" id="rm-brgy"></span></div>
+          <div class="mi"><span class="ml">Purok</span><span class="mv" id="rm-purok"></span></div>
+          <div class="mi"><span class="ml">Street / House No.</span><span class="mv" id="rm-street"></span></div>
           <div class="mi span3"><span class="ml">Complete Address</span><span class="mv" id="rm-addr"></span></div>
         </div>
       </div>
@@ -727,6 +809,24 @@ tbody tr:last-child td { border-bottom: none; }
 
 <script>
 var _rbiResident = null;
+
+const PUROK_NAMES = ['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'];
+function extractPurok(r) {
+  if (r.household && r.household.sitio) return r.household.sitio;
+  const addr = (r.address || '').toLowerCase();
+  for (const p of PUROK_NAMES) {
+    if (addr.startsWith(p.toLowerCase())) return p;
+  }
+  return null;
+}
+function extractStreet(r) {
+  const addr = (r.address || '').trim();
+  const purok = extractPurok(r);
+  if (purok && addr.toLowerCase().startsWith(purok.toLowerCase())) {
+    return addr.slice(purok.length).trim() || null;
+  }
+  return addr || null;
+}
 
 function printRBIForm() {
   var r = _rbiResident;
@@ -845,6 +945,8 @@ function openResidentModal(r, pendingStatus) {
   document.getElementById('rm-prov').textContent    = r.province  || '—';
   document.getElementById('rm-city').textContent    = r.city      || '—';
   document.getElementById('rm-brgy').textContent    = r.barangay  || '—';
+  document.getElementById('rm-purok').textContent   = extractPurok(r) || '—';
+  document.getElementById('rm-street').textContent  = extractStreet(r) || '—';
   document.getElementById('rm-addr').textContent    = r.address   || '—';
   document.getElementById('rm-occ').textContent     = r.occupation      || '—';
   document.getElementById('rm-emp').textContent     = r.employer        || '—';
@@ -865,9 +967,7 @@ document.getElementById('residentModal').addEventListener('click', function(e) {
 });
 
 // Filter state
-const fltState   = { gender: '', civil: '', sitio: '', class: '' };
-const fltDefault = { gender: 'Sex', civil: 'Civil Status', sitio: 'Purok', class: 'Classification' };
-const fltKeys    = ['gender', 'civil', 'sitio', 'class'];
+const fltKeys = ['gender', 'civil', 'sitio', 'class'];
 
 function positionDropdown(el, btn) {
   const r = btn.getBoundingClientRect();
@@ -890,25 +990,18 @@ function toggleFlt(key) {
   }
 }
 
-function setFlt(key, val, label) {
-  fltState[key] = val;
-  document.getElementById('lbl-' + key).textContent = val ? label : fltDefault[key];
-  document.getElementById('btn-' + key).classList.toggle('active', !!val);
-  document.getElementById('caret-' + key).style.display = val ? 'none' : '';
-  document.getElementById('x-' + key).style.display = val ? '' : 'none';
-  document.querySelectorAll('#dd-' + key + ' .flt-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.dataset.val === val);
-  });
-  document.getElementById('dd-' + key).classList.remove('open');
-  filterTable();
+function navigate(url) {
+  window.location = url.toString();
 }
 
-function clearFlt(key) {
-  setFlt(key, '', fltDefault[key]);
+// Navigate URL with a filter param change, resetting pagination
+function applyFilter(key, value) {
+  const url = new URL(window.location);
+  if (value) { url.searchParams.set(key, value); }
+  else { url.searchParams.delete(key); }
+  url.searchParams.delete('page');
+  navigate(url);
 }
-
-// Age range state
-let activeAgeMin = null, activeAgeMax = null;
 
 function toggleAgePopup() {
   const isOpen = document.getElementById('agePopup').classList.contains('open');
@@ -924,26 +1017,18 @@ function toggleAgePopup() {
 function applyAge() {
   const min = document.getElementById('ageMin').value;
   const max = document.getElementById('ageMax').value;
-  activeAgeMin = min !== '' ? parseInt(min) : null;
-  activeAgeMax = max !== '' ? parseInt(max) : null;
-  const hasFilter = activeAgeMin !== null || activeAgeMax !== null;
-  document.getElementById('ageFilterBtn').classList.toggle('active', hasFilter);
-  document.getElementById('lbl-age').textContent = hasFilter ? `${activeAgeMin ?? '0'}–${activeAgeMax ?? '∞'} yrs` : 'Age Range';
-  document.getElementById('caret-age').style.display = hasFilter ? 'none' : '';
-  document.getElementById('x-age').style.display = hasFilter ? '' : 'none';
-  document.getElementById('agePopup').classList.remove('open');
-  filterTable();
+  const url = new URL(window.location);
+  if (min) { url.searchParams.set('age_min', min); } else { url.searchParams.delete('age_min'); }
+  if (max) { url.searchParams.set('age_max', max); } else { url.searchParams.delete('age_max'); }
+  url.searchParams.delete('page');
+  navigate(url);
 }
 function clearAge() {
-  activeAgeMin = null; activeAgeMax = null;
-  document.getElementById('ageMin').value = '';
-  document.getElementById('ageMax').value = '';
-  document.getElementById('ageFilterBtn').classList.remove('active');
-  document.getElementById('lbl-age').textContent = 'Age Range';
-  document.getElementById('caret-age').style.display = '';
-  document.getElementById('x-age').style.display = 'none';
-  document.getElementById('agePopup').classList.remove('open');
-  filterTable();
+  const url = new URL(window.location);
+  url.searchParams.delete('age_min');
+  url.searchParams.delete('age_max');
+  url.searchParams.delete('page');
+  navigate(url);
 }
 
 // Close all popups when clicking outside
@@ -956,37 +1041,17 @@ document.addEventListener('click', function(e) {
   if (ageWrap && !ageWrap.contains(e.target)) document.getElementById('agePopup').classList.remove('open');
 });
 
-// Search & filter
-function filterTable() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const gender = fltState.gender;
-  const civil  = fltState.civil;
-  const sitio  = fltState.sitio;
-  const cls    = fltState.class;
+// Search submits on Enter
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const url = new URL(window.location);
+    const val = this.value.trim();
+    if (val) { url.searchParams.set('search', val); } else { url.searchParams.delete('search'); }
+    url.searchParams.delete('page');
+    navigate(url);
+  }
+});
 
-  document.querySelectorAll('#residentsTable tbody tr').forEach(function(row) {
-    if (!row.dataset.hasOwnProperty('age')) { row.style.display = ''; return; }
-    const nameCol   = (row.cells[1] ? row.cells[1].textContent : '').toLowerCase();
-    const addrCol   = (row.cells[4] ? row.cells[4].textContent : '').toLowerCase();
-    const genderCol = (row.cells[2] ? row.cells[2].textContent : '').toLowerCase();
-    const badgeCol  = (row.cells[5] ? row.cells[5].textContent : '').toLowerCase();
-    const rowAge    = parseInt(row.dataset.age) || 0;
-    const rowCivil  = row.dataset.civil || '';
-    const rowSitio  = row.dataset.sitio || '';
-
-    const matchSearch = !search || nameCol.includes(search) || addrCol.includes(search);
-    const matchGender = !gender || genderCol.startsWith(gender);
-    const matchCivil  = !civil  || rowCivil === civil;
-    const matchSitio  = !sitio  || rowSitio === sitio;
-    const matchCls    = !cls    || badgeCol.includes(cls === 'voter' ? 'voter' : cls === 'senior' ? 'senior' : 'pwd');
-    const matchAge    = (activeAgeMin === null || rowAge >= activeAgeMin) &&
-                        (activeAgeMax === null || rowAge <= activeAgeMax);
-
-    row.style.display = (matchSearch && matchGender && matchCivil && matchSitio && matchCls && matchAge) ? '' : 'none';
-  });
-}
-
-document.getElementById('searchInput').addEventListener('input', filterTable);
 
 // ── REJECT CONFIRM ──
 var _rejectForm = null;

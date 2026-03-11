@@ -34,4 +34,10 @@ class AuditLogController extends Controller
 
         return view('audit-log.index', compact('logs'));
     }
+
+    public function clear()
+    {
+        ActivityLog::truncate();
+        return redirect()->route('audit.index')->with('success', 'Audit log cleared.');
+    }
 }
