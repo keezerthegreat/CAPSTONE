@@ -115,35 +115,41 @@ tbody tr:last-child td { border-bottom:none; }
   @endif
 
   <div class="fam-stats">
-    <div class="fam-stat"><div class="slabel">Total Families</div><div class="svalue" id="stat-families">{{ $families->count() }}</div></div>
-    <div class="fam-stat"><div class="slabel">Total Members</div><div class="svalue" id="stat-members">{{ $families->sum('member_count') }}</div></div>
-    <div class="fam-stat"><div class="slabel">Linked to Households</div><div class="svalue" id="stat-linked">{{ $families->whereNotNull('household_id')->count() }}</div></div>
+    <div class="fam-stat"><div class="slabel">Total Families</div><div class="svalue">{{ $totalFamilies }}</div></div>
+    <div class="fam-stat"><div class="slabel">Total Members</div><div class="svalue">{{ $totalMembers }}</div></div>
+    <div class="fam-stat"><div class="slabel">Linked to Households</div><div class="svalue">{{ $totalLinked }}</div></div>
   </div>
 
   <div class="card">
     <div class="filter-row">
       <div class="search-wrap">
         <span class="si"><i class="fas fa-search"></i></span>
-        <input type="text" id="searchInput" placeholder="Search by family name or head...">
+        <input type="text" id="searchInput" placeholder="Search by family name or head..." value="{{ $filters['search'] }}" onkeydown="if(event.key==='Enter'){famApplyFilter('search',this.value)}">
       </div>
       <div class="filter-controls">
 
         <!-- Sitio filter -->
         <div class="flt-wrap" id="fam-wrap-sitio">
-          <button class="flt-btn" id="fam-btn-sitio" onclick="toggleFamFlt('sitio')">
+          <button class="flt-btn {{ $filters['sitio'] ? 'active' : '' }}" id="fam-btn-sitio" onclick="toggleFamFlt('sitio')">
             <i class="fas fa-map-pin"></i>
-            <span id="fam-lbl-sitio">Purok</span>
-            <i class="fas fa-chevron-down flt-caret" id="fam-caret-sitio"></i>
-            <span class="flt-x" id="fam-x-sitio" style="display:none" onclick="event.stopPropagation();clearFamFlt('sitio')">×</span>
+            <span id="fam-lbl-sitio">{{ $filters['sitio'] ? ($filters['sitio'] === '__none__' ? 'No Household' : $filters['sitio']) : 'Purok' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="fam-caret-sitio" style="{{ $filters['sitio'] ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="fam-x-sitio" style="{{ $filters['sitio'] ? '' : 'display:none' }}" onclick="event.stopPropagation();famApplyFilter('sitio','')">×</span>
           </button>
           <div class="flt-dropdown" id="fam-dd-sitio">
-            <div class="flt-option selected" data-val="" onclick="setFamFlt('sitio','','Purok')">All Puroks</div>
+            <div class="flt-option {{ !$filters['sitio'] ? 'selected':'' }}" onclick="famApplyFilter('sitio','')">All Puroks</div>
             @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $s)
-            <div class="flt-option" data-val="{{ $s }}" onclick="setFamFlt('sitio','{{ $s }}','{{ $s }}')">{{ $s }}</div>
+            <div class="flt-option {{ $filters['sitio']===$s ? 'selected':'' }}" onclick="famApplyFilter('sitio','{{ $s }}')">{{ $s }}</div>
             @endforeach
-            <div class="flt-option" data-val="__none__" onclick="setFamFlt('sitio','__none__','No Household')">Not linked to household</div>
+            <div class="flt-option {{ $filters['sitio']==='__none__' ? 'selected':'' }}" onclick="famApplyFilter('sitio','__none__')">Not linked to household</div>
           </div>
         </div>
+
+        @if($filters['search'] || $filters['sitio'])
+        <button class="flt-btn" onclick="famClearAll()" style="color:var(--danger)">
+          <i class="fas fa-times"></i> Clear Filters
+        </button>
+        @endif
 
       </div>
     </div>
@@ -160,9 +166,9 @@ tbody tr:last-child td { border-bottom:none; }
           </tr>
         </thead>
         <tbody>
-          @forelse($families as $index => $family)
-          <tr ondblclick='openFamilyModal(@json($family))' data-sitio="{{ $family->household?->sitio ?? '' }}" data-members="{{ $family->member_count }}" data-linked="{{ $family->household_id ? '1' : '0' }}">
-            <td style="color:var(--muted);font-size:12px">{{ $index + 1 }}</td>
+          @forelse($families as $family)
+          <tr ondblclick='openFamilyModal(@json($family))'>
+            <td style="color:var(--muted);font-size:12px">{{ $families->firstItem() + $loop->index }}</td>
             <td>
               <div style="font-weight:700">{{ $family->family_name }}</div>
               <div style="font-size:11px;color:var(--muted)">ID #{{ $family->id }}</div>
@@ -209,12 +215,18 @@ tbody tr:last-child td { border-bottom:none; }
         </tbody>
       </table>
     </div>
+
+    @if($families->hasPages())
+    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">
+      <span>Showing {{ $families->firstItem() }}–{{ $families->lastItem() }} of {{ $families->total() }} families</span>
+      {{ $families->links() }}
+    </div>
+    @endif
+
   </div>
 </div>
 
 <script>
-const famFlt = { sitio: '' };
-
 function positionDropdown(el, btn) {
   const r = btn.getBoundingClientRect();
   el.style.top  = (r.bottom + 6) + 'px';
@@ -234,54 +246,22 @@ function toggleFamFlt(key) {
     document.getElementById('fam-dd-' + key).classList.remove('open');
   }
 }
-function setFamFlt(key, val, label) {
-  famFlt[key] = val;
-  document.getElementById('fam-lbl-' + key).textContent = val ? label : (key === 'sitio' ? 'Purok' : key);
-  document.getElementById('fam-btn-' + key).classList.toggle('active', !!val);
-  document.getElementById('fam-caret-' + key).style.display = val ? 'none' : '';
-  document.getElementById('fam-x-' + key).style.display = val ? '' : 'none';
-  document.querySelectorAll('#fam-dd-' + key + ' .flt-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.dataset.val === val);
-  });
-  document.getElementById('fam-dd-' + key).classList.remove('open');
-  applyFilters();
+function famApplyFilter(key, val) {
+  document.getElementById('fam-dd-' + key)?.classList.remove('open');
+  const url = new URL(window.location.href);
+  if (val) { url.searchParams.set(key, val); } else { url.searchParams.delete(key); }
+  url.searchParams.delete('page');
+  window.location = url.toString();
 }
-function clearFamFlt(key) { setFamFlt(key, '', key === 'sitio' ? 'Purok' : key); }
-
+function famClearAll() {
+  const url = new URL(window.location.href);
+  ['search','sitio','page'].forEach(k => url.searchParams.delete(k));
+  window.location = url.toString();
+}
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('fam-wrap-sitio');
   if (wrap && !wrap.contains(e.target)) document.getElementById('fam-dd-sitio').classList.remove('open');
 });
-
-function applyFilters() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const sitio  = famFlt.sitio;
-  let famCount = 0, memCount = 0, linkedCount = 0;
-
-  document.querySelectorAll('#familiesTable tbody tr').forEach(row => {
-    if (!row.dataset.hasOwnProperty('sitio')) { row.style.display = ''; return; }
-    const rowSitio   = row.dataset.sitio;
-    const rowMembers = parseInt(row.dataset.members) || 0;
-    const rowLinked  = row.dataset.linked === '1';
-    const textMatch  = row.textContent.toLowerCase().includes(search);
-    const sitioMatch = !sitio || (sitio === '__none__' ? rowSitio === '' : rowSitio === sitio);
-
-    if (textMatch && sitioMatch) {
-      row.style.display = '';
-      famCount++;
-      memCount += rowMembers;
-      if (rowLinked) linkedCount++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-
-  document.getElementById('stat-families').textContent = famCount;
-  document.getElementById('stat-members').textContent  = memCount;
-  document.getElementById('stat-linked').textContent   = linkedCount;
-}
-
-document.getElementById('searchInput').addEventListener('keyup', applyFilters);
 </script>
 
 <!-- Family Print Frame -->

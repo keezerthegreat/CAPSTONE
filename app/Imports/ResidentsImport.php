@@ -16,6 +16,8 @@ class ResidentsImport implements SkipsEmptyRows, ToModel, WithEvents, WithStartR
 
     public int $skipped = 0;
 
+    public int $duplicates = 0;
+
     /** Tracks household IDs created/touched during this import for post-processing. */
     private array $touchedHouseholdIds = [];
 
@@ -119,6 +121,20 @@ class ResidentsImport implements SkipsEmptyRows, ToModel, WithEvents, WithStartR
             }
         }
         // ─────────────────────────────────────────────────────────────────────
+
+        // Skip duplicate: same name + birthdate already exists
+        $birthdate = $this->parseDate($this->val($row, 11));
+        $duplicate = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($firstName)])
+            ->whereRaw('LOWER(last_name) = ?', [strtolower($lastName)])
+            ->where('birthdate', $birthdate)
+            ->exists();
+
+        if ($duplicate) {
+            $this->duplicates++;
+            $this->skipped++;
+
+            return null;
+        }
 
         $this->imported++;
 

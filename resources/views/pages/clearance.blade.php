@@ -83,11 +83,11 @@ tbody tr:last-child td { border-bottom:none; }
   <div class="stat-row">
     <div class="stat-card">
       <div class="slabel">Total Clearances Issued</div>
-      <div class="svalue">{{ $clearances->count() }}</div>
+      <div class="svalue">{{ $totalClearances }}</div>
     </div>
     <div class="stat-card">
       <div class="slabel">Issued This Month</div>
-      <div class="svalue">{{ $clearances->filter(fn($c) => \Carbon\Carbon::parse($c->date_issued)->isCurrentMonth())->count() }}</div>
+      <div class="svalue">{{ $monthClearances }}</div>
     </div>
   </div>
 
@@ -184,6 +184,14 @@ tbody tr:last-child td { border-bottom:none; }
           </tbody>
         </table>
       </div>
+
+      @if($clearances->hasPages())
+      <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">
+        <span>Showing {{ $clearances->firstItem() }}–{{ $clearances->lastItem() }} of {{ $clearances->total() }} clearances</span>
+        {{ $clearances->links() }}
+      </div>
+      @endif
+
     </div>
 
   </div>

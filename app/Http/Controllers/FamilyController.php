@@ -10,10 +10,40 @@ use Illuminate\Http\Request;
 
 class FamilyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $families = Family::with(['household', 'members', 'headResident'])->get();
-        return view('families.index', compact('families'));
+        $search = $request->get('search', '');
+        $sitio = $request->get('sitio', '');
+
+        $query = Family::with(['household', 'members', 'headResident']);
+
+        if ($search) {
+            $s = strtolower($search);
+            $query->where(function ($q) use ($s) {
+                $q->whereRaw('LOWER(family_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(head_last_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(head_first_name) like ?', ["%{$s}%"]);
+            });
+        }
+        if ($sitio === '__none__') {
+            $query->whereNull('household_id');
+        } elseif ($sitio) {
+            $query->whereHas('household', function ($q) use ($sitio) {
+                $q->whereRaw('LOWER(sitio) like ?', ['%'.strtolower($sitio).'%']);
+            });
+        }
+
+        $totalFamilies = Family::count();
+        $totalMembers = Family::sum('member_count');
+        $totalLinked = Family::whereNotNull('household_id')->count();
+
+        $families = $query->paginate(20)->withQueryString();
+        $filters = compact('search', 'sitio');
+
+        return view('families.index', compact(
+            'families', 'filters',
+            'totalFamilies', 'totalMembers', 'totalLinked'
+        ));
     }
 
     public function create()
@@ -23,21 +53,22 @@ class FamilyController extends Controller
         $residents = Resident::whereNull('family_id')
             ->orderBy('last_name')
             ->get(['id', 'last_name', 'first_name', 'middle_name']);
+
         return view('families.create', compact('households', 'residents'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'family_name'      => 'required|string|max:255',
+            'family_name' => 'required|string|max:255',
             'head_resident_id' => 'required|exists:residents,id',
-            'household_id'     => 'nullable|exists:households,id',
-            'notes'            => 'nullable|string',
-            'member_data'      => 'nullable|array',
+            'household_id' => 'nullable|exists:households,id',
+            'notes' => 'nullable|string',
+            'member_data' => 'nullable|array',
         ]);
 
-        $resident    = Resident::findOrFail($request->head_resident_id);
-        $memberData  = $request->input('member_data', []); // [id => role]
+        $resident = Resident::findOrFail($request->head_resident_id);
+        $memberData = $request->input('member_data', []); // [id => role]
         $memberCount = count($memberData) + 1;
 
         // Duplicate check: same head resident already heads a family
@@ -57,31 +88,33 @@ class FamilyController extends Controller
         }
 
         $family = Family::create([
-            'family_name'      => $request->family_name,
+            'family_name' => $request->family_name,
             'head_resident_id' => $resident->id,
-            'head_last_name'   => $resident->last_name,
-            'head_first_name'  => $resident->first_name,
+            'head_last_name' => $resident->last_name,
+            'head_first_name' => $resident->first_name,
             'head_middle_name' => $resident->middle_name,
-            'head_role'        => $request->head_role,
-            'household_id'     => $request->household_id,
-            'member_count'     => $memberCount,
-            'notes'            => $request->notes,
+            'head_role' => $request->head_role,
+            'household_id' => $request->household_id,
+            'member_count' => $memberCount,
+            'notes' => $request->notes,
         ]);
 
         foreach ($memberData as $residentId => $role) {
             Resident::where('id', $residentId)->update([
-                'family_id'   => $family->id,
+                'family_id' => $family->id,
                 'family_role' => $role ?: null,
             ]);
         }
 
         ActivityLog::log('created', 'Family', "Added family: {$family->family_name}");
+
         return redirect()->route('families.index')->with('success', 'Family added.');
     }
 
     public function show(Family $family)
     {
         $family->load(['household', 'members', 'headResident']);
+
         return view('families.show', compact('family'));
     }
 
@@ -90,25 +123,26 @@ class FamilyController extends Controller
         $households = Household::orderBy('head_last_name')->get();
         // Residents not in any family, OR already in THIS family
         $residents = Resident::where(function ($q) use ($family) {
-                $q->whereNull('family_id')->orWhere('family_id', $family->id);
-            })
+            $q->whereNull('family_id')->orWhere('family_id', $family->id);
+        })
             ->orderBy('last_name')
             ->get(['id', 'last_name', 'first_name', 'middle_name']);
         $family->load('members');
+
         return view('families.edit', compact('family', 'households', 'residents'));
     }
 
     public function update(Request $request, Family $family)
     {
         $request->validate([
-            'family_name'      => 'required|string|max:255',
+            'family_name' => 'required|string|max:255',
             'head_resident_id' => 'required|exists:residents,id',
-            'household_id'     => 'nullable|exists:households,id',
-            'notes'            => 'nullable|string',
-            'member_data'      => 'nullable|array',
+            'household_id' => 'nullable|exists:households,id',
+            'notes' => 'nullable|string',
+            'member_data' => 'nullable|array',
         ]);
 
-        $resident   = Resident::findOrFail($request->head_resident_id);
+        $resident = Resident::findOrFail($request->head_resident_id);
         $memberData = $request->input('member_data', []);
         $memberCount = count($memberData) + 1;
 
@@ -118,24 +152,25 @@ class FamilyController extends Controller
         // Re-assign with roles
         foreach ($memberData as $residentId => $role) {
             Resident::where('id', $residentId)->update([
-                'family_id'   => $family->id,
+                'family_id' => $family->id,
                 'family_role' => $role ?: null,
             ]);
         }
 
         $family->update([
-            'family_name'      => $request->family_name,
+            'family_name' => $request->family_name,
             'head_resident_id' => $resident->id,
-            'head_last_name'   => $resident->last_name,
-            'head_first_name'  => $resident->first_name,
+            'head_last_name' => $resident->last_name,
+            'head_first_name' => $resident->first_name,
             'head_middle_name' => $resident->middle_name,
-            'head_role'        => $request->head_role,
-            'household_id'     => $request->household_id,
-            'member_count'     => $memberCount,
-            'notes'            => $request->notes,
+            'head_role' => $request->head_role,
+            'household_id' => $request->household_id,
+            'member_count' => $memberCount,
+            'notes' => $request->notes,
         ]);
 
         ActivityLog::log('updated', 'Family', "Updated family: {$family->family_name}");
+
         return redirect()->route('families.index')->with('success', 'Family updated.');
     }
 
@@ -144,6 +179,7 @@ class FamilyController extends Controller
         Resident::where('family_id', $family->id)->update(['family_id' => null, 'family_role' => null]);
         ActivityLog::log('deleted', 'Family', "Deleted family: {$family->family_name}");
         $family->delete();
+
         return redirect()->route('families.index')->with('success', 'Family deleted.');
     }
 }

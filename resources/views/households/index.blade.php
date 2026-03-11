@@ -129,23 +129,23 @@ tbody tr:last-child td { border-bottom:none; }
   <div class="res-stats">
     <div class="res-stat">
       <div class="slabel">Total Households</div>
-      <div class="svalue">{{ $households->count() }}</div>
+      <div class="svalue">{{ $totalHouseholds }}</div>
     </div>
     <div class="res-stat">
       <div class="slabel">Residential</div>
-      <div class="svalue">{{ $households->where('residency_type','Residential')->count() }}</div>
+      <div class="svalue">{{ $totalResidential }}</div>
     </div>
     <div class="res-stat">
       <div class="slabel">Commercial</div>
-      <div class="svalue">{{ $households->where('residency_type','Commercial')->count() }}</div>
+      <div class="svalue">{{ $totalCommercial }}</div>
     </div>
     <div class="res-stat">
       <div class="slabel">Rented</div>
-      <div class="svalue">{{ $households->where('residency_type','Rented')->count() }}</div>
+      <div class="svalue">{{ $totalRented }}</div>
     </div>
     <div class="res-stat">
       <div class="slabel">Total Members</div>
-      <div class="svalue">{{ $households->sum('member_count') }}</div>
+      <div class="svalue">{{ $totalMembers }}</div>
     </div>
   </div>
 
@@ -154,41 +154,47 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="filter-row">
       <div class="search-wrap">
         <span class="si"><i class="fas fa-search"></i></span>
-        <input type="text" id="searchInput" placeholder="Search by household head or purok...">
+        <input type="text" id="searchInput" placeholder="Search by household head or number..." value="{{ $filters['search'] }}" onkeydown="if(event.key==='Enter'){hhApplyFilter('search',this.value)}">
       </div>
       <div class="filter-controls">
 
         <!-- Classification filter -->
         <div class="flt-wrap" id="hh-wrap-residency">
-          <button class="flt-btn" id="hh-btn-residency" onclick="toggleHhFlt('residency')">
+          <button class="flt-btn {{ $filters['residency'] ? 'active' : '' }}" id="hh-btn-residency" onclick="toggleHhFlt('residency')">
             <i class="fas fa-house"></i>
-            <span id="hh-lbl-residency">Classification</span>
-            <i class="fas fa-chevron-down flt-caret" id="hh-caret-residency"></i>
-            <span class="flt-x" id="hh-x-residency" style="display:none" onclick="event.stopPropagation();clearHhFlt('residency')">×</span>
+            <span id="hh-lbl-residency">{{ $filters['residency'] ?: 'Classification' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="hh-caret-residency" style="{{ $filters['residency'] ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="hh-x-residency" style="{{ $filters['residency'] ? '' : 'display:none' }}" onclick="event.stopPropagation();hhApplyFilter('residency','')">×</span>
           </button>
           <div class="flt-dropdown" id="hh-dd-residency">
-            <div class="flt-option selected" data-val="" onclick="setHhFlt('residency','','Classification')">All</div>
-            <div class="flt-option" data-val="Residential" onclick="setHhFlt('residency','Residential','Residential')">Residential</div>
-            <div class="flt-option" data-val="Commercial" onclick="setHhFlt('residency','Commercial','Commercial')">Commercial</div>
-            <div class="flt-option" data-val="Rented" onclick="setHhFlt('residency','Rented','Rented')">Rented</div>
+            <div class="flt-option {{ !$filters['residency'] ? 'selected':'' }}" onclick="hhApplyFilter('residency','')">All</div>
+            <div class="flt-option {{ $filters['residency']==='Residential' ? 'selected':'' }}" onclick="hhApplyFilter('residency','Residential')">Residential</div>
+            <div class="flt-option {{ $filters['residency']==='Commercial' ? 'selected':'' }}" onclick="hhApplyFilter('residency','Commercial')">Commercial</div>
+            <div class="flt-option {{ $filters['residency']==='Rented' ? 'selected':'' }}" onclick="hhApplyFilter('residency','Rented')">Rented</div>
           </div>
         </div>
 
         <!-- Sitio filter -->
         <div class="flt-wrap" id="hh-wrap-sitio">
-          <button class="flt-btn" id="hh-btn-sitio" onclick="toggleHhFlt('sitio')">
+          <button class="flt-btn {{ $filters['sitio'] ? 'active' : '' }}" id="hh-btn-sitio" onclick="toggleHhFlt('sitio')">
             <i class="fas fa-map-pin"></i>
-            <span id="hh-lbl-sitio">Purok</span>
-            <i class="fas fa-chevron-down flt-caret" id="hh-caret-sitio"></i>
-            <span class="flt-x" id="hh-x-sitio" style="display:none" onclick="event.stopPropagation();clearHhFlt('sitio')">×</span>
+            <span id="hh-lbl-sitio">{{ $filters['sitio'] ?: 'Purok' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="hh-caret-sitio" style="{{ $filters['sitio'] ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="hh-x-sitio" style="{{ $filters['sitio'] ? '' : 'display:none' }}" onclick="event.stopPropagation();hhApplyFilter('sitio','')">×</span>
           </button>
           <div class="flt-dropdown" id="hh-dd-sitio">
-            <div class="flt-option selected" data-val="" onclick="setHhFlt('sitio','','Purok')">All</div>
-            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $sitio)
-            <div class="flt-option" data-val="{{ $sitio }}" onclick="setHhFlt('sitio','{{ $sitio }}','{{ $sitio }}')">{{ $sitio }}</div>
+            <div class="flt-option {{ !$filters['sitio'] ? 'selected':'' }}" onclick="hhApplyFilter('sitio','')">All</div>
+            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $sitioOpt)
+            <div class="flt-option {{ $filters['sitio']===$sitioOpt ? 'selected':'' }}" onclick="hhApplyFilter('sitio','{{ $sitioOpt }}')">{{ $sitioOpt }}</div>
             @endforeach
           </div>
         </div>
+
+        @if($filters['search'] || $filters['sitio'] || $filters['residency'])
+        <button class="flt-btn" onclick="hhClearAll()" style="color:var(--danger)">
+          <i class="fas fa-times"></i> Clear Filters
+        </button>
+        @endif
 
       </div>
     </div>
@@ -215,7 +221,7 @@ tbody tr:last-child td { border-bottom:none; }
             data-residency="{{ $hh->residency_type }}"
             ondblclick='openHouseholdModal(@json($hh))'
           >
-            <td style="color:var(--muted);font-size:12px">{{ $index + 1 }}</td>
+            <td style="color:var(--muted);font-size:12px">{{ $households->firstItem() + $loop->index }}</td>
             <td><span style="font-weight:700;color:var(--primary)">{{ $hh->household_number }}</span></td>
             <td>
               <div style="font-weight:600">{{ $hh->head_last_name }}, {{ $hh->head_first_name }} {{ $hh->head_middle_name }}</div>
@@ -283,12 +289,18 @@ tbody tr:last-child td { border-bottom:none; }
         </tbody>
       </table>
     </div>
+
+    @if($households->hasPages())
+    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">
+      <span>Showing {{ $households->firstItem() }}–{{ $households->lastItem() }} of {{ $households->total() }} households</span>
+      {{ $households->links() }}
+    </div>
+    @endif
+
   </div>
 </div>
 
 <script>
-const hhFlt = { residency: '', sitio: '' };
-const hhFltDefault = { residency: 'Classification', sitio: 'Purok' };
 const hhFltKeys = ['residency', 'sitio'];
 
 function positionDropdown(el, btn) {
@@ -309,37 +321,24 @@ function toggleHhFlt(key) {
     dd.classList.add('open');
   }
 }
-function setHhFlt(key, val, label) {
-  hhFlt[key] = val;
-  document.getElementById('hh-lbl-' + key).textContent = val ? label : hhFltDefault[key];
-  document.getElementById('hh-btn-' + key).classList.toggle('active', !!val);
-  document.getElementById('hh-caret-' + key).style.display = val ? 'none' : '';
-  document.getElementById('hh-x-' + key).style.display = val ? '' : 'none';
-  document.querySelectorAll('#hh-dd-' + key + ' .flt-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.dataset.val === val);
-  });
+function hhApplyFilter(key, val) {
   document.getElementById('hh-dd-' + key).classList.remove('open');
-  filterTable();
+  const url = new URL(window.location.href);
+  if (val) { url.searchParams.set(key, val); } else { url.searchParams.delete(key); }
+  url.searchParams.delete('page');
+  window.location = url.toString();
 }
-function clearHhFlt(key) { setHhFlt(key, '', hhFltDefault[key]); }
-
+function hhClearAll() {
+  const url = new URL(window.location.href);
+  ['search','sitio','residency','page'].forEach(k => url.searchParams.delete(k));
+  window.location = url.toString();
+}
 document.addEventListener('click', function(e) {
   hhFltKeys.forEach(key => {
     const wrap = document.getElementById('hh-wrap-' + key);
     if (wrap && !wrap.contains(e.target)) document.getElementById('hh-dd-' + key).classList.remove('open');
   });
 });
-
-function filterTable() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  document.querySelectorAll('#householdsTable tbody tr[data-name]').forEach(row => {
-    const matchQ = !q || (row.dataset.name||'').includes(q) || (row.dataset.sitio||'').toLowerCase().includes(q);
-    const matchR = !hhFlt.residency || row.dataset.residency === hhFlt.residency;
-    const matchS = !hhFlt.sitio    || row.dataset.sitio === hhFlt.sitio;
-    row.style.display = (matchQ && matchR && matchS) ? '' : 'none';
-  });
-}
-document.getElementById('searchInput').addEventListener('keyup', filterTable);
 </script>
 
 <!-- Household Print Frame -->

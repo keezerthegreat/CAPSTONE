@@ -5,18 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Clearance;
 use App\Models\Resident;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ClearanceController extends Controller
 {
     public function index()
     {
-        $clearances = Clearance::latest()->get();
-        $residents = Resident::where('is_deceased', false)
+        $clearances = Clearance::latest()->paginate(20)->withQueryString();
+        $totalClearances = Clearance::count();
+        $monthClearances = Clearance::whereMonth('date_issued', now()->month)
+            ->whereYear('date_issued', now()->year)->count();
+        $residents = Resident::where('status', 'approved')->where('is_deceased', false)
             ->orderBy('last_name')->orderBy('first_name')
             ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay']);
-        return view('pages.clearance', compact('clearances', 'residents'));
+
+        return view('pages.clearance', compact('clearances', 'residents', 'totalClearances', 'monthClearances'));
     }
 
     public function store(Request $request)
@@ -27,8 +31,12 @@ class ClearanceController extends Controller
             'purpose' => 'required|string|max:255',
         ]);
 
+        $year = now()->format('Y');
+        $seq = Clearance::whereYear('date_issued', $year)->count() + 1;
+        $clrNo = 'CLR-'.$year.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+
         Clearance::create([
-            'clearance_no' => 'CLR-' . now()->format('Y') . '-' . rand(1000, 9999),
+            'clearance_no' => $clrNo,
             'resident_name' => $request->resident_name,
             'certificate_type' => $request->certificate_type,
             'purpose' => $request->purpose,
@@ -44,12 +52,14 @@ class ClearanceController extends Controller
         $clearance = Clearance::findOrFail($id);
         ActivityLog::log('deleted', 'Clearance', "Deleted clearance for: {$clearance->resident_name}");
         $clearance->delete();
+
         return redirect()->back()->with('success', 'Clearance deleted.');
     }
 
     public function print($id)
     {
         $clearance = Clearance::findOrFail($id);
+
         return view('pages.clearance-print', compact('clearance'));
     }
 
@@ -57,6 +67,7 @@ class ClearanceController extends Controller
     public function edit($id)
     {
         $clearance = Clearance::findOrFail($id);
+
         return view('pages.clearance-edit', compact('clearance'));
     }
 

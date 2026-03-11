@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\ActivityLog;
 use App\Models\Certificate;
 use App\Models\Resident;
@@ -10,21 +11,35 @@ class CertificateController extends Controller
 {
     public function index()
     {
-        $certificates = Certificate::orderBy('id', 'desc')->get();
-        $residents = Resident::where('is_deceased', false)
+        $certificates = Certificate::orderBy('id', 'desc')->paginate(20)->withQueryString();
+        $totalCertificates = Certificate::count();
+        $monthCertificates = Certificate::whereMonth('issued_date', now()->month)
+            ->whereYear('issued_date', now()->year)->count();
+        $residents = Resident::where('status', 'approved')->where('is_deceased', false)
             ->orderBy('last_name')->orderBy('first_name')
             ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay']);
-        return view('pages.certificate', compact('certificates', 'residents'));
+
+        return view('pages.certificate', compact('certificates', 'residents', 'totalCertificates', 'monthCertificates'));
     }
 
     public function store(Request $request)
     {
+        $request->validate([
+            'resident_name' => 'required|string|max:255',
+            'certificate_type' => 'required|string|max:255',
+            'purpose' => 'required|string|max:255',
+        ]);
+
+        $year = date('Y');
+        $seq = Certificate::whereYear('issued_date', $year)->count() + 1;
+        $certNo = 'CERT-'.$year.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+
         Certificate::create([
-            'certificate_no'   => 'CERT-' . date('Y') . '-' . rand(1000, 9999),
-            'resident_name'    => $request->resident_name,
+            'certificate_no' => $certNo,
+            'resident_name' => $request->resident_name,
             'certificate_type' => $request->certificate_type,
-            'purpose'          => $request->purpose,
-            'issued_date'      => now(),
+            'purpose' => $request->purpose,
+            'issued_date' => now(),
         ]);
         ActivityLog::log('created', 'Certificate', "Issued certificate for: {$request->resident_name} ({$request->certificate_type})");
 
@@ -35,6 +50,7 @@ class CertificateController extends Controller
     public function edit($id)
     {
         $certificate = Certificate::findOrFail($id);
+
         return view('pages.certificate-edit', compact('certificate'));
     }
 
@@ -44,13 +60,13 @@ class CertificateController extends Controller
         $certificate = Certificate::findOrFail($id);
 
         $certificate->update([
-            'resident_name'    => $request->resident_name,
+            'resident_name' => $request->resident_name,
             'certificate_type' => $request->certificate_type,
-            'purpose'          => $request->purpose,
+            'purpose' => $request->purpose,
         ]);
         ActivityLog::log('updated', 'Certificate', "Updated certificate for: {$request->resident_name}");
 
-        return redirect('/certificate')->with('success', 'Certificate updated successfully.');
+        return redirect()->route('certificate.index')->with('success', 'Certificate updated successfully.');
     }
 
     // 🔹 DELETE
@@ -59,15 +75,14 @@ class CertificateController extends Controller
         $certificate = Certificate::findOrFail($id);
         ActivityLog::log('deleted', 'Certificate', "Deleted certificate for: {$certificate->resident_name}");
         $certificate->delete();
+
         return redirect()->back()->with('success', 'Certificate deleted successfully.');
     }
 
+    public function print($id)
+    {
+        $certificate = Certificate::findOrFail($id);
 
-public function print($id)
-{
-    $certificate = Certificate::findOrFail($id);
-
-    return view('pages.certificate-print', compact('certificate'));
-}
-
+        return view('pages.certificate-print', compact('certificate'));
+    }
 }

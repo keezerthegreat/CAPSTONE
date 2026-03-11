@@ -82,11 +82,11 @@ tbody tr:last-child td { border-bottom:none; }
 <div class="stat-row">
 <div class="stat-card">
 <div class="slabel">Total Certificates Issued</div>
-<div class="svalue">{{ $certificates->count() }}</div>
+<div class="svalue">{{ $totalCertificates }}</div>
 </div>
 <div class="stat-card">
 <div class="slabel">Issued This Month</div>
-<div class="svalue">{{ $certificates->filter(fn($c) => \Carbon\Carbon::parse($c->issued_date)->isCurrentMonth())->count() }}</div>
+<div class="svalue">{{ $monthCertificates }}</div>
 </div>
 </div>
 
@@ -205,6 +205,14 @@ No certificates issued yet.
 </tbody>
 </table>
 </div>
+
+@if($certificates->hasPages())
+<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">
+  <span>Showing {{ $certificates->firstItem() }}–{{ $certificates->lastItem() }} of {{ $certificates->total() }} certificates</span>
+  {{ $certificates->links() }}
+</div>
+@endif
+
 </div>
 
 </div>

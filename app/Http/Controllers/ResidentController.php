@@ -139,10 +139,6 @@ class ResidentController extends Controller
 
         $resident = Resident::create($validated);
 
-        if (! empty($validated['household_id'])) {
-            Household::where('id', $validated['household_id'])->increment('member_count');
-        }
-
         ActivityLog::log('submitted', 'Resident', "Submitted for verification: {$resident->first_name} {$resident->last_name} — awaiting admin approval");
 
         return redirect()->route('residents.index')
@@ -267,8 +263,14 @@ class ResidentController extends Controller
     public function destroy($id)
     {
         $resident = Resident::findOrFail($id);
+        $householdId = $resident->household_id;
         ActivityLog::log('deleted', 'Resident', "Deleted resident: {$resident->first_name} {$resident->last_name}");
         $resident->delete();
+
+        if ($householdId) {
+            $count = Resident::where('household_id', $householdId)->where('status', 'approved')->count();
+            Household::where('id', $householdId)->update(['member_count' => $count]);
+        }
 
         return redirect()->route('residents.index')
             ->with('success', 'Resident deleted successfully!');
@@ -278,6 +280,11 @@ class ResidentController extends Controller
     {
         $resident = Resident::where('status', 'pending')->findOrFail($id);
         $resident->update(['status' => 'approved']);
+
+        if ($resident->household_id) {
+            $count = Resident::where('household_id', $resident->household_id)->where('status', 'approved')->count();
+            Household::where('id', $resident->household_id)->update(['member_count' => $count]);
+        }
 
         ActivityLog::log('approved', 'Resident', "Approved resident record: {$resident->first_name} {$resident->last_name} (ID #{$resident->id})");
 
@@ -316,8 +323,12 @@ class ResidentController extends Controller
 
         ActivityLog::log('created', 'Resident', "Bulk imported {$import->imported} resident(s) via Excel.");
 
-        return redirect()->route('residents.index')
-            ->with('success', "Import complete — {$import->imported} resident(s) added, {$import->skipped} row(s) skipped.");
+        $msg = "Import complete — {$import->imported} resident(s) added, {$import->skipped} row(s) skipped.";
+        if ($import->duplicates > 0) {
+            $msg .= " ({$import->duplicates} duplicate(s) skipped.)";
+        }
+
+        return redirect()->route('residents.index')->with('success', $msg);
     }
 
     public function location()

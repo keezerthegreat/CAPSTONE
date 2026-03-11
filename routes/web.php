@@ -1,17 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ClearanceController;
-use App\Http\Controllers\WorkerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\ReportsController;
-use App\Http\Controllers\AuditLogController;
-use App\Http\Controllers\FamilyController;
+use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\WorkerController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,8 +24,7 @@ Route::redirect('/', '/login');
 
 // Login
 Route::get('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticate'])->name('login.submit');
-
+Route::post('/login', [AuthController::class, 'authenticate'])->name('login.submit')->middleware('throttle:10,1');
 
 /*
 |--------------------------------------------------------------------------
@@ -38,18 +37,17 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
     /*
     |--------------------------------------------------------------------------
     | STATIC PAGES
     |--------------------------------------------------------------------------
     */
 
-/*
-    |--------------------------------------------------------------------------
-    | EMPLOYEE + ADMIN
-    |--------------------------------------------------------------------------
-    */
+    /*
+        |--------------------------------------------------------------------------
+        | EMPLOYEE + ADMIN
+        |--------------------------------------------------------------------------
+        */
 
     // Certificates (EMPLOYEE + ADMIN)
     Route::controller(CertificateController::class)->group(function () {
@@ -84,7 +82,6 @@ Route::middleware('auth')->group(function () {
 
     // Theme toggle — available to all authenticated users
     Route::post('/settings/theme', [SettingsController::class, 'setTheme'])->name('settings.theme');
-
 
     /*
     |--------------------------------------------------------------------------
@@ -127,7 +124,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/audit-log/clear', [AuditLogController::class, 'clear'])->name('audit.clear');
 
     });
-
 
     /*
     |--------------------------------------------------------------------------
