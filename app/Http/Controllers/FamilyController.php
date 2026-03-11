@@ -62,9 +62,11 @@ class FamilyController extends Controller
         $request->validate([
             'family_name' => 'required|string|max:255',
             'head_resident_id' => 'required|exists:residents,id',
+            'head_role' => 'nullable|string|max:100',
             'household_id' => 'nullable|exists:households,id',
             'notes' => 'nullable|string',
             'member_data' => 'nullable|array',
+            'member_data.*' => 'nullable|string|max:100',
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);
@@ -137,9 +139,11 @@ class FamilyController extends Controller
         $request->validate([
             'family_name' => 'required|string|max:255',
             'head_resident_id' => 'required|exists:residents,id',
+            'head_role' => 'nullable|string|max:100',
             'household_id' => 'nullable|exists:households,id',
             'notes' => 'nullable|string',
             'member_data' => 'nullable|array',
+            'member_data.*' => 'nullable|string|max:100',
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);

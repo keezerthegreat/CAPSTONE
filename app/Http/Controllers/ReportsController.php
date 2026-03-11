@@ -36,10 +36,11 @@ class ReportsController extends Controller
             ->orderByDesc('total')
             ->get();
 
-        $seniorList = (clone $base)->where('age', '>=', 60)->orderBy('last_name')->get();
-        $pwdList = (clone $base)->where('is_pwd', true)->orderBy('last_name')->get();
-        $voterList = (clone $base)->where('is_voter', true)->orderBy('last_name')->get();
-        $minorList = (clone $base)->where('age', '<', 18)->orderBy('last_name')->get();
+        $listFields = ['id', 'first_name', 'last_name', 'age', 'gender', 'address', 'contact_number'];
+        $seniorList = (clone $base)->where('age', '>=', 60)->orderBy('last_name')->get($listFields);
+        $pwdList = (clone $base)->where('is_pwd', true)->orderBy('last_name')->get($listFields);
+        $voterList = (clone $base)->where('is_voter', true)->orderBy('last_name')->get($listFields);
+        $minorList = (clone $base)->where('age', '<', 18)->orderBy('last_name')->get($listFields);
 
         $totalClearances = Clearance::count();
         $totalCertificates = Certificate::count();

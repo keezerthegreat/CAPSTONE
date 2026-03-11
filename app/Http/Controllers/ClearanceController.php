@@ -7,6 +7,7 @@ use App\Models\Clearance;
 use App\Models\Resident;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ClearanceController extends Controller
 {
@@ -27,21 +28,23 @@ class ClearanceController extends Controller
     {
         $request->validate([
             'resident_name' => 'required|string|max:255',
-            'certificate_type' => 'required|string|max:255',
+            'certificate_type' => 'required|in:Barangay Clearance,Residency Clearance,Good Moral Clearance,Police Clearance Endorsement,First Time Job Seeker Clearance',
             'purpose' => 'required|string|max:255',
         ]);
 
-        $year = now()->format('Y');
-        $seq = Clearance::whereYear('date_issued', $year)->count() + 1;
-        $clrNo = 'CLR-'.$year.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+        DB::transaction(function () use ($request) {
+            $year = now()->format('Y');
+            $seq = Clearance::whereYear('date_issued', $year)->count() + 1;
+            $clrNo = 'CLR-'.$year.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
 
-        Clearance::create([
-            'clearance_no' => $clrNo,
-            'resident_name' => $request->resident_name,
-            'certificate_type' => $request->certificate_type,
-            'purpose' => $request->purpose,
-            'date_issued' => Carbon::now(),
-        ]);
+            Clearance::create([
+                'clearance_no' => $clrNo,
+                'resident_name' => $request->resident_name,
+                'certificate_type' => $request->certificate_type,
+                'purpose' => $request->purpose,
+                'date_issued' => Carbon::now(),
+            ]);
+        });
         ActivityLog::log('created', 'Clearance', "Issued clearance for: {$request->resident_name} ({$request->certificate_type})");
 
         return redirect()->back()->with('success', 'Barangay Clearance issued successfully.');

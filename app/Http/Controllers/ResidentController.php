@@ -102,7 +102,7 @@ class ResidentController extends Controller
             'street_no' => 'nullable|string|max:255',
             'occupation' => 'nullable|string|max:255',
             'employer' => 'nullable|string|max:255',
-            'monthly_income' => 'nullable|numeric|min:0',
+            'monthly_income' => 'nullable|numeric|min:0|max:9999999',
             'education_level' => 'nullable|string|max:255',
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
@@ -185,7 +185,7 @@ class ResidentController extends Controller
             'street_no' => 'nullable|string|max:255',
             'occupation' => 'nullable|string|max:255',
             'employer' => 'nullable|string|max:255',
-            'monthly_income' => 'nullable|numeric|min:0',
+            'monthly_income' => 'nullable|numeric|min:0|max:9999999',
             'education_level' => 'nullable|string|max:255',
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
@@ -240,6 +240,21 @@ class ResidentController extends Controller
     {
         $pendingEdit = ResidentPendingEdit::findOrFail($id);
         $resident = $pendingEdit->resident;
+
+        $validator = \Illuminate\Support\Facades\Validator::make($pendingEdit->proposed_data, [
+            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'gender' => 'required|in:Male,Female,Other',
+            'birthdate' => 'required|date',
+            'age' => 'required|integer|min:0|max:120',
+            'monthly_income' => 'nullable|numeric|min:0|max:9999999',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('residents.index')
+                ->with('error', "Cannot apply edit for {$resident->first_name} {$resident->last_name}: the proposed data contains invalid values. Ask the employee to resubmit.");
+        }
+
         $resident->update($pendingEdit->proposed_data);
         ActivityLog::log('approved_edit', 'Resident', "Approved proposed edit for: {$resident->first_name} {$resident->last_name} (submitted by {$pendingEdit->submitted_by_name})");
         $pendingEdit->delete();

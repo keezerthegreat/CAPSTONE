@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Certificate;
 use App\Models\Resident;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CertificateController extends Controller
 {
@@ -26,21 +27,23 @@ class CertificateController extends Controller
     {
         $request->validate([
             'resident_name' => 'required|string|max:255',
-            'certificate_type' => 'required|string|max:255',
+            'certificate_type' => 'required|in:Good Moral Character Clearance,Certificate of Residency,Certificate of Indigency,Certificate of Unemployment,Certificate of Residency for Voters,Certificate of Guardianship',
             'purpose' => 'required|string|max:255',
         ]);
 
-        $year = date('Y');
-        $seq = Certificate::whereYear('issued_date', $year)->count() + 1;
-        $certNo = 'CERT-'.$year.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+        DB::transaction(function () use ($request) {
+            $year = date('Y');
+            $seq = Certificate::whereYear('issued_date', $year)->count() + 1;
+            $certNo = 'CERT-'.$year.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
 
-        Certificate::create([
-            'certificate_no' => $certNo,
-            'resident_name' => $request->resident_name,
-            'certificate_type' => $request->certificate_type,
-            'purpose' => $request->purpose,
-            'issued_date' => now(),
-        ]);
+            Certificate::create([
+                'certificate_no' => $certNo,
+                'resident_name' => $request->resident_name,
+                'certificate_type' => $request->certificate_type,
+                'purpose' => $request->purpose,
+                'issued_date' => now(),
+            ]);
+        });
         ActivityLog::log('created', 'Certificate', "Issued certificate for: {$request->resident_name} ({$request->certificate_type})");
 
         return redirect()->back()->with('success', 'Certificate issued successfully.');

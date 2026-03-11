@@ -49,26 +49,22 @@ Route::middleware('auth')->group(function () {
         |--------------------------------------------------------------------------
         */
 
-    // Certificates (EMPLOYEE + ADMIN)
+    // Certificates (EMPLOYEE + ADMIN — edit/update/delete are admin-only below)
     Route::controller(CertificateController::class)->group(function () {
         Route::get('/certificate', 'index')->name('certificate.index');
         Route::post('/certificate', 'store')->name('certificate.store');
         Route::get('/certificate/print/{id}', 'print')->name('certificate.print');
-        Route::get('/certificate/{id}/edit', 'edit')->name('certificate.edit');
-        Route::put('/certificate/{id}', 'update')->name('certificate.update');
     });
 
-    // Clearance (EMPLOYEE + ADMIN)
+    // Clearance (EMPLOYEE + ADMIN — edit/update/delete are admin-only below)
     Route::controller(ClearanceController::class)->group(function () {
         Route::get('/clearance', 'index')->name('clearance.index');
         Route::post('/clearance', 'store')->name('clearance.store');
         Route::get('/clearance/print/{id}', 'print')->name('clearance.print');
-        Route::get('/clearance/{id}/edit', 'edit')->name('clearance.edit');
-        Route::put('/clearance/{id}', 'update')->name('clearance.update');
     });
 
-    // Families (EMPLOYEE + ADMIN)
-    Route::resource('families', FamilyController::class);
+    // Families (EMPLOYEE + ADMIN — destroy is admin-only below)
+    Route::resource('families', FamilyController::class)->except(['destroy']);
 
     // Households (EMPLOYEE + ADMIN — delete is admin-only below)
     Route::get('/households/map', [HouseholdController::class, 'map'])->name('households.map');
@@ -115,9 +111,18 @@ Route::middleware('auth')->group(function () {
         // Workers / Employees
         Route::resource('workers', WorkerController::class);
 
-        // Certificate & Clearance — delete is admin-only
+        // Certificate — edit, update, delete are admin-only
+        Route::get('/certificate/{id}/edit', [CertificateController::class, 'edit'])->name('certificate.edit');
+        Route::put('/certificate/{id}', [CertificateController::class, 'update'])->name('certificate.update');
         Route::delete('/certificate/{id}', [CertificateController::class, 'destroy'])->name('certificate.destroy');
+
+        // Clearance — edit, update, delete are admin-only
+        Route::get('/clearance/{id}/edit', [ClearanceController::class, 'edit'])->name('clearance.edit');
+        Route::put('/clearance/{id}', [ClearanceController::class, 'update'])->name('clearance.update');
         Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])->name('clearance.destroy');
+
+        // Families — destroy is admin-only
+        Route::delete('/families/{family}', [FamilyController::class, 'destroy'])->name('families.destroy');
 
         // Audit Log
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');
