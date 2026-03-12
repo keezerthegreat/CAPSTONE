@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Worker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class WorkerController extends Controller
 {
@@ -14,6 +15,7 @@ class WorkerController extends Controller
     public function index()
     {
         $workers = Worker::orderBy('created_at', 'desc')->get();
+
         return view('workers.index', compact('workers'));
     }
 
@@ -31,21 +33,21 @@ class WorkerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'first_name'        => 'required|string|max:255',
-            'last_name'         => 'required|string|max:255',
-            'middle_name'       => 'nullable|string|max:255',
-            'birthdate'         => 'nullable|date',
-            'gender'            => 'nullable|string|max:20',
-            'civil_status'      => 'nullable|string|max:50',
-            'address'           => 'nullable|string|max:255',
-            'contact_number'    => 'nullable|string|max:20',
-            'email'             => 'nullable|email|max:255',
-            'position'          => 'required|string|max:255',
-            'date_hired'        => 'nullable|date',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'birthdate' => 'nullable|date',
+            'gender' => 'nullable|string|max:20',
+            'civil_status' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'position' => 'required|string|max:255',
+            'date_hired' => 'nullable|date',
             'employment_status' => 'nullable|string|max:50',
 
             // PHOTO VALIDATION
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         // HANDLE PHOTO UPLOAD
@@ -79,30 +81,32 @@ class WorkerController extends Controller
     public function update(Request $request, Worker $worker)
     {
         $validated = $request->validate([
-            'first_name'        => 'required|string|max:255',
-            'last_name'         => 'required|string|max:255',
-            'middle_name'       => 'nullable|string|max:255',
-            'birthdate'         => 'nullable|date',
-            'gender'            => 'nullable|string|max:20',
-            'civil_status'      => 'nullable|string|max:50',
-            'address'           => 'nullable|string|max:255',
-            'contact_number'    => 'nullable|string|max:20',
-            'email'             => 'nullable|email|max:255',
-            'position'          => 'required|string|max:255',
-            'date_hired'        => 'nullable|date',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'birthdate' => 'nullable|date',
+            'gender' => 'nullable|string|max:20',
+            'civil_status' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'position' => 'required|string|max:255',
+            'date_hired' => 'nullable|date',
             'employment_status' => 'nullable|string|max:50',
 
             // PHOTO VALIDATION
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         // UPDATE PHOTO IF NEW ONE IS UPLOADED
         if ($request->hasFile('photo')) {
+            if ($worker->photo) {
+                Storage::disk('public')->delete($worker->photo);
+            }
 
             $validated['photo'] = $request
                 ->file('photo')
                 ->store('workers', 'public');
-
         }
 
         $worker->update($validated);
@@ -118,6 +122,10 @@ class WorkerController extends Controller
     // ===============================
     public function destroy(Worker $worker)
     {
+        if ($worker->photo) {
+            Storage::disk('public')->delete($worker->photo);
+        }
+
         ActivityLog::log('deleted', 'Worker', "Deleted worker: {$worker->first_name} {$worker->last_name}");
         $worker->delete();
 

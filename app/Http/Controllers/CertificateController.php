@@ -60,6 +60,12 @@ class CertificateController extends Controller
     // 🔹 UPDATE
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'resident_name' => 'required|string|max:255',
+            'certificate_type' => 'required|in:Good Moral Character Clearance,Certificate of Residency,Certificate of Indigency,Certificate of Unemployment,Certificate of Residency for Voters,Certificate of Guardianship',
+            'purpose' => 'required|string|max:255',
+        ]);
+
         $certificate = Certificate::findOrFail($id);
 
         $certificate->update([

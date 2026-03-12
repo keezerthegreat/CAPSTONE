@@ -79,7 +79,7 @@ class ClearanceController extends Controller
     {
         $request->validate([
             'resident_name' => 'required|string|max:255',
-            'certificate_type' => 'required|string|max:255',
+            'certificate_type' => 'required|in:Barangay Clearance,Residency Clearance,Good Moral Clearance,Police Clearance Endorsement,First Time Job Seeker Clearance',
             'purpose' => 'required|string|max:255',
         ]);
 
