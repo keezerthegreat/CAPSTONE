@@ -267,7 +267,11 @@ input::placeholder { color:#94a3b8; }
     <!-- Submit -->
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
+      @if(auth()->user()->role === 'admin')
       <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Resident Record</button>
+      @else
+      <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit for Verification</button>
+      @endif
     </div>
 
   </form>
@@ -333,6 +337,7 @@ document.getElementById('birthdate').addEventListener('change', function() {
 
   const hhMap = {};
 
+  let rawHouseholds = [];
   let allHouseholds = [];
   let hhPage = 1;
   const HH_PER_PAGE = 10;
@@ -381,16 +386,29 @@ document.getElementById('birthdate').addEventListener('change', function() {
     buildCards(hhPage);
   }
 
+  function applyPurokFilter() {
+    const selected = sitioSelect ? sitioSelect.value.toLowerCase() : '';
+    allHouseholds = selected
+      ? rawHouseholds.filter(h => h.sitio && h.sitio.toLowerCase() === selected)
+      : rawHouseholds;
+    hhPage = 1;
+    panel.style.display = 'block';
+    if (allHouseholds.length === 0) {
+      list.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle"></i> No households found in this purok yet.</div>';
+      return;
+    }
+    buildCards(hhPage);
+  }
+
   function renderHouseholds(households) {
     panel.style.display = 'block';
     if (households.length === 0) {
       list.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle"></i> No households found in this barangay yet.</div>';
       return;
     }
-    allHouseholds = households;
-    hhPage = 1;
+    rawHouseholds = households;
     households.forEach(h => { hhMap[h.id] = h; });
-    buildCards(hhPage);
+    applyPurokFilter();
   }
 
   function fetchHouseholds(barangay) {
@@ -471,6 +489,11 @@ document.getElementById('birthdate').addEventListener('change', function() {
   // Expose functions needed by inline onclick handlers to global scope
   window.hhGoPage = hhGoPage;
   window.selectHousehold = selectHousehold;
+
+  // Re-filter household list when purok selection changes
+  if (sitioSelect) {
+    sitioSelect.addEventListener('change', applyPurokFilter);
+  }
 
   // Barangay is fixed to "Cogon" — fetch households immediately on page load
   fetchHouseholds(barangayInput.value);

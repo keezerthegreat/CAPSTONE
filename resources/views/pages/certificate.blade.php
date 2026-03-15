@@ -179,7 +179,7 @@ tbody tr:last-child td { border-bottom:none; }
 <i class="fas fa-edit"></i> Edit
 </a>
 
-@if(auth()->user()->role == 'admin')
+@if(auth()->user()->role === 'admin')
 <form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" style="display:inline">
 @csrf
 @method('DELETE')
