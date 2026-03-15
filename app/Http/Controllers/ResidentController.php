@@ -58,7 +58,7 @@ class ResidentController extends Controller
         $totalResidents = (clone $query)->where('is_deceased', false)->count();
         $totalSeniors = (clone $query)->where('is_deceased', false)->where('age', '>=', 60)->count();
         $totalPwd = (clone $query)->where('is_deceased', false)->where('is_pwd', true)->count();
-        $residents = (clone $query)->with('household')->latest()->paginate(50)->withQueryString();
+        $residents = (clone $query)->with('household')->orderBy('last_name')->orderBy('first_name')->paginate(50)->withQueryString();
 
         $pendingResidents = Resident::where('status', 'pending')->latest()->get();
         $pendingEdits = ResidentPendingEdit::with('resident')->latest()->get();
@@ -336,11 +336,18 @@ class ResidentController extends Controller
                 ->with('error', 'Import failed: '.$e->getMessage().' — Try re-saving the file as .xlsx in Excel or Google Sheets first.');
         }
 
-        ActivityLog::log('created', 'Resident', "Bulk imported {$import->imported} resident(s) via Excel.");
+        // Get counts from the inner DataSheetImport
+        $sheets = $import->sheets();
+        $dataSheet = $sheets['DATA'] ?? null;
+        $imported   = $dataSheet ? $dataSheet->imported   : 0;
+        $skipped    = $dataSheet ? $dataSheet->skipped     : 0;
+        $duplicates = $dataSheet ? $dataSheet->duplicates  : 0;
 
-        $msg = "Import complete — {$import->imported} resident(s) added, {$import->skipped} row(s) skipped.";
-        if ($import->duplicates > 0) {
-            $msg .= " ({$import->duplicates} duplicate(s) skipped.)";
+        ActivityLog::log('created', 'Resident', "Bulk imported {$imported} resident(s) via Excel.");
+
+        $msg = "Import complete — {$imported} resident(s) added, {$skipped} row(s) skipped.";
+        if ($duplicates > 0) {
+            $msg .= " ({$duplicates} duplicate(s) skipped.)";
         }
 
         return redirect()->route('residents.index')->with('success', $msg);
