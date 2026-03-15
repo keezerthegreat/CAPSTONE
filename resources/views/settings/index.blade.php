@@ -163,6 +163,57 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
         </div>
 
     </div>
+
+    {{-- Backup Card (full width) --}}
+    <div class="s-card" style="margin-top:24px">
+        <div class="s-card-header" style="justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+                <i class="fas fa-database"></i>
+                <span class="s-card-title">Database Backup</span>
+            </div>
+            <form method="POST" action="{{ route('settings.backup') }}">
+                @csrf
+                <button type="submit" class="btn btn-green" style="width:auto;margin-top:0">
+                    <i class="fas fa-download"></i> Backup Now
+                </button>
+            </form>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Created</th>
+                        <th>Size</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($backups as $backup)
+                    <tr>
+                        <td style="font-family:monospace;font-size:13px">{{ $backup['filename'] }}</td>
+                        <td style="color:var(--muted-color,#64748b)">{{ $backup['created'] }}</td>
+                        <td style="color:var(--muted-color,#64748b)">{{ $backup['size'] }} KB</td>
+                        <td>
+                            <a href="{{ route('settings.backup.download', $backup['filename']) }}"
+                               class="btn btn-danger" style="text-decoration:none">
+                                <i class="fas fa-file-download"></i> Download
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" style="text-align:center;padding:32px;color:var(--muted-color,#64748b)">
+                            <i class="fas fa-database" style="font-size:32px;opacity:.3;display:block;margin-bottom:8px"></i>
+                            No backups yet. Click "Backup Now" to create one.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 @endsection
