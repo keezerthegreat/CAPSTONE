@@ -90,6 +90,8 @@ Route::middleware('auth')->group(function () {
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings/employee', [SettingsController::class, 'storeEmployee'])->name('settings.employee.store');
+        Route::patch('/settings/employee/{id}/archive', [SettingsController::class, 'archiveEmployee'])->name('settings.employee.archive');
+        Route::patch('/settings/employee/{id}/unarchive', [SettingsController::class, 'unarchiveEmployee'])->name('settings.employee.unarchive');
         Route::delete('/settings/employee/{id}', [SettingsController::class, 'destroyEmployee'])->name('settings.employee.destroy');
 
         // Households — delete only
