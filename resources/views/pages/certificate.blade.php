@@ -134,12 +134,24 @@ tbody tr:last-child td { border-bottom:none; }
 </div>
 
 <div class="card">
-<div class="card-header"><div class="card-title"><i class="fas fa-list"></i> Issued Certificates</div></div>
+<div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+  <div class="card-title"><i class="fas fa-list"></i> Issued Certificates</div>
+  @if(auth()->user()->role === 'admin')
+  <button type="button" id="certBulkBtn" onclick="submitCertBulk()"
+    style="display:none;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;
+           padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;align-items:center;gap:5px">
+    <i class="fas fa-trash"></i> Delete Selected (<span id="certCount">0</span>)
+  </button>
+  @endif
+</div>
 
 <div class="table-wrap">
 <table>
 <thead>
 <tr>
+@if(auth()->user()->role === 'admin')
+<th style="width:36px"><input type="checkbox" id="certSelectAll" onchange="certToggleAll(this)" style="width:15px;height:15px;cursor:pointer"></th>
+@endif
 <th>Certificate No.</th>
 <th>Resident Name</th>
 <th>Certificate Type</th>
@@ -152,6 +164,9 @@ tbody tr:last-child td { border-bottom:none; }
 @forelse($certificates as $cert)
 <tr>
 
+@if(auth()->user()->role === 'admin')
+<td onclick="event.stopPropagation()"><input type="checkbox" class="cert-check" value="{{ $cert->id }}" style="width:15px;height:15px;cursor:pointer"></td>
+@endif
 <td>
 <span style="font-weight:700;color:var(--primary)">
 {{ $cert->certificate_no }}
@@ -275,4 +290,37 @@ document.getElementById('resPickerModal').addEventListener('click', function(e) 
 });
 </script>
 
+<form id="certBulkForm" method="POST" action="{{ route('certificate.bulkDestroy') }}" style="display:none">
+  @csrf
+  @method('DELETE')
+</form>
+<script>
+function certToggleAll(src) {
+  document.querySelectorAll('.cert-check').forEach(cb => cb.checked = src.checked);
+  certUpdateBtn();
+}
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('cert-check')) certUpdateBtn();
+});
+function certUpdateBtn() {
+  const checked = document.querySelectorAll('.cert-check:checked');
+  const btn = document.getElementById('certBulkBtn');
+  if (!btn) return;
+  document.getElementById('certCount').textContent = checked.length;
+  btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+}
+function submitCertBulk() {
+  const checked = document.querySelectorAll('.cert-check:checked');
+  if (!checked.length) return;
+  if (!confirm('Delete ' + checked.length + ' certificate(s)? This cannot be undone.')) return;
+  const form = document.getElementById('certBulkForm');
+  form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
+  checked.forEach(cb => {
+    const inp = document.createElement('input');
+    inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+    form.appendChild(inp);
+  });
+  form.submit();
+}
+</script>
 @endsection

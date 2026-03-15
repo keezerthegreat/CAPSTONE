@@ -355,4 +355,28 @@ class ResidentController extends Controller
 
         return view('residents.location', compact('households'));
     }
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No residents selected.');
+        }
+
+        $residents = Resident::whereIn('id', $ids)->get();
+        $householdIds = $residents->pluck('household_id')->filter()->unique();
+
+        foreach ($residents as $resident) {
+            ActivityLog::log('deleted', 'Resident', "Bulk deleted resident: {$resident->first_name} {$resident->last_name}");
+            $resident->delete();
+        }
+
+        foreach ($householdIds as $householdId) {
+            $count = Resident::where('household_id', $householdId)->where('status', 'approved')->count();
+            Household::where('id', $householdId)->update(['member_count' => $count]);
+        }
+
+        return redirect()->route('residents.index')
+            ->with('success', count($ids) . ' resident(s) deleted successfully.');
+    }
+
 }

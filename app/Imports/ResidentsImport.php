@@ -116,18 +116,25 @@ class ResidentsImport implements SkipsEmptyRows, ToModel, WithEvents, WithStartR
 
         if ($hhNumber) {
             if ($familyRole === 'head') {
-                $household = Household::firstOrCreate(
-                    ['household_number' => $hhNumber],
-                    [
-                        'head_last_name' => $this->titleCase($lastName),
-                        'head_first_name' => $this->titleCase($firstName),
-                        'sitio' => $this->titleCase($this->val($row, 9)) ?? 'Unknown', // col J
-                        'street' => $this->titleCase($this->val($row, 7)),              // col H
-                        'barangay' => 'Cogon',
-                        'city' => 'Ormoc City',
-                        'province' => 'Leyte',
-                    ]
-                );
+                // Use firstOrNew + save to safely handle existing household numbers
+                $household = Household::where('household_number', $hhNumber)->first();
+                if (! $household) {
+                    try {
+                        $household = Household::create([
+                            'household_number' => $hhNumber,
+                            'head_last_name'   => $this->titleCase($lastName),
+                            'head_first_name'  => $this->titleCase($firstName),
+                            'sitio'            => $this->titleCase($this->val($row, 9)) ?? 'Unknown',
+                            'street'           => $this->titleCase($this->val($row, 7)),
+                            'barangay'         => 'Cogon',
+                            'city'             => 'Ormoc City',
+                            'province'         => 'Leyte',
+                        ]);
+                    } catch (\Exception $e) {
+                        // Household already exists (race condition) — fetch it
+                        $household = Household::where('household_number', $hhNumber)->first();
+                    }
+                }
             } else {
                 $household = Household::where('household_number', $hhNumber)->first();
             }

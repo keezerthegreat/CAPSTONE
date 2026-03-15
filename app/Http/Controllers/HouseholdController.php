@@ -180,4 +180,24 @@ class HouseholdController extends Controller
 
         return view('households.map', compact('households'));
     }
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No households selected.');
+        }
+
+        foreach ($ids as $id) {
+            $household = Household::find($id);
+            if ($household) {
+                Resident::where('household_id', $household->id)->update(['household_id' => null]);
+                ActivityLog::log('deleted', 'Household', "Bulk deleted household: #{$household->household_number}");
+                $household->delete();
+            }
+        }
+
+        return redirect()->route('households.index')
+            ->with('success', count($ids) . ' household(s) deleted successfully.');
+    }
+
 }

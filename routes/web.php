@@ -37,18 +37,6 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    /*
-    |--------------------------------------------------------------------------
-    | STATIC PAGES
-    |--------------------------------------------------------------------------
-    */
-
-    /*
-        |--------------------------------------------------------------------------
-        | EMPLOYEE + ADMIN
-        |--------------------------------------------------------------------------
-        */
-
     // Certificates (EMPLOYEE + ADMIN — delete is admin-only below)
     Route::controller(CertificateController::class)->group(function () {
         Route::get('/certificate', 'index')->name('certificate.index');
@@ -108,11 +96,13 @@ Route::middleware('auth')->group(function () {
         Route::patch('/settings/employee/{id}/unarchive', [SettingsController::class, 'unarchiveEmployee'])->name('settings.employee.unarchive');
         Route::delete('/settings/employee/{id}', [SettingsController::class, 'destroyEmployee'])->name('settings.employee.destroy');
 
-        // Households — delete only
+        // Households — delete + bulk delete (admin only)
         Route::delete('/households/{household}', [HouseholdController::class, 'destroy'])->name('households.destroy');
+        Route::delete('/households-bulk', [HouseholdController::class, 'bulkDestroy'])->name('households.bulkDestroy');
 
-        // Residents — admin-only actions
+        // Residents — admin-only actions + bulk delete
         Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])->name('residents.destroy');
+        Route::delete('/residents-bulk', [ResidentController::class, 'bulkDestroy'])->name('residents.bulkDestroy');
         Route::get('/residents-import', [ResidentController::class, 'importForm'])->name('residents.import.form');
         Route::post('/residents-import', [ResidentController::class, 'import'])->name('residents.import');
         Route::post('/residents/{id}/approve', [ResidentController::class, 'approve'])->name('residents.approve');
@@ -120,18 +110,21 @@ Route::middleware('auth')->group(function () {
         Route::post('/residents/edits/{id}/approve', [ResidentController::class, 'approveEdit'])->name('residents.approveEdit');
         Route::post('/residents/edits/{id}/reject', [ResidentController::class, 'rejectEdit'])->name('residents.rejectEdit');
 
-
-        // Workers / Employees
+        // Workers / Employees + bulk delete
         Route::resource('workers', WorkerController::class);
+        Route::delete('/workers-bulk', [WorkerController::class, 'bulkDestroy'])->name('workers.bulkDestroy');
 
-        // Certificate — delete is admin-only
+        // Certificate — delete + bulk delete (admin only)
         Route::delete('/certificate/{id}', [CertificateController::class, 'destroy'])->name('certificate.destroy');
+        Route::delete('/certificate-bulk', [CertificateController::class, 'bulkDestroy'])->name('certificate.bulkDestroy');
 
-        // Clearance — delete is admin-only
+        // Clearance — delete + bulk delete (admin only)
         Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])->name('clearance.destroy');
+        Route::delete('/clearance-bulk', [ClearanceController::class, 'bulkDestroy'])->name('clearance.bulkDestroy');
 
-        // Families — destroy is admin-only
+        // Families — destroy + bulk delete (admin only)
         Route::delete('/families/{family}', [FamilyController::class, 'destroy'])->name('families.destroy');
+        Route::delete('/families-bulk', [FamilyController::class, 'bulkDestroy'])->name('families.bulkDestroy');
 
         // Audit Log
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');

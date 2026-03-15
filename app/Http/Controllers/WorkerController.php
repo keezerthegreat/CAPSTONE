@@ -133,4 +133,26 @@ class WorkerController extends Controller
             ->route('workers.index')
             ->with('success', 'Worker deleted successfully!');
     }
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No workers selected.');
+        }
+
+        foreach ($ids as $id) {
+            $worker = Worker::find($id);
+            if ($worker) {
+                if ($worker->photo) {
+                    Storage::disk('public')->delete($worker->photo);
+                }
+                ActivityLog::log('deleted', 'Worker', "Bulk deleted worker: {$worker->first_name} {$worker->last_name}");
+                $worker->delete();
+            }
+        }
+
+        return redirect()->route('workers.index')
+            ->with('success', count($ids) . ' worker(s) deleted successfully.');
+    }
+
 }
