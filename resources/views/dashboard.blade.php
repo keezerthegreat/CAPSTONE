@@ -120,9 +120,11 @@ function svgDonut($segments, $size=160, $thickness=30) {
       <a href="{{ route('residents.location') }}" class="qa-btn">
         <i class="fas fa-map-marker-alt" style="background:#fee2e2;color:#dc2626"></i>Resident Map
       </a>
+      @if(auth()->user()->role === 'admin')
       <a href="{{ route('workers.index') }}" class="qa-btn">
         <i class="fas fa-user-tie" style="background:#e0f2fe;color:#0284c7"></i>Worker Info
       </a>
+      @endif
     </div>
   </div>
 
@@ -281,7 +283,9 @@ function svgDonut($segments, $size=160, $thickness=30) {
   <div class="card" style="margin-bottom:20px">
     <div class="card-header">
       <div class="card-title"><i class="fas fa-history"></i> Recent Activity</div>
+      @if(auth()->user()->role === 'admin')
       <a href="{{ route('audit.index') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">View All →</a>
+      @endif
     </div>
     <table class="recent-table">
       <thead>

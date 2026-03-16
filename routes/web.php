@@ -49,18 +49,22 @@ Route::middleware('auth')->group(function () {
         |--------------------------------------------------------------------------
         */
 
-    // Certificates (EMPLOYEE + ADMIN — edit/update/delete are admin-only below)
+    // Certificates (EMPLOYEE + ADMIN — delete is admin-only below)
     Route::controller(CertificateController::class)->group(function () {
         Route::get('/certificate', 'index')->name('certificate.index');
         Route::post('/certificate', 'store')->name('certificate.store');
         Route::get('/certificate/print/{id}', 'print')->name('certificate.print');
+        Route::get('/certificate/{id}/edit', 'edit')->name('certificate.edit');
+        Route::put('/certificate/{id}', 'update')->name('certificate.update');
     });
 
-    // Clearance (EMPLOYEE + ADMIN — edit/update/delete are admin-only below)
+    // Clearance (EMPLOYEE + ADMIN — delete is admin-only below)
     Route::controller(ClearanceController::class)->group(function () {
         Route::get('/clearance', 'index')->name('clearance.index');
         Route::post('/clearance', 'store')->name('clearance.store');
         Route::get('/clearance/print/{id}', 'print')->name('clearance.print');
+        Route::get('/clearance/{id}/edit', 'edit')->name('clearance.edit');
+        Route::put('/clearance/{id}', 'update')->name('clearance.update');
     });
 
     // Families (EMPLOYEE + ADMIN — destroy is admin-only below)
@@ -71,10 +75,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/households/search', [HouseholdController::class, 'search'])->name('households.search');
     Route::resource('households', HouseholdController::class)->except(['destroy']);
 
-    // Resident edit & update — employees submit for review, admins apply directly
+    // Residents — index, show, create, store, edit, update available to all authenticated users
+    Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
+    Route::get('/residents/create', [ResidentController::class, 'create'])->name('residents.create');
+    Route::post('/residents', [ResidentController::class, 'store'])->name('residents.store');
+    Route::get('/residents/{resident}', [ResidentController::class, 'show'])->name('residents.show');
     Route::get('/residents/{resident}/edit', [ResidentController::class, 'edit'])->name('residents.edit');
     Route::put('/residents/{resident}', [ResidentController::class, 'update'])->name('residents.update');
     Route::patch('/residents/{resident}', [ResidentController::class, 'update']);
+
+    // Reports
+    Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+
+    // Resident map — available to all authenticated users
+    Route::get('/resident-location', [ResidentController::class, 'location'])->name('residents.location');
 
     // Theme toggle — available to all authenticated users
     Route::post('/settings/theme', [SettingsController::class, 'setTheme'])->name('settings.theme');
@@ -95,9 +109,8 @@ Route::middleware('auth')->group(function () {
         // Households — delete only
         Route::delete('/households/{household}', [HouseholdController::class, 'destroy'])->name('households.destroy');
 
-        // Residents (edit/update handled outside admin for employee access)
-        Route::resource('residents', ResidentController::class)->except(['edit', 'update']);
-        Route::get('/resident-location', [ResidentController::class, 'location'])->name('residents.location');
+        // Residents — admin-only actions
+        Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])->name('residents.destroy');
         Route::get('/residents-import', [ResidentController::class, 'importForm'])->name('residents.import.form');
         Route::post('/residents-import', [ResidentController::class, 'import'])->name('residents.import');
         Route::post('/residents/{id}/approve', [ResidentController::class, 'approve'])->name('residents.approve');
@@ -105,20 +118,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/residents/edits/{id}/approve', [ResidentController::class, 'approveEdit'])->name('residents.approveEdit');
         Route::post('/residents/edits/{id}/reject', [ResidentController::class, 'rejectEdit'])->name('residents.rejectEdit');
 
-        // Reports
-        Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
         // Workers / Employees
         Route::resource('workers', WorkerController::class);
 
-        // Certificate — edit, update, delete are admin-only
-        Route::get('/certificate/{id}/edit', [CertificateController::class, 'edit'])->name('certificate.edit');
-        Route::put('/certificate/{id}', [CertificateController::class, 'update'])->name('certificate.update');
+        // Certificate — delete is admin-only
         Route::delete('/certificate/{id}', [CertificateController::class, 'destroy'])->name('certificate.destroy');
 
-        // Clearance — edit, update, delete are admin-only
-        Route::get('/clearance/{id}/edit', [ClearanceController::class, 'edit'])->name('clearance.edit');
-        Route::put('/clearance/{id}', [ClearanceController::class, 'update'])->name('clearance.update');
+        // Clearance — delete is admin-only
         Route::delete('/clearance/{id}', [ClearanceController::class, 'destroy'])->name('clearance.destroy');
 
         // Families — destroy is admin-only

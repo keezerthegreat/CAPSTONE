@@ -189,10 +189,10 @@ tbody tr:last-child td { border-bottom:none; }
                 <button onclick='event.stopPropagation();openFamilyModal(@json($family))' class="btn btn-sm btn-view">
                   <i class="fas fa-eye"></i> View
                 </button>
+                <a href="{{ route('families.edit', $family->id) }}" class="btn btn-sm btn-edit" onclick="event.stopPropagation()">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
                 @if(auth()->user()->role == 'admin')
-                  <a href="{{ route('families.edit', $family->id) }}" class="btn btn-sm btn-edit" onclick="event.stopPropagation()">
-                    <i class="fas fa-edit"></i> Edit
-                  </a>
                   <form method="POST" action="{{ route('families.destroy', $family->id) }}" style="display:inline" onsubmit="return confirmDelete(this,'Delete the {{ addslashes($family->family_name) }} family record? This cannot be undone.')" onclick="event.stopPropagation()">
                     @csrf
                     @method('DELETE')
@@ -469,9 +469,7 @@ function openFamilyModal(f) {
     <tbody>${rows}</tbody>
   </table>`;
 
-  @if(auth()->user()->role == 'admin')
   document.getElementById('fm-edit-link').innerHTML = `<a href="/families/${f.id}/edit" style="color:var(--primary);font-weight:600;text-decoration:none"><i class="fas fa-edit" style="margin-right:4px"></i>Edit this family</a>`;
-  @endif
 }
 function closeFamilyModal() {
   document.getElementById('familyModal').classList.remove('open');
