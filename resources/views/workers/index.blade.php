@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('page-title', 'Worker Information')
-
 @section('content')
 <style>
 .bidb-wrap { background:var(--bg); min-height:100vh; padding:28px; }
@@ -19,8 +17,8 @@
 .btn-view   { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; padding:5px 10px; font-size:12px; }
 .btn-edit   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:5px 10px; font-size:12px; }
 .btn-delete { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; padding:5px 10px; font-size:12px; }
-.btn-view:hover   { background:#dcfce7; }
-.btn-edit:hover   { background:#dbeafe; }
+.btn-view:hover { background:#dcfce7; }
+.btn-edit:hover { background:#dbeafe; }
 .btn-delete:hover { background:#ffe4e6; }
 .action-btns { display:flex; gap:5px; }
 .search-input { padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; outline:none; width:240px; }
@@ -38,8 +36,6 @@ tbody tr:last-child td { border-bottom:none; }
 .badge-volunteer { background:#dbeafe; color:#1e40af; }
 .badge-na        { background:#f1f5f9; color:#64748b; }
 .avatar { width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid var(--border); }
-
-/* Modal */
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; }
 .modal-backdrop.open { display:flex; }
 .modal { background:#fff; border-radius:16px; width:520px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
@@ -57,17 +53,24 @@ tbody tr:last-child td { border-bottom:none; }
 </style>
 
 <div class="bidb-wrap">
-
   <div class="page-hdr">
     <div>
       <h1><i class="fas fa-user-tie" style="margin-right:8px"></i>Worker Information</h1>
       <div class="breadcrumb">Home › <span>Worker Information</span></div>
     </div>
-    @if(auth()->user()->role == 'admin')
-    <a href="{{ route('workers.create') }}" class="btn btn-primary">
-      <i class="fas fa-plus"></i> Add Worker
-    </a>
-    @endif
+    <div style="display:flex;gap:8px;align-items:center">
+      @if(auth()->user()->role == 'admin')
+      <button type="button" id="bulkDeleteBtn" onclick="submitBulkDelete()"
+        style="display:none;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;
+               padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;
+               cursor:pointer;align-items:center;gap:6px">
+        <i class="fas fa-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+      </button>
+      <a href="{{ route('workers.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Worker
+      </a>
+      @endif
+    </div>
   </div>
 
   @if(session('success'))
@@ -83,6 +86,9 @@ tbody tr:last-child td { border-bottom:none; }
       <table>
         <thead>
           <tr>
+            @if(auth()->user()->role == 'admin')
+            <th style="width:40px"><input type="checkbox" id="selectAll" onchange="toggleAll(this)" style="width:16px;height:16px;cursor:pointer" title="Select All"></th>
+            @endif
             <th>Photo</th>
             <th>Name</th>
             <th>Position</th>
@@ -93,13 +99,13 @@ tbody tr:last-child td { border-bottom:none; }
         <tbody>
           @forelse($workers as $worker)
           <tr>
+            @if(auth()->user()->role == 'admin')
+            <td><input type="checkbox" class="row-check" value="{{ $worker->id }}" style="width:16px;height:16px;cursor:pointer"></td>
+            @endif
             <td>
-              <img src="{{ $worker->photo ? asset('storage/'.$worker->photo) : 'https://ui-avatars.com/api/?name='.urlencode($worker->first_name.' '.$worker->last_name).'&background=dbeafe&color=1d4ed8&size=80' }}"
-                   class="avatar">
+              <img src="{{ $worker->photo ? asset('storage/'.$worker->photo) : 'https://ui-avatars.com/api/?name='.urlencode($worker->first_name.' '.$worker->last_name).'&background=dbeafe&color=1d4ed8&size=80' }}" class="avatar">
             </td>
-            <td>
-              <div style="font-weight:600">{{ $worker->first_name }} {{ $worker->middle_name }} {{ $worker->last_name }}</div>
-            </td>
+            <td><div style="font-weight:600">{{ $worker->first_name }} {{ $worker->middle_name }} {{ $worker->last_name }}</div></td>
             <td>{{ $worker->position }}</td>
             <td>
               @if($worker->employment_status == 'Regular')
@@ -114,13 +120,9 @@ tbody tr:last-child td { border-bottom:none; }
             </td>
             <td>
               <div class="action-btns">
-                <button onclick='openModal(@json($worker))' class="btn btn-view">
-                  <i class="fas fa-eye"></i> View
-                </button>
+                <button onclick='openModal(@json($worker))' class="btn btn-view"><i class="fas fa-eye"></i> View</button>
                 @if(auth()->user()->role == 'admin')
-                <a href="{{ route('workers.edit', $worker->id) }}" class="btn btn-edit">
-                  <i class="fas fa-edit"></i> Edit
-                </a>
+                <a href="{{ route('workers.edit', $worker->id) }}" class="btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
                 <form action="{{ route('workers.destroy', $worker->id) }}" method="POST" style="display:inline" onsubmit="return confirmDelete(this,'Delete {{ $worker->first_name }} {{ $worker->last_name }}? This action cannot be undone.')">
                   @csrf
                   @method('DELETE')
@@ -132,7 +134,7 @@ tbody tr:last-child td { border-bottom:none; }
           </tr>
           @empty
           <tr>
-            <td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">
+            <td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">
               <i class="fas fa-user-tie" style="font-size:32px;opacity:.3;display:block;margin-bottom:8px"></i>
               No workers found.
             </td>
@@ -142,8 +144,12 @@ tbody tr:last-child td { border-bottom:none; }
       </table>
     </div>
   </div>
-
 </div>
+
+<form id="bulkForm" method="POST" action="{{ route('workers.bulkDestroy') }}" style="display:none">
+  @csrf
+  @method('DELETE')
+</form>
 
 <!-- View Worker Modal -->
 <div id="viewModal" class="modal-backdrop">
@@ -153,56 +159,22 @@ tbody tr:last-child td { border-bottom:none; }
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
-      <div class="modal-photo">
-        <img id="v_photo" src="" alt="Worker Photo">
-      </div>
+      <div class="modal-photo"><img id="v_photo" src="" alt="Worker Photo"></div>
       <div class="info-grid">
-        <div class="info-item" style="grid-column:span 2">
-          <span class="ilabel">Full Name</span>
-          <span class="ivalue" id="v_name"></span>
-        </div>
-        <div class="info-item">
-          <span class="ilabel">Birthdate</span>
-          <span class="ivalue" id="v_birthdate"></span>
-        </div>
-        <div class="info-item">
-          <span class="ilabel">Gender</span>
-          <span class="ivalue" id="v_gender"></span>
-        </div>
-        <div class="info-item">
-          <span class="ilabel">Civil Status</span>
-          <span class="ivalue" id="v_civil_status"></span>
-        </div>
-        <div class="info-item">
-          <span class="ilabel">Contact</span>
-          <span class="ivalue" id="v_contact"></span>
-        </div>
-        <div class="info-item" style="grid-column:span 2">
-          <span class="ilabel">Email</span>
-          <span class="ivalue" id="v_email"></span>
-        </div>
-        <div class="info-item" style="grid-column:span 2">
-          <span class="ilabel">Address</span>
-          <span class="ivalue" id="v_address"></span>
-        </div>
-        <div class="info-item">
-          <span class="ilabel">Position</span>
-          <span class="ivalue" id="v_position"></span>
-        </div>
-        <div class="info-item">
-          <span class="ilabel">Date Hired</span>
-          <span class="ivalue" id="v_date_hired"></span>
-        </div>
-        <div class="info-item" style="grid-column:span 2">
-          <span class="ilabel">Employment Status</span>
-          <span class="ivalue" id="v_status"></span>
-        </div>
+        <div class="info-item" style="grid-column:span 2"><span class="ilabel">Full Name</span><span class="ivalue" id="v_name"></span></div>
+        <div class="info-item"><span class="ilabel">Birthdate</span><span class="ivalue" id="v_birthdate"></span></div>
+        <div class="info-item"><span class="ilabel">Gender</span><span class="ivalue" id="v_gender"></span></div>
+        <div class="info-item"><span class="ilabel">Civil Status</span><span class="ivalue" id="v_civil_status"></span></div>
+        <div class="info-item"><span class="ilabel">Contact</span><span class="ivalue" id="v_contact"></span></div>
+        <div class="info-item" style="grid-column:span 2"><span class="ilabel">Email</span><span class="ivalue" id="v_email"></span></div>
+        <div class="info-item" style="grid-column:span 2"><span class="ilabel">Address</span><span class="ivalue" id="v_address"></span></div>
+        <div class="info-item"><span class="ilabel">Position</span><span class="ivalue" id="v_position"></span></div>
+        <div class="info-item"><span class="ilabel">Date Hired</span><span class="ivalue" id="v_date_hired"></span></div>
+        <div class="info-item" style="grid-column:span 2"><span class="ilabel">Employment Status</span><span class="ivalue" id="v_status"></span></div>
       </div>
     </div>
     <div class="modal-footer">
-      <button onclick="closeModal()" class="btn" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
-        <i class="fas fa-times"></i> Close
-      </button>
+      <button onclick="closeModal()" class="btn" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)"><i class="fas fa-times"></i> Close</button>
     </div>
   </div>
 </div>
@@ -217,8 +189,7 @@ document.getElementById("workerSearch").addEventListener("keyup", function() {
 
 function openModal(worker) {
     document.getElementById('viewModal').classList.add('open');
-    document.getElementById('v_name').textContent =
-        (worker.first_name ?? '') + ' ' + (worker.middle_name ?? '') + ' ' + (worker.last_name ?? '');
+    document.getElementById('v_name').textContent = (worker.first_name ?? '') + ' ' + (worker.middle_name ?? '') + ' ' + (worker.last_name ?? '');
     document.getElementById('v_birthdate').textContent = worker.birthdate ?? '—';
     document.getElementById('v_gender').textContent = worker.gender ?? '—';
     document.getElementById('v_civil_status').textContent = worker.civil_status ?? '—';
@@ -228,19 +199,40 @@ function openModal(worker) {
     document.getElementById('v_position').textContent = worker.position ?? '—';
     document.getElementById('v_date_hired').textContent = worker.date_hired ?? '—';
     document.getElementById('v_status').textContent = worker.employment_status ?? '—';
-    const photo = worker.photo
-        ? '/storage/' + worker.photo
-        : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((worker.first_name ?? '') + ' ' + (worker.last_name ?? '')) + '&background=dbeafe&color=1d4ed8&size=160';
+    const photo = worker.photo ? '/storage/' + worker.photo : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((worker.first_name ?? '') + ' ' + (worker.last_name ?? '')) + '&background=dbeafe&color=1d4ed8&size=160';
     document.getElementById('v_photo').src = photo;
 }
+function closeModal() { document.getElementById('viewModal').classList.remove('open'); }
+document.getElementById('viewModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
-function closeModal() {
-    document.getElementById('viewModal').classList.remove('open');
+// ── BULK DELETE ──
+function toggleAll(source) {
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = source.checked);
+    updateBulkBtn();
 }
-
-document.getElementById('viewModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('row-check')) updateBulkBtn();
 });
+function updateBulkBtn() {
+    const checked = document.querySelectorAll('.row-check:checked');
+    const btn = document.getElementById('bulkDeleteBtn');
+    if (!btn) return;
+    document.getElementById('selectedCount').textContent = checked.length;
+    btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+}
+function submitBulkDelete() {
+    const checked = document.querySelectorAll('.row-check:checked');
+    if (!checked.length) return;
+    if (!confirm('Delete ' + checked.length + ' selected worker(s)? This cannot be undone.')) return;
+    const form = document.getElementById('bulkForm');
+    form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
+    checked.forEach(cb => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+        form.appendChild(inp);
+    });
+    form.submit();
+}
 </script>
 
 @endsection

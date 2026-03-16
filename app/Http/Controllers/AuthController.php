@@ -22,6 +22,15 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'))) {
+            // Block archived accounts
+            if (Auth::user()->is_archived) {
+                Auth::logout();
+                return back()
+                    ->withInput($request->only('email'))
+                    ->withErrors([
+                        'email' => 'This account has been archived. Please contact your administrator.',
+                    ]);
+            }
             $request->session()->regenerate();
             ActivityLog::log('logged_in', 'Auth', 'User logged in');
             return redirect()->route('dashboard');

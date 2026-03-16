@@ -152,6 +152,14 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
 
   <div style="display:flex;gap:10px;align-items:center">
+    @if(auth()->user()->role == 'admin')
+    <button type="button" id="bulkDeleteBtn" onclick="submitBulkDelete()"
+      style="display:none;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;
+             padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;
+             cursor:pointer;align-items:center;gap:6px">
+      <i class="fas fa-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+    </button>
+    @endif
     <a href="{{ route('residents.create') }}" class="btn btn-primary">
       <i class="fas fa-user-plus"></i> Add Resident
     </a>
@@ -438,6 +446,9 @@ tbody tr:last-child td { border-bottom: none; }
       <table id="residentsTable">
         <thead>
           <tr>
+            @if(auth()->user()->role == 'admin')
+            <th style="width:40px"><input type="checkbox" id="selectAll" onchange="toggleAll(this)" style="width:16px;height:16px;cursor:pointer" title="Select All"></th>
+            @endif
             <th>#</th>
             <th>Full Name</th>
             <th>Sex / Age</th>
@@ -460,6 +471,12 @@ tbody tr:last-child td { border-bottom: none; }
           @endphp
           <tr ondblclick='openResidentModal(@json($resident))' data-age="{{ $resident->age ?? '' }}" data-civil="{{ strtolower($resident->civil_status ?? '') }}" data-sitio="{{ $trSitio }}">
 
+            @if(auth()->user()->role == 'admin')
+            <td onclick="event.stopPropagation()">
+              <input type="checkbox" class="row-check" value="{{ $resident->id }}"
+                     style="width:16px;height:16px;cursor:pointer">
+            </td>
+            @endif
             <td style="color:var(--muted);font-size:12px">{{ $residents->firstItem() + $loop->index }}</td>
 
             <td>
@@ -1073,6 +1090,43 @@ document.getElementById('rejectCancel').addEventListener('click', function() {
 document.getElementById('rejectBackdrop').addEventListener('click', function(e) {
   if (e.target === this) { this.style.display = 'none'; _rejectForm = null; }
 });
+</script>
+
+<form id="bulkForm" method="POST" action="{{ route('residents.bulkDestroy') }}" style="display:none">
+  @csrf
+  @method('DELETE')
+</form>
+
+<script>
+function toggleAll(source) {
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = source.checked);
+    updateBulkBtn();
+}
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('row-check')) updateBulkBtn();
+});
+function updateBulkBtn() {
+    const checked = document.querySelectorAll('.row-check:checked');
+    const btn = document.getElementById('bulkDeleteBtn');
+    if (!btn) return;
+    document.getElementById('selectedCount').textContent = checked.length;
+    btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+}
+function submitBulkDelete() {
+    const checked = document.querySelectorAll('.row-check:checked');
+    if (!checked.length) return;
+    if (!confirm('Delete ' + checked.length + ' selected resident(s)? This cannot be undone.')) return;
+    const form = document.getElementById('bulkForm');
+    form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
+    checked.forEach(cb => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = cb.value;
+        form.appendChild(input);
+    });
+    form.submit();
+}
 </script>
 
 @endsection

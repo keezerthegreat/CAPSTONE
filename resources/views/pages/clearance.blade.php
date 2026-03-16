@@ -132,11 +132,23 @@ tbody tr:last-child td { border-bottom:none; }
 
     <!-- Table -->
     <div class="card">
-      <div class="card-header"><div class="card-title"><i class="fas fa-list"></i> Issued Clearances</div></div>
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+  <div class="card-title"><i class="fas fa-list"></i> Issued Clearances</div>
+  @if(auth()->user()->role === 'admin')
+  <button type="button" id="clrBulkBtn" onclick="submitClrBulk()"
+    style="display:none;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;
+           padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;align-items:center;gap:5px">
+    <i class="fas fa-trash"></i> Delete Selected (<span id="clrCount">0</span>)
+  </button>
+  @endif
+</div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              @if(auth()->user()->role === 'admin')
+              <th style="width:36px"><input type="checkbox" id="clrSelectAll" onchange="clrToggleAll(this)" style="width:15px;height:15px;cursor:pointer"></th>
+              @endif
               <th>Clearance No.</th>
               <th>Resident Name</th>
               <th>Clearance Type</th>
@@ -147,6 +159,9 @@ tbody tr:last-child td { border-bottom:none; }
           <tbody>
             @forelse($clearances as $clearance)
             <tr>
+              @if(auth()->user()->role === 'admin')
+              <td onclick="event.stopPropagation()"><input type="checkbox" class="clr-check" value="{{ $clearance->id }}" style="width:15px;height:15px;cursor:pointer"></td>
+              @endif
               <td><span style="font-weight:700;color:var(--primary)">{{ $clearance->clearance_no }}</span></td>
               <td>{{ $clearance->resident_name }}</td>
               <td><span class="badge">{{ $clearance->certificate_type }}</span></td>
@@ -255,5 +270,38 @@ function selectResident(name) {
 document.getElementById('resPickerModal').addEventListener('click', function(e) {
   if (e.target === this) closeResPicker();
 });
+</script>
+<form id="clrBulkForm" method="POST" action="{{ route('clearance.bulkDestroy') }}" style="display:none">
+  @csrf
+  @method('DELETE')
+</form>
+<script>
+function clrToggleAll(src) {
+  document.querySelectorAll('.clr-check').forEach(cb => cb.checked = src.checked);
+  clrUpdateBtn();
+}
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('clr-check')) clrUpdateBtn();
+});
+function clrUpdateBtn() {
+  const checked = document.querySelectorAll('.clr-check:checked');
+  const btn = document.getElementById('clrBulkBtn');
+  if (!btn) return;
+  document.getElementById('clrCount').textContent = checked.length;
+  btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+}
+function submitClrBulk() {
+  const checked = document.querySelectorAll('.clr-check:checked');
+  if (!checked.length) return;
+  if (!confirm('Delete ' + checked.length + ' clearance(s)? This cannot be undone.')) return;
+  const form = document.getElementById('clrBulkForm');
+  form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
+  checked.forEach(cb => {
+    const inp = document.createElement('input');
+    inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+    form.appendChild(inp);
+  });
+  form.submit();
+}
 </script>
 @endsection

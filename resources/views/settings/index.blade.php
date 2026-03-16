@@ -139,7 +139,8 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
                             <td style="color:var(--muted-color,#64748b)">{{ $emp->email }}</td>
                             <td><span class="badge badge-{{ $emp->role }}">{{ ucfirst($emp->role) }}</span></td>
                             <td>
-                                <form method="POST" action="{{ route('settings.employee.destroy', $emp->id) }}">
+                                <form method="POST" action="{{ route('settings.employee.destroy', $emp->id) }}"
+                                    onsubmit="return confirmDelete(this, 'Delete employee account for {{ addslashes($emp->name) }}? This cannot be undone.')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger">

@@ -186,4 +186,24 @@ class FamilyController extends Controller
 
         return redirect()->route('families.index')->with('success', 'Family deleted.');
     }
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No families selected.');
+        }
+
+        foreach ($ids as $id) {
+            $family = Family::find($id);
+            if ($family) {
+                Resident::where('family_id', $family->id)->update(['family_id' => null, 'family_role' => null]);
+                ActivityLog::log('deleted', 'Family', "Bulk deleted family: {$family->family_name}");
+                $family->delete();
+            }
+        }
+
+        return redirect()->route('families.index')
+            ->with('success', count($ids) . ' family/families deleted successfully.');
+    }
+
 }
