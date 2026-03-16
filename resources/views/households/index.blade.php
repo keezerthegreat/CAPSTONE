@@ -335,21 +335,20 @@ function submitBulkDelete() {
   const form = document.getElementById('bulkForm');
   form.querySelectorAll('input[name="ids[]"], input[name="select_all"]').forEach(el => el.remove());
   if (selectAllMode) {
-    if (!confirm('Delete ALL {{ $households->total() }} households? This cannot be undone.')) return;
     const inp = document.createElement('input');
     inp.type = 'hidden'; inp.name = 'select_all'; inp.value = '1';
     form.appendChild(inp);
+    confirmDelete(form, 'Delete ALL {{ $households->total() }} households? This cannot be undone.');
   } else {
     const checked = document.querySelectorAll('.row-check:checked');
     if (!checked.length) return;
-    if (!confirm('Delete ' + checked.length + ' selected household(s)? This cannot be undone.')) return;
     checked.forEach(cb => {
       const inp = document.createElement('input');
       inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
       form.appendChild(inp);
     });
+    confirmDelete(form, 'Delete ' + checked.length + ' selected household(s)? This cannot be undone.');
   }
-  form.submit();
 }
 </script>
 

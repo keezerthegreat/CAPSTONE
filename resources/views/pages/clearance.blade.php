@@ -318,21 +318,20 @@ function submitClrBulk() {
   const form = document.getElementById('clrBulkForm');
   form.querySelectorAll('input[name="ids[]"], input[name="select_all"]').forEach(el => el.remove());
   if (clrSelectAllMode) {
-    if (!confirm('Delete ALL {{ $clearances->total() }} clearances? This cannot be undone.')) return;
     const inp = document.createElement('input');
     inp.type = 'hidden'; inp.name = 'select_all'; inp.value = '1';
     form.appendChild(inp);
+    confirmDelete(form, 'Delete ALL {{ $clearances->total() }} clearances? This cannot be undone.');
   } else {
     const checked = document.querySelectorAll('.clr-check:checked');
     if (!checked.length) return;
-    if (!confirm('Delete ' + checked.length + ' clearance(s)? This cannot be undone.')) return;
     checked.forEach(cb => {
       const inp = document.createElement('input');
       inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
       form.appendChild(inp);
     });
+    confirmDelete(form, 'Delete ' + checked.length + ' clearance(s)? This cannot be undone.');
   }
-  form.submit();
 }
 </script>
 @endsection

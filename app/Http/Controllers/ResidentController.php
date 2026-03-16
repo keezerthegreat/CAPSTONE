@@ -336,12 +336,9 @@ class ResidentController extends Controller
                 ->with('error', 'Import failed: '.$e->getMessage().' — Try re-saving the file as .xlsx in Excel or Google Sheets first.');
         }
 
-        // Get counts from the inner DataSheetImport
-        $sheets = $import->sheets();
-        $dataSheet = $sheets['DATA'] ?? null;
-        $imported = $dataSheet ? $dataSheet->imported : 0;
-        $skipped = $dataSheet ? $dataSheet->skipped : 0;
-        $duplicates = $dataSheet ? $dataSheet->duplicates : 0;
+        $imported = $import->dataSheet->imported;
+        $skipped = $import->dataSheet->skipped;
+        $duplicates = $import->dataSheet->duplicates;
 
         ActivityLog::log('created', 'Resident', "Bulk imported {$imported} resident(s) via Excel.");
 

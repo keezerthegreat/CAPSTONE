@@ -1140,21 +1140,20 @@ function submitBulkDelete() {
     const form = document.getElementById('bulkForm');
     form.querySelectorAll('input[name="ids[]"], input[name="select_all"]').forEach(el => el.remove());
     if (selectAllMode) {
-        if (!confirm('Delete ALL {{ $residents->total() }} residents? This cannot be undone.')) return;
         const inp = document.createElement('input');
         inp.type = 'hidden'; inp.name = 'select_all'; inp.value = '1';
         form.appendChild(inp);
+        confirmDelete(form, 'Delete ALL {{ $residents->total() }} residents? This cannot be undone.');
     } else {
         const checked = document.querySelectorAll('.row-check:checked');
         if (!checked.length) return;
-        if (!confirm('Delete ' + checked.length + ' selected resident(s)? This cannot be undone.')) return;
         checked.forEach(cb => {
             const input = document.createElement('input');
             input.type = 'hidden'; input.name = 'ids[]'; input.value = cb.value;
             form.appendChild(input);
         });
+        confirmDelete(form, 'Delete ' + checked.length + ' selected resident(s)? This cannot be undone.');
     }
-    form.submit();
 }
 </script>
 

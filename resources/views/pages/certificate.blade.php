@@ -337,21 +337,20 @@ function submitCertBulk() {
   const form = document.getElementById('certBulkForm');
   form.querySelectorAll('input[name="ids[]"], input[name="select_all"]').forEach(el => el.remove());
   if (certSelectAllMode) {
-    if (!confirm('Delete ALL {{ $certificates->total() }} certificates? This cannot be undone.')) return;
     const inp = document.createElement('input');
     inp.type = 'hidden'; inp.name = 'select_all'; inp.value = '1';
     form.appendChild(inp);
+    confirmDelete(form, 'Delete ALL {{ $certificates->total() }} certificates? This cannot be undone.');
   } else {
     const checked = document.querySelectorAll('.cert-check:checked');
     if (!checked.length) return;
-    if (!confirm('Delete ' + checked.length + ' certificate(s)? This cannot be undone.')) return;
     checked.forEach(cb => {
       const inp = document.createElement('input');
       inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
       form.appendChild(inp);
     });
+    confirmDelete(form, 'Delete ' + checked.length + ' certificate(s)? This cannot be undone.');
   }
-  form.submit();
 }
 </script>
 @endsection
