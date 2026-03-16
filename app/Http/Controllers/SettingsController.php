@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,7 +14,18 @@ class SettingsController extends Controller
     {
         $employees = User::where('role', 'employee')->orderBy('created_at', 'desc')->get();
 
-        return view('settings.index', compact('employees'));
+        $backupDir = storage_path('backups');
+        $backupFiles = file_exists($backupDir) ? glob($backupDir.DIRECTORY_SEPARATOR.'database_*.sqlite') : [];
+        if ($backupFiles !== false) {
+            rsort($backupFiles);
+        }
+        $backups = collect($backupFiles)->map(fn ($path) => [
+            'filename' => basename($path),
+            'size' => round(filesize($path) / 1024, 1),
+            'created' => date('M d, Y g:i A', filemtime($path)),
+        ]);
+
+        return view('settings.index', compact('employees', 'backups'));
     }
 
     public function storeEmployee(Request $request)
@@ -50,6 +62,30 @@ class SettingsController extends Controller
 
         return redirect()->route('settings.index')
             ->with('success', '"'.$name.'" account has been deleted.');
+    }
+
+    public function backupNow()
+    {
+        Artisan::call('backup:database');
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Database backup created successfully.');
+    }
+
+    public function downloadBackup(string $filename)
+    {
+        // Prevent path traversal — only allow the exact filename format
+        if (! preg_match('/^database_[\d_-]+\.sqlite$/', $filename)) {
+            abort(404);
+        }
+
+        $path = storage_path('backups'.DIRECTORY_SEPARATOR.$filename);
+
+        if (! file_exists($path)) {
+            abort(404);
+        }
+
+        return response()->download($path);
     }
 
     public function setTheme(Request $request)

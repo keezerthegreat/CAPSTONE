@@ -517,11 +517,6 @@
         <i class="fas fa-users"></i> Residents
       </a>
 
-      <a href="{{ route('residents.import.form') }}"
-         class="nav-item {{ request()->routeIs('residents.import*') ? 'active' : '' }}">
-        <i class="fas fa-file-import"></i> Import Data
-      </a>
-
       <div class="nav-section">Documents</div>
 
       <a href="{{ route('clearance.index') }}"
@@ -552,6 +547,11 @@
       <a href="{{ route('audit.index') }}"
          class="nav-item {{ request()->is('audit-log*') ? 'active' : '' }}">
         <i class="fas fa-history"></i> Audit Log
+      </a>
+
+      <a href="{{ route('residents.import.form') }}"
+         class="nav-item {{ request()->routeIs('residents.import*') ? 'active' : '' }}">
+        <i class="fas fa-file-import"></i> Import Data
       </a>
 
       <a href="{{ route('settings.index') }}"

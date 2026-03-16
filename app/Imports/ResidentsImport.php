@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\Family;
 use App\Models\Household;
 use App\Models\Resident;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
@@ -43,6 +44,24 @@ class ResidentsImport implements SkipsEmptyRows, ToModel, WithEvents, WithStartR
                             'head_resident_id' => $head?->id,
                             'member_count' => Resident::where('household_id', $hh->id)->count(),
                         ]);
+
+                        // Auto-create a family for this household if none exists yet
+                        $existingFamily = Family::where('household_id', $hh->id)->first();
+                        if (! $existingFamily && $head) {
+                            $familyName = $head->last_name.' Family';
+                            $family = Family::create([
+                                'family_name' => $familyName,
+                                'head_resident_id' => $head->id,
+                                'head_last_name' => $head->last_name,
+                                'head_first_name' => $head->first_name,
+                                'head_middle_name' => $head->middle_name,
+                                'household_id' => $hh->id,
+                                'member_count' => Resident::where('household_id', $hh->id)->count(),
+                            ]);
+
+                            // Link all household members to this family
+                            Resident::where('household_id', $hh->id)->update(['family_id' => $family->id]);
+                        }
                     });
             },
         ];

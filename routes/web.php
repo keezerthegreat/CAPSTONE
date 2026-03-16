@@ -128,6 +128,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');
         Route::delete('/audit-log/clear', [AuditLogController::class, 'clear'])->name('audit.clear');
 
+        // Database Backup
+        Route::post('/settings/backup', [SettingsController::class, 'backupNow'])->name('settings.backup');
+        Route::get('/settings/backup/{filename}/download', [SettingsController::class, 'downloadBackup'])->name('settings.backup.download');
+
     });
 
     /*
