@@ -145,6 +145,13 @@ tbody tr:last-child td { border-bottom:none; }
   @endif
 </div>
 
+@if(auth()->user()->role === 'admin')
+<div id="certSelectAllBanner" style="display:none;padding:8px 16px;background:#eff6ff;border-bottom:1px solid #bfdbfe;font-size:13px;color:#1e40af;text-align:center">
+  All <strong>{{ $certificates->perPage() }}</strong> certificates on this page are selected.
+  <a href="#" onclick="certSelectAll(); return false;" style="font-weight:700;color:#1d4ed8;text-decoration:underline">Select all <strong>{{ $certificates->total() }}</strong> certificates</a>
+  &nbsp;&middot;&nbsp;<a href="#" onclick="certClearSelect(); return false;" style="color:#64748b;text-decoration:underline">Clear</a>
+</div>
+@endif
 <div class="table-wrap">
 <table>
 <thead>
@@ -295,31 +302,55 @@ document.getElementById('resPickerModal').addEventListener('click', function(e) 
   @method('DELETE')
 </form>
 <script>
+let certSelectAllMode = false;
 function certToggleAll(src) {
   document.querySelectorAll('.cert-check').forEach(cb => cb.checked = src.checked);
+  certSelectAllMode = false;
   certUpdateBtn();
+  document.getElementById('certSelectAllBanner').style.display = src.checked ? 'block' : 'none';
 }
 document.addEventListener('change', function(e) {
-  if (e.target.classList.contains('cert-check')) certUpdateBtn();
+  if (e.target.classList.contains('cert-check')) { certSelectAllMode = false; certUpdateBtn(); }
 });
 function certUpdateBtn() {
   const checked = document.querySelectorAll('.cert-check:checked');
   const btn = document.getElementById('certBulkBtn');
   if (!btn) return;
-  document.getElementById('certCount').textContent = checked.length;
-  btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+  document.getElementById('certCount').textContent = certSelectAllMode ? '{{ $certificates->total() }}' : checked.length;
+  btn.style.display = (checked.length > 0 || certSelectAllMode) ? 'inline-flex' : 'none';
+}
+function certSelectAll() {
+  certSelectAllMode = true;
+  document.getElementById('certSelectAllBanner').innerHTML =
+    'All <strong>{{ $certificates->total() }}</strong> certificates are selected. ' +
+    '<a href="#" onclick="certClearSelect(); return false;" style="color:#be123c;font-weight:700;text-decoration:underline">Clear selection</a>';
+  certUpdateBtn();
+}
+function certClearSelect() {
+  certSelectAllMode = false;
+  document.getElementById('certSelectAll').checked = false;
+  document.querySelectorAll('.cert-check').forEach(cb => cb.checked = false);
+  certUpdateBtn();
+  document.getElementById('certSelectAllBanner').style.display = 'none';
 }
 function submitCertBulk() {
-  const checked = document.querySelectorAll('.cert-check:checked');
-  if (!checked.length) return;
-  if (!confirm('Delete ' + checked.length + ' certificate(s)? This cannot be undone.')) return;
   const form = document.getElementById('certBulkForm');
-  form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
-  checked.forEach(cb => {
+  form.querySelectorAll('input[name="ids[]"], input[name="select_all"]').forEach(el => el.remove());
+  if (certSelectAllMode) {
+    if (!confirm('Delete ALL {{ $certificates->total() }} certificates? This cannot be undone.')) return;
     const inp = document.createElement('input');
-    inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+    inp.type = 'hidden'; inp.name = 'select_all'; inp.value = '1';
     form.appendChild(inp);
-  });
+  } else {
+    const checked = document.querySelectorAll('.cert-check:checked');
+    if (!checked.length) return;
+    if (!confirm('Delete ' + checked.length + ' certificate(s)? This cannot be undone.')) return;
+    checked.forEach(cb => {
+      const inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+      form.appendChild(inp);
+    });
+  }
   form.submit();
 }
 </script>

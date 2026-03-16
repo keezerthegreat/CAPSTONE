@@ -133,26 +133,29 @@ class WorkerController extends Controller
             ->route('workers.index')
             ->with('success', 'Worker deleted successfully!');
     }
+
     public function bulkDestroy(Request $request)
     {
-        $ids = $request->input('ids', []);
-        if (empty($ids)) {
-            return redirect()->back()->with('error', 'No workers selected.');
+        if ($request->input('select_all')) {
+            $workers = Worker::all();
+        } else {
+            $ids = $request->input('ids', []);
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No workers selected.');
+            }
+            $workers = Worker::whereIn('id', $ids)->get();
         }
 
-        foreach ($ids as $id) {
-            $worker = Worker::find($id);
-            if ($worker) {
-                if ($worker->photo) {
-                    Storage::disk('public')->delete($worker->photo);
-                }
-                ActivityLog::log('deleted', 'Worker', "Bulk deleted worker: {$worker->first_name} {$worker->last_name}");
-                $worker->delete();
+        $count = $workers->count();
+        foreach ($workers as $worker) {
+            if ($worker->photo) {
+                Storage::disk('public')->delete($worker->photo);
             }
+            ActivityLog::log('deleted', 'Worker', "Bulk deleted worker: {$worker->first_name} {$worker->last_name}");
+            $worker->delete();
         }
 
         return redirect()->route('workers.index')
-            ->with('success', count($ids) . ' worker(s) deleted successfully.');
+            ->with('success', $count.' worker(s) deleted successfully.');
     }
-
 }

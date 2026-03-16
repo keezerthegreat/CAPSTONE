@@ -95,21 +95,26 @@ class ClearanceController extends Controller
         return redirect()->route('clearance.index')
             ->with('success', 'Clearance updated successfully.');
     }
+
     public function bulkDestroy(Request $request)
     {
-        $ids = $request->input('ids', []);
-        if (empty($ids)) {
-            return redirect()->back()->with('error', 'No clearances selected.');
+        if ($request->input('select_all')) {
+            $clearances = Clearance::all();
+        } else {
+            $ids = $request->input('ids', []);
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No clearances selected.');
+            }
+            $clearances = Clearance::whereIn('id', $ids)->get();
         }
 
-        $clearances = Clearance::whereIn('id', $ids)->get();
+        $count = $clearances->count();
         foreach ($clearances as $clr) {
             ActivityLog::log('deleted', 'Clearance', "Bulk deleted clearance: {$clr->clearance_no} for {$clr->resident_name}");
+            $clr->delete();
         }
-        Clearance::whereIn('id', $ids)->delete();
 
         return redirect()->route('clearance.index')
-            ->with('success', count($ids) . ' clearance(s) deleted successfully.');
+            ->with('success', $count.' clearance(s) deleted successfully.');
     }
-
 }

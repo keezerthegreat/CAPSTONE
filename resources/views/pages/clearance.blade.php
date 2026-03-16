@@ -142,6 +142,13 @@ tbody tr:last-child td { border-bottom:none; }
   </button>
   @endif
 </div>
+      @if(auth()->user()->role === 'admin')
+      <div id="clrSelectAllBanner" style="display:none;padding:8px 16px;background:#eff6ff;border-bottom:1px solid #bfdbfe;font-size:13px;color:#1e40af;text-align:center">
+        All <strong>{{ $clearances->perPage() }}</strong> clearances on this page are selected.
+        <a href="#" onclick="clrSelectAll(); return false;" style="font-weight:700;color:#1d4ed8;text-decoration:underline">Select all <strong>{{ $clearances->total() }}</strong> clearances</a>
+        &nbsp;&middot;&nbsp;<a href="#" onclick="clrClearSelect(); return false;" style="color:#64748b;text-decoration:underline">Clear</a>
+      </div>
+      @endif
       <div class="table-wrap">
         <table>
           <thead>
@@ -276,31 +283,55 @@ document.getElementById('resPickerModal').addEventListener('click', function(e) 
   @method('DELETE')
 </form>
 <script>
+let clrSelectAllMode = false;
 function clrToggleAll(src) {
   document.querySelectorAll('.clr-check').forEach(cb => cb.checked = src.checked);
+  clrSelectAllMode = false;
   clrUpdateBtn();
+  document.getElementById('clrSelectAllBanner').style.display = src.checked ? 'block' : 'none';
 }
 document.addEventListener('change', function(e) {
-  if (e.target.classList.contains('clr-check')) clrUpdateBtn();
+  if (e.target.classList.contains('clr-check')) { clrSelectAllMode = false; clrUpdateBtn(); }
 });
 function clrUpdateBtn() {
   const checked = document.querySelectorAll('.clr-check:checked');
   const btn = document.getElementById('clrBulkBtn');
   if (!btn) return;
-  document.getElementById('clrCount').textContent = checked.length;
-  btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+  document.getElementById('clrCount').textContent = clrSelectAllMode ? '{{ $clearances->total() }}' : checked.length;
+  btn.style.display = (checked.length > 0 || clrSelectAllMode) ? 'inline-flex' : 'none';
+}
+function clrSelectAll() {
+  clrSelectAllMode = true;
+  document.getElementById('clrSelectAllBanner').innerHTML =
+    'All <strong>{{ $clearances->total() }}</strong> clearances are selected. ' +
+    '<a href="#" onclick="clrClearSelect(); return false;" style="color:#be123c;font-weight:700;text-decoration:underline">Clear selection</a>';
+  clrUpdateBtn();
+}
+function clrClearSelect() {
+  clrSelectAllMode = false;
+  document.getElementById('clrSelectAll').checked = false;
+  document.querySelectorAll('.clr-check').forEach(cb => cb.checked = false);
+  clrUpdateBtn();
+  document.getElementById('clrSelectAllBanner').style.display = 'none';
 }
 function submitClrBulk() {
-  const checked = document.querySelectorAll('.clr-check:checked');
-  if (!checked.length) return;
-  if (!confirm('Delete ' + checked.length + ' clearance(s)? This cannot be undone.')) return;
   const form = document.getElementById('clrBulkForm');
-  form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
-  checked.forEach(cb => {
+  form.querySelectorAll('input[name="ids[]"], input[name="select_all"]').forEach(el => el.remove());
+  if (clrSelectAllMode) {
+    if (!confirm('Delete ALL {{ $clearances->total() }} clearances? This cannot be undone.')) return;
     const inp = document.createElement('input');
-    inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+    inp.type = 'hidden'; inp.name = 'select_all'; inp.value = '1';
     form.appendChild(inp);
-  });
+  } else {
+    const checked = document.querySelectorAll('.clr-check:checked');
+    if (!checked.length) return;
+    if (!confirm('Delete ' + checked.length + ' clearance(s)? This cannot be undone.')) return;
+    checked.forEach(cb => {
+      const inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+      form.appendChild(inp);
+    });
+  }
   form.submit();
 }
 </script>

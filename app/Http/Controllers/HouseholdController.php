@@ -180,24 +180,27 @@ class HouseholdController extends Controller
 
         return view('households.map', compact('households'));
     }
+
     public function bulkDestroy(Request $request)
     {
-        $ids = $request->input('ids', []);
-        if (empty($ids)) {
-            return redirect()->back()->with('error', 'No households selected.');
+        if ($request->input('select_all')) {
+            $households = Household::all();
+        } else {
+            $ids = $request->input('ids', []);
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No households selected.');
+            }
+            $households = Household::whereIn('id', $ids)->get();
         }
 
-        foreach ($ids as $id) {
-            $household = Household::find($id);
-            if ($household) {
-                Resident::where('household_id', $household->id)->update(['household_id' => null]);
-                ActivityLog::log('deleted', 'Household', "Bulk deleted household: #{$household->household_number}");
-                $household->delete();
-            }
+        $count = $households->count();
+        foreach ($households as $household) {
+            Resident::where('household_id', $household->id)->update(['household_id' => null]);
+            ActivityLog::log('deleted', 'Household', "Bulk deleted household: #{$household->household_number}");
+            $household->delete();
         }
 
         return redirect()->route('households.index')
-            ->with('success', count($ids) . ' household(s) deleted successfully.');
+            ->with('success', $count.' household(s) deleted successfully.');
     }
-
 }

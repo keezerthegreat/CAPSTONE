@@ -82,6 +82,12 @@ tbody tr:last-child td { border-bottom:none; }
       <div class="card-title"><i class="fas fa-list"></i> Workers List</div>
       <input type="text" id="workerSearch" class="search-input" placeholder="Search worker...">
     </div>
+    @if(auth()->user()->role == 'admin')
+    <div id="selectAllBanner" style="display:none;padding:8px 16px;background:#eff6ff;border-bottom:1px solid #bfdbfe;font-size:13px;color:#1e40af;text-align:center">
+      All <strong>{{ $workers->count() }}</strong> workers are selected.
+      <a href="#" onclick="clearSelectAll(); return false;" style="color:#be123c;font-weight:700;text-decoration:underline">Clear selection</a>
+    </div>
+    @endif
     <div class="table-wrap">
       <table>
         <thead>
@@ -206,31 +212,50 @@ function closeModal() { document.getElementById('viewModal').classList.remove('o
 document.getElementById('viewModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
 // ── BULK DELETE ──
+let selectAllMode = false;
 function toggleAll(source) {
     document.querySelectorAll('.row-check').forEach(cb => cb.checked = source.checked);
+    selectAllMode = false;
     updateBulkBtn();
+    const banner = document.getElementById('selectAllBanner');
+    if (banner) banner.style.display = source.checked ? 'block' : 'none';
 }
 document.addEventListener('change', function(e) {
-    if (e.target.classList.contains('row-check')) updateBulkBtn();
+    if (e.target.classList.contains('row-check')) { selectAllMode = false; updateBulkBtn(); }
 });
 function updateBulkBtn() {
     const checked = document.querySelectorAll('.row-check:checked');
     const btn = document.getElementById('bulkDeleteBtn');
     if (!btn) return;
-    document.getElementById('selectedCount').textContent = checked.length;
-    btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+    document.getElementById('selectedCount').textContent = selectAllMode ? '{{ $workers->count() }}' : checked.length;
+    btn.style.display = (checked.length > 0 || selectAllMode) ? 'inline-flex' : 'none';
+}
+function clearSelectAll() {
+    selectAllMode = false;
+    document.getElementById('selectAll').checked = false;
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+    updateBulkBtn();
+    const banner = document.getElementById('selectAllBanner');
+    if (banner) banner.style.display = 'none';
 }
 function submitBulkDelete() {
-    const checked = document.querySelectorAll('.row-check:checked');
-    if (!checked.length) return;
-    if (!confirm('Delete ' + checked.length + ' selected worker(s)? This cannot be undone.')) return;
     const form = document.getElementById('bulkForm');
-    form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
-    checked.forEach(cb => {
+    form.querySelectorAll('input[name="ids[]"], input[name="select_all"]').forEach(el => el.remove());
+    if (selectAllMode) {
+        if (!confirm('Delete ALL {{ $workers->count() }} workers? This cannot be undone.')) return;
         const inp = document.createElement('input');
-        inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+        inp.type = 'hidden'; inp.name = 'select_all'; inp.value = '1';
         form.appendChild(inp);
-    });
+    } else {
+        const checked = document.querySelectorAll('.row-check:checked');
+        if (!checked.length) return;
+        if (!confirm('Delete ' + checked.length + ' selected worker(s)? This cannot be undone.')) return;
+        checked.forEach(cb => {
+            const inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+            form.appendChild(inp);
+        });
+    }
     form.submit();
 }
 </script>

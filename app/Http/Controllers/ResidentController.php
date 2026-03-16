@@ -339,9 +339,9 @@ class ResidentController extends Controller
         // Get counts from the inner DataSheetImport
         $sheets = $import->sheets();
         $dataSheet = $sheets['DATA'] ?? null;
-        $imported   = $dataSheet ? $dataSheet->imported   : 0;
-        $skipped    = $dataSheet ? $dataSheet->skipped     : 0;
-        $duplicates = $dataSheet ? $dataSheet->duplicates  : 0;
+        $imported = $dataSheet ? $dataSheet->imported : 0;
+        $skipped = $dataSheet ? $dataSheet->skipped : 0;
+        $duplicates = $dataSheet ? $dataSheet->duplicates : 0;
 
         ActivityLog::log('created', 'Resident', "Bulk imported {$imported} resident(s) via Excel.");
 
@@ -362,15 +362,21 @@ class ResidentController extends Controller
 
         return view('residents.location', compact('households'));
     }
+
     public function bulkDestroy(Request $request)
     {
-        $ids = $request->input('ids', []);
-        if (empty($ids)) {
-            return redirect()->back()->with('error', 'No residents selected.');
+        if ($request->input('select_all')) {
+            $residents = Resident::all();
+        } else {
+            $ids = $request->input('ids', []);
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No residents selected.');
+            }
+            $residents = Resident::whereIn('id', $ids)->get();
         }
 
-        $residents = Resident::whereIn('id', $ids)->get();
         $householdIds = $residents->pluck('household_id')->filter()->unique();
+        $count = $residents->count();
 
         foreach ($residents as $resident) {
             ActivityLog::log('deleted', 'Resident', "Bulk deleted resident: {$resident->first_name} {$resident->last_name}");
@@ -378,12 +384,11 @@ class ResidentController extends Controller
         }
 
         foreach ($householdIds as $householdId) {
-            $count = Resident::where('household_id', $householdId)->where('status', 'approved')->count();
-            Household::where('id', $householdId)->update(['member_count' => $count]);
+            $remaining = Resident::where('household_id', $householdId)->where('status', 'approved')->count();
+            Household::where('id', $householdId)->update(['member_count' => $remaining]);
         }
 
         return redirect()->route('residents.index')
-            ->with('success', count($ids) . ' resident(s) deleted successfully.');
+            ->with('success', $count.' resident(s) deleted successfully.');
     }
-
 }

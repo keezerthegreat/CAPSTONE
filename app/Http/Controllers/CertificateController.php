@@ -94,21 +94,26 @@ class CertificateController extends Controller
 
         return view('pages.certificate-print', compact('certificate'));
     }
+
     public function bulkDestroy(Request $request)
     {
-        $ids = $request->input('ids', []);
-        if (empty($ids)) {
-            return redirect()->back()->with('error', 'No certificates selected.');
+        if ($request->input('select_all')) {
+            $certificates = Certificate::all();
+        } else {
+            $ids = $request->input('ids', []);
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No certificates selected.');
+            }
+            $certificates = Certificate::whereIn('id', $ids)->get();
         }
 
-        $certificates = Certificate::whereIn('id', $ids)->get();
+        $count = $certificates->count();
         foreach ($certificates as $cert) {
             ActivityLog::log('deleted', 'Certificate', "Bulk deleted certificate: {$cert->certificate_no} for {$cert->resident_name}");
+            $cert->delete();
         }
-        Certificate::whereIn('id', $ids)->delete();
 
         return redirect()->route('certificate.index')
-            ->with('success', count($ids) . ' certificate(s) deleted successfully.');
+            ->with('success', $count.' certificate(s) deleted successfully.');
     }
-
 }
