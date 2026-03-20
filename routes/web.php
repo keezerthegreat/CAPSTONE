@@ -133,6 +133,7 @@ Route::middleware('auth')->group(function () {
         // Database Backup
         Route::post('/settings/backup', [SettingsController::class, 'backupNow'])->name('settings.backup');
         Route::get('/settings/backup/{filename}/download', [SettingsController::class, 'downloadBackup'])->name('settings.backup.download');
+        Route::post('/settings/backup/restore', [SettingsController::class, 'restoreBackup'])->name('settings.backup.restore');
 
     });
 

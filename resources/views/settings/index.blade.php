@@ -55,6 +55,26 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
 
 /* Avatar initials */
 .avatar { width: 30px; height: 30px; border-radius: 50%; background: #1a3a6b; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; margin-right: 6px; }
+
+.hidden { display: none !important; }
+
+/* Restore panel */
+.restore-panel { background: #fff7ed; border-bottom: 1px solid var(--border-color, #e2e8f0); padding: 20px 24px; }
+.restore-panel .restore-icon { background: #fed7aa; color: #c2410c; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+.restore-panel .restore-title { font-weight: 700; font-size: 13px; color: #c2410c; margin-bottom: 4px; }
+.restore-panel .restore-desc { font-size: 12px; color: #92400e; margin-bottom: 14px; line-height: 1.6; }
+.restore-panel .restore-file { font-size: 13px; color: #1e293b; background: #fff; border: 1.5px solid #fed7aa; border-radius: 8px; padding: 8px 12px; flex: 1; min-width: 220px; }
+.btn-restore { background: #c2410c; color: #fff; }
+.btn-restore:hover { background: #9a3412; }
+
+[data-theme="dark"] .restore-panel { background: #2a1a0e !important; border-color: #4a2c10 !important; }
+[data-theme="dark"] .restore-panel .restore-icon { background: #4a2c10 !important; color: #fb923c !important; }
+[data-theme="dark"] .restore-panel .restore-title { color: #fb923c !important; }
+[data-theme="dark"] .restore-panel .restore-desc { color: #c2845a !important; }
+[data-theme="dark"] .restore-panel .restore-file { background: #1a0f08 !important; color: #d1d9e6 !important; border-color: #4a2c10 !important; }
+[data-theme="dark"] .btn-restore { background: #9a3412 !important; color: #fff !important; }
+[data-theme="dark"] .btn-restore:hover { background: #7c2d12 !important; }
+[data-theme="dark"] .btn-restore-toggle { background: #2a1a0e !important; color: #fb923c !important; border-color: #4a2c10 !important; }
 </style>
 
 <div class="settings-wrap">
@@ -171,12 +191,47 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
                 <i class="fas fa-database"></i>
                 <span class="s-card-title">Database Backup</span>
             </div>
-            <form method="POST" action="{{ route('settings.backup') }}">
-                @csrf
-                <button type="submit" class="btn btn-green" style="width:auto;margin-top:0">
-                    <i class="fas fa-download"></i> Backup Now
+            <div style="display:flex;gap:8px;align-items:center">
+                <button type="button" onclick="document.getElementById('restore-panel').classList.toggle('hidden')"
+                    class="btn btn-restore-toggle" style="width:auto;margin-top:0;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa">
+                    <i class="fas fa-upload"></i> Restore from Backup
                 </button>
-            </form>
+                <form method="POST" action="{{ route('settings.backup') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-green" style="width:auto;margin-top:0">
+                        <i class="fas fa-download"></i> Backup Now
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {{-- Restore panel (hidden by default) --}}
+        <div id="restore-panel" class="restore-panel hidden">
+            <div style="display:flex;align-items:flex-start;gap:12px">
+                <div class="restore-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div style="flex:1">
+                    <div class="restore-title">Restore Database</div>
+                    <div class="restore-desc">
+                        This will <strong>replace all current data</strong> with the contents of the uploaded backup file.
+                        The current database will be auto-saved as a backup before restoring.
+                    </div>
+                    <form method="POST" action="{{ route('settings.backup.restore') }}" enctype="multipart/form-data"
+                        onsubmit="return confirm('Are you sure you want to restore this backup? All current data will be replaced.')">
+                        @csrf
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                            <input type="file" name="backup_file" accept=".sqlite" required class="restore-file">
+                            <button type="submit" class="btn btn-restore" style="width:auto;margin-top:0;flex-shrink:0">
+                                <i class="fas fa-undo"></i> Restore Now
+                            </button>
+                        </div>
+                        @error('backup_file')
+                            <div style="color:#dc2626;font-size:12px;margin-top:6px">{{ $message }}</div>
+                        @enderror
+                    </form>
+                </div>
+            </div>
         </div>
         <div class="table-wrap">
             <table>

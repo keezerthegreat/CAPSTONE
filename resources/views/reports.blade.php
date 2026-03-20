@@ -72,8 +72,11 @@
 
 @media print {
   .sidebar, .topbar, .page-hdr .btn, .tabs { display:none !important; }
-  .bidb-wrap { padding:0; }
-  .card { box-shadow:none; border:1px solid #ccc; }
+  .main-content { margin-left: 0 !important; }
+  .bidb-wrap { padding: 12px; background: #fff !important; }
+  .card { box-shadow: none; border: 1px solid #ccc; }
+  .stat-card { box-shadow: none; border: 1px solid #ccc; }
+  @page { size: A4 portrait; margin: 12mm; }
 }
 </style>
 

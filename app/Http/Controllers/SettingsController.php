@@ -88,6 +88,38 @@ class SettingsController extends Controller
         return response()->download($path);
     }
 
+    public function restoreBackup(Request $request)
+    {
+        $request->validate([
+            'backup_file' => 'required|file|mimes:sqlite,application/octet-stream|max:102400',
+        ]);
+
+        $uploadedFile = $request->file('backup_file');
+
+        // Only accept files with the expected naming pattern or a plain .sqlite extension
+        $originalName = $uploadedFile->getClientOriginalName();
+        if (! preg_match('/^database_[\d_-]+\.sqlite$/', $originalName) && ! str_ends_with($originalName, '.sqlite')) {
+            return redirect()->route('settings.index')
+                ->with('error', 'Invalid backup file. Please upload a valid .sqlite backup file.');
+        }
+
+        $dbPath = database_path('database.sqlite');
+
+        // Auto-backup the current database before overwriting
+        $backupDir = storage_path('backups');
+        if (! file_exists($backupDir)) {
+            mkdir($backupDir, 0755, true);
+        }
+        $autoBackupName = 'database_'.now()->format('Y_m_d_His').'_pre_restore.sqlite';
+        copy($dbPath, $backupDir.DIRECTORY_SEPARATOR.$autoBackupName);
+
+        // Replace the live database with the uploaded file
+        $uploadedFile->move(dirname($dbPath), basename($dbPath));
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Database restored successfully. A pre-restore backup was saved as "'.$autoBackupName.'".');
+    }
+
     public function setTheme(Request $request)
     {
         $theme = $request->input('theme', 'light');

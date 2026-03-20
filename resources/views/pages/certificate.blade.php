@@ -65,6 +65,13 @@ tbody tr:last-child td { border-bottom:none; }
 .rpicker-item .ri-name { font-size:13px; font-weight:600; color:var(--text); }
 .rpicker-item .ri-meta { font-size:11px; color:var(--muted); margin-top:2px; }
 .rpicker-empty { padding:24px; text-align:center; color:var(--muted); font-size:13px; }
+/* Document editor body */
+#ct-doc-body p { margin:0 0 14px; text-align:justify; font-family:"Times New Roman",serif; font-size:15px; line-height:1.9; }
+#ct-doc-body p:last-child { margin-bottom:0; }
+.doc-toolbar { display:flex; align-items:center; gap:2px; padding:5px 8px; background:#f8fafc; border:1px solid #dde1e7; border-radius:6px 6px 0 0; flex-wrap:wrap; }
+.doc-toolbar button { width:26px; height:24px; background:none; border:1px solid transparent; border-radius:4px; cursor:pointer; font-size:13px; color:#374151; display:flex; align-items:center; justify-content:center; }
+.doc-toolbar button:hover { background:#e2e8f0; border-color:#cbd5e1; }
+.doc-toolbar .sep { width:1px; height:16px; background:#dde1e7; margin:0 3px; }
 </style>
 
 <div class="bidb-wrap">
@@ -90,13 +97,31 @@ tbody tr:last-child td { border-bottom:none; }
 </div>
 </div>
 
-<div class="two-col">
+{{-- SPLIT SCREEN: Form + Live Preview --}}
+<div style="display:grid;grid-template-columns:420px 1fr;gap:20px;margin-bottom:20px;align-items:start">
 
-<div class="card">
+{{-- LEFT: Form --}}
+<div class="card" style="position:sticky;top:20px">
 <div class="card-header"><div class="card-title"><i class="fas fa-plus-circle"></i> Issue New Certificate</div></div>
-<div class="card-body">
-<form method="POST" action="{{ route('certificate.store') }}">
+<div class="card-body" style="padding:18px">
+<form method="POST" action="{{ route('certificate.store') }}" id="ct-form">
 @csrf
+<input type="hidden" name="body_content" id="ct-body-hidden">
+
+<div class="form-group">
+<label>Document Type <span class="req">*</span></label>
+<select name="certificate_type" id="ct-type-select" required onchange="ctUpdate()">
+<option value="">Select type...</option>
+<option value="Barangay Certification">Barangay Certification (Custom)</option>
+<option value="Good Moral Character Clearance">Good Moral Character Clearance</option>
+<option value="Certificate of Residency">Certificate of Residency</option>
+<option value="Certificate of Indigency">Certificate of Indigency</option>
+<option value="Certificate of Unemployment">Certificate of Unemployment</option>
+<option value="Certificate of Residency for Voters">Certificate of Residency for Voters</option>
+<option value="Certificate of Guardianship">Certificate of Guardianship</option>
+<option value="Barangay Business Clearance">Barangay Business Clearance</option>
+</select>
+</div>
 
 <div class="form-group">
 <label>Resident Name <span class="req">*</span></label>
@@ -107,31 +132,121 @@ tbody tr:last-child td { border-bottom:none; }
 </button>
 </div>
 
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 <div class="form-group">
-<label>Certificate Type <span class="req">*</span></label>
-<select name="certificate_type" required>
-<option value="">Select type...</option>
-<option value="Good Moral Character Clearance">Good Moral Character Clearance</option>
-<option value="Certificate of Residency">Certificate of Residency</option>
-<option value="Certificate of Indigency">Certificate of Indigency</option>
-<option value="Certificate of Unemployment">Certificate of Unemployment</option>
-<option value="Certificate of Residency for Voters">Certificate of Residency for Voters</option>
-<option value="Certificate of Guardianship">Certificate of Guardianship</option>
+<label>Civil Status</label>
+<select name="civil_status" id="ct-civil-status" onchange="ctUpdate()">
+<option value="Single">Single</option>
+<option value="Married">Married</option>
+<option value="Widowed">Widowed</option>
+<option value="Separated">Separated</option>
+<option value="Annulled">Annulled</option>
+</select>
+</div>
+<div class="form-group">
+<label>Purok / Address</label>
+<input type="text" name="purok" id="ct-purok" placeholder="e.g. Sampaguita" oninput="ctUpdate()">
+</div>
+</div>
+
+<div class="form-group">
+<label>Requestor</label>
+<select name="requestor" id="ct-requestor" onchange="ctUpdate()">
+<option value="The Subject (Self)">The Subject (Self)</option>
+<option value="Parent/Guardian">Parent/Guardian</option>
+<option value="Representative">Representative</option>
 </select>
 </div>
 
-<div class="form-group">
-<label>Purpose <span class="req">*</span></label>
-<textarea name="purpose" placeholder="e.g. For employment purposes" required></textarea>
+<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Receipt Footer</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div class="form-group" style="margin-bottom:8px">
+<label>O.R. Number</label>
+<input type="text" name="or_number" id="ct-or-number" placeholder="e.g. 8954164" oninput="ctUpdate()">
+</div>
+<div class="form-group" style="margin-bottom:8px">
+<label>Amount (₱)</label>
+<input type="number" name="amount" id="ct-amount" step="0.01" min="0" placeholder="0.00" oninput="ctUpdate()">
+</div>
+</div>
 </div>
 
-<button type="submit" class="btn btn-primary">
-<i class="fas fa-certificate"></i> Issue Certificate
+<div style="display:flex;gap:8px;margin-top:8px">
+<button type="submit" class="btn btn-primary" style="flex:1">
+<i class="fas fa-save"></i> Save Record
 </button>
+</div>
 
 </form>
 </div>
 </div>
+
+{{-- RIGHT: Document Editor --}}
+<div class="card" style="overflow:hidden">
+<div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+  <div class="card-title"><i class="fas fa-file-alt"></i> Document Editor</div>
+  <span style="font-size:11px;color:var(--muted)"><i class="fas fa-pencil-alt" style="margin-right:4px"></i>Click on the body text to edit directly</span>
+</div>
+<div style="background:#e5e7eb;padding:24px;min-height:640px;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start">
+  <div style="background:#fff;color:#000;width:100%;max-width:680px;min-height:900px;padding:50px 60px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-family:'Times New Roman',serif;font-size:15px;line-height:1.9;display:flex;flex-direction:column">
+
+    {{-- Header --}}
+    <div style="text-align:center;margin-bottom:24px">
+      <img src="{{ asset('images/cogon.png') }}" style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 8px" onerror="this.style.display='none'">
+      <div style="font-size:13px;font-style:italic">Republic of the Philippines</div>
+      <div style="font-size:14px;font-weight:bold;text-transform:uppercase">Office of the Punong Barangay</div>
+      <div style="font-size:13px">Barangay Cogon, Ormoc City</div>
+    </div>
+
+    {{-- Title --}}
+    <div id="ct-doc-title" style="text-align:center;font-size:18px;font-weight:bold;text-transform:uppercase;margin:20px 0 24px;letter-spacing:1px">
+      BARANGAY CERTIFICATION
+    </div>
+
+    {{-- Editable Body --}}
+    <div style="margin-bottom:14px;flex:1">
+      <div class="doc-toolbar">
+        <button type="button" onclick="ctFmt('bold')" title="Bold (Ctrl+B)"><b style="font-family:Georgia,serif">B</b></button>
+        <button type="button" onclick="ctFmt('italic')" title="Italic (Ctrl+I)"><i style="font-family:Georgia,serif">I</i></button>
+        <button type="button" onclick="ctFmt('underline')" title="Underline (Ctrl+U)"><u style="font-family:Georgia,serif">U</u></button>
+        <div class="sep"></div>
+        <button type="button" onclick="ctFmt('justifyFull')" title="Justify text"><i class="fas fa-align-justify" style="font-size:10px"></i></button>
+        <button type="button" onclick="ctFmt('justifyLeft')" title="Align left"><i class="fas fa-align-left" style="font-size:10px"></i></button>
+        <button type="button" onclick="ctFmt('justifyCenter')" title="Align center"><i class="fas fa-align-center" style="font-size:10px"></i></button>
+        <div style="flex:1"></div>
+        <button type="button" onclick="ctUpdate()" title="Regenerate body from current form values"
+          style="width:auto;padding:0 8px;font-size:11px;font-family:inherit;color:#64748b;gap:4px">
+          <i class="fas fa-redo-alt" style="font-size:9px"></i> Reset to template
+        </button>
+      </div>
+      <div id="ct-doc-body" contenteditable="true"
+        style="outline:none;min-height:180px;border:1px solid #dde1e7;border-top:none;border-radius:0 0 6px 6px;padding:10px 8px;cursor:text;transition:background .15s"
+        onfocus="this.style.background='rgba(239,246,255,0.6)'"
+        onblur="this.style.background=''"
+        oninput="ctSyncBody()">
+        <p style="color:#aaa;text-align:center">Select a document type to generate the body.</p>
+      </div>
+    </div>
+
+    {{-- Issued date --}}
+    <p id="ct-issued-line" style="margin-top:14px"></p>
+
+    {{-- Signature --}}
+    <div style="margin-top:50px;text-align:right">
+      <strong style="display:block;font-size:15px">ATTY. MA. CASSANDRA T. CODILLA, RCE</strong>
+      <span style="font-size:13px;font-style:italic">Punong Barangay</span>
+    </div>
+
+    {{-- Receipt --}}
+    <div id="ct-receipt" style="display:none;margin-top:30px;font-size:13px;color:#555"></div>
+
+  </div>
+</div>
+</div>
+
+</div>
+{{-- END SPLIT SCREEN --}}
 
 <div class="card">
 <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
@@ -238,7 +353,6 @@ No certificates issued yet.
 </div>
 
 </div>
-</div>
 
 <!-- Resident Picker Modal -->
 <div id="resPickerModal" class="rpicker-backdrop">
@@ -291,10 +405,107 @@ function selectResident(name) {
   document.getElementById('ct-picker-label').textContent = name;
   document.getElementById('ct-picker-btn').classList.add('selected');
   closeResPicker();
+  ctUpdate();
 }
 document.getElementById('resPickerModal').addEventListener('click', function(e) {
   if (e.target === this) closeResPicker();
 });
+
+// ── Live Preview ──────────────────────────────────────────────────────────
+const ctBodies = {
+  'Barangay Certification':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Barangay Cogon, Ormoc City.</p>
+     <p style="text-indent:2em">[Type custom content here...]</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+  'Good Moral Character Clearance':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Barangay Cogon, Ormoc City.</p>
+     <p style="text-indent:2em">CERTIFYING FURTHER, that based on the records of this office, the above-named person is known to be of <strong>good moral character</strong>, law-abiding, and has no derogatory record on file as of this date.</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+  'Certificate of Residency':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide permanent resident of Purok [PUROK], Barangay Cogon, Ormoc City.</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+  'Certificate of Indigency':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a permanent resident of PUROK [PUROK], Barangay COGON, ORMOC.</p>
+     <p style="text-indent:2em">CERTIFYING FURTHER, that based on the records of this office, the above-named person belongs to an <strong>INDIGENT FAMILY</strong> in this Barangay. The family's annual income is barely enough to sustain their daily needs.</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+  'Certificate of Unemployment':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Purok [PUROK], Barangay Cogon, Ormoc City, and is currently <strong>UNEMPLOYED</strong> as of this date.</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+  'Certificate of Residency for Voters':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Purok [PUROK], Barangay Cogon, Ormoc City, and is qualified to <strong>register as a voter</strong> within this jurisdiction in accordance with the requirements of the Commission on Elections (COMELEC).</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+  'Certificate of Guardianship':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Purok [PUROK], Barangay Cogon, Ormoc City, and is recognized as the <strong>legal guardian</strong> of the minor/dependent under their care.</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+  'Barangay Business Clearance':
+    `<p>TO WHOM IT MAY CONCERN:</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, is an existing business establishment within the territorial jurisdiction of Barangay Cogon, Ormoc City.</p>
+     <p style="text-indent:2em">This certification is issued to establish and confirm the exact location of the said business within Barangay Cogon in compliance with the requirements of the Bureau of Internal Revenue (BIR).</p>
+     <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
+};
+
+function ctGetVal(id) { return (document.getElementById(id)||{}).value || ''; }
+
+function ctSyncBody() {
+  document.getElementById('ct-body-hidden').value = document.getElementById('ct-doc-body').innerHTML;
+}
+
+function ctFmt(cmd) {
+  document.getElementById('ct-doc-body').focus();
+  document.execCommand(cmd, false, null);
+  ctSyncBody();
+}
+
+function ctUpdate() {
+  const type      = ctGetVal('ct-type-select');
+  const name      = ctGetVal('ct-resident-name') || '___________________';
+  const civil     = ctGetVal('ct-civil-status')  || 'Single';
+  const purok     = ctGetVal('ct-purok')          || '___________';
+  const requestor = ctGetVal('ct-requestor')      || 'the above-named person';
+  const orNum     = ctGetVal('ct-or-number');
+  const amount    = ctGetVal('ct-amount');
+  const today     = new Date();
+  const day       = today.getDate();
+  const suffix    = ['th','st','nd','rd'][day%10<4&&~~(day%100/10)!==1?day%10:0]||'th';
+  const months    = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dateStr   = `${day}${suffix} day of ${months[today.getMonth()]}, ${today.getFullYear()}`;
+
+  // Update document title
+  document.getElementById('ct-doc-title').textContent = type || 'BARANGAY CERTIFICATION';
+
+  // Update editable body from template
+  const bodyTpl  = ctBodies[type] || '';
+  const bodyHtml = bodyTpl
+    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil)
+    .replace(/\[PUROK\]/g, purok).replace(/\[REQUESTOR\]/g, requestor);
+  document.getElementById('ct-doc-body').innerHTML = bodyHtml
+    || '<p style="color:#aaa;text-align:center;font-family:sans-serif;font-size:13px">Select a document type to generate the body.</p>';
+  ctSyncBody();
+
+  // Update issued line
+  document.getElementById('ct-issued-line').innerHTML =
+    `Issued this ${day}<sup>${suffix}</sup> day of ${months[today.getMonth()]} ${today.getFullYear()} at Barangay Cogon, Ormoc City, Philippines.`;
+
+  // Update receipt
+  const receipt = document.getElementById('ct-receipt');
+  if (orNum || amount) {
+    receipt.style.display = 'block';
+    receipt.innerHTML = (orNum ? `O.R. No.: <strong>${orNum}</strong>&nbsp;&nbsp;` : '')
+      + (amount ? `Amount Paid: <strong>₱${parseFloat(amount).toFixed(2)}</strong>` : '');
+  } else {
+    receipt.style.display = 'none';
+  }
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', ctUpdate);
 </script>
 
 <form id="certBulkForm" method="POST" action="{{ route('certificate.bulkDestroy') }}" style="display:none">

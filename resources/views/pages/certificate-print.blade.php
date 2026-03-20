@@ -1,167 +1,247 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Certificate</title>
+  <meta charset="UTF-8">
+  <title>{{ $certificate->certificate_type }} — {{ $certificate->certificate_no }}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <a href="{{ url()->previous() }}"
-   style="
-        display: inline-block;
-        margin-bottom: 12px;
-        padding: 6px 12px;
-        background-color: #2c3e50;
-        color: #ffffff;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 14px;
-   ">
-    ← Back
-    
-</a>
-    <style>
-        body {
-            font-family: "Times New Roman", serif;
-            margin: 50px;
-        }
-        .certificate {
-            border: 2px solid #000;
-            padding: 40px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        h2 {
-            text-transform: uppercase;
-            margin-bottom: 30px;
-        }
-        p {
-            font-size: 18px;
-            line-height: 1.8;
-            text-align: justify;
-        }
-        .footer {
-            margin-top: 60px;
-        }
-    </style>
+    body {
+      background: #d1d5db;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 13pt;
+      color: #000;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .toolbar a, .toolbar button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-family: -apple-system, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: background .15s;
+    }
+    .toolbar .btn-back    { background: #334155; color: #e2e8f0; }
+    .toolbar .btn-back:hover { background: #475569; }
+    .toolbar .btn-print   { background: #2563eb; color: #fff; }
+    .toolbar .btn-print:hover { background: #1d4ed8; }
+    .toolbar .doc-info {
+      margin-left: auto;
+      font-family: -apple-system, sans-serif;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .toolbar .doc-info strong { color: #e2e8f0; }
+
+    /* ── Page wrapper ── */
+    .page-wrap {
+      padding: 72px 24px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ── Document / Paper ── */
+    .document {
+      background: #fff;
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm 22mm 24mm;
+      box-shadow: 0 4px 24px rgba(0,0,0,.18);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .doc-body { flex: 1; }
+
+    /* ── Letterhead ── */
+    .lh { text-align: center; margin-bottom: 20px; }
+    .lh img { width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 8px; }
+    .lh .republic  { font-size: 11pt; font-style: italic; }
+    .lh .office    { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
+    .lh .location  { font-size: 11pt; margin-top: 2px; }
+    .lh hr         { display: none; }
+    .lh .sub-hr    { display: none; }
+
+    /* ── Document title ── */
+    .doc-title {
+      text-align: center;
+      font-size: 16pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 22px 0 20px;
+    }
+
+    /* ── Body ── */
+    .doc-body { line-height: 1.9; }
+    .doc-body p {
+      margin: 0 0 14px;
+      text-align: justify;
+      font-size: 13pt;
+      line-height: 1.9;
+    }
+    .doc-body p:last-child { margin-bottom: 0; }
+
+    /* ── Issued line ── */
+    .issued-line {
+      margin-top: 18px;
+      font-size: 12pt;
+      line-height: 1.7;
+    }
+
+    /* ── Signature ── */
+    .sig-block {
+      margin-top: 48px;
+      text-align: right;
+    }
+    .sig-block .sig-name {
+      font-size: 13pt;
+      font-weight: bold;
+      display: inline-block;
+      letter-spacing: .3px;
+    }
+    .sig-block .sig-title {
+      font-size: 12pt;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    /* ── Receipt footer ── */
+    .receipt {
+      position: absolute;
+      bottom: 14mm;
+      left: 22mm;
+      font-size: 10pt;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* ── Doc number badge ── */
+    .doc-no {
+      position: absolute;
+      bottom: 14mm;
+      right: 22mm;
+      font-size: 9pt;
+      color: #999;
+      font-style: italic;
+    }
+
+    /* ── PRINT STYLES ── */
+    @media print {
+      body { background: white; }
+      .toolbar { display: none !important; }
+      .page-wrap { padding: 0; }
+      .document {
+        box-shadow: none;
+        width: 100%;
+        min-height: unset;
+        padding: 15mm 20mm 20mm;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+    }
+  </style>
 </head>
-<body onload="window.print()">
+<body>
 
-<div class="certificate">
-
-    <div class="header">
-        <h2>{{ $certificate->certificate_type }}</h2>
-    </div>
-
-    {{-- GOOD MORAL CHARACTER --}}
-    @if($certificate->certificate_type === 'Good Moral Character Clearance')
-        <p>
-            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
-            is a resident of this barangay and is known to be of
-            <strong>good moral character</strong>, law-abiding, and has no derogatory
-            record on file as of this date.
-        </p>
-
-        <p>
-            This certification is issued upon request of the above-named person
-            for the purpose stated below.
-        </p>
-
-    {{-- RESIDENCY --}}
-    @elseif($certificate->certificate_type === 'Certificate of Residency' || $certificate->certificate_type === 'Residency Certificate')
-        <p>
-            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
-            is a bona fide resident of this barangay.
-        </p>
-
-        <p>
-            This certification is issued upon request for whatever
-            legal purpose it may serve.
-        </p>
-
-    {{-- INDIGENCY --}}
-    @elseif($certificate->certificate_type === 'Certificate of Indigency' || $certificate->certificate_type === 'Indigency Certificate')
-        <p>
-            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
-            is a resident of this barangay and belongs to an
-            <strong>indigent family</strong>.
-        </p>
-
-        <p>
-            This certification is issued to support the request for
-            financial or medical assistance.
-        </p>
-
-    {{-- UNEMPLOYMENT --}}
-    @elseif($certificate->certificate_type === 'Certificate of Unemployment')
-        <p>
-            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
-            is a resident of this barangay and is currently
-            <strong>unemployed</strong> as of this date.
-        </p>
-
-        <p>
-            This certification is issued upon the request of the above-named person
-            for whatever legal purpose it may serve.
-        </p>
-
-    {{-- RESIDENCY FOR VOTERS --}}
-    @elseif($certificate->certificate_type === 'Certificate of Residency for Voters')
-        <p>
-            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
-            is a bona fide resident of this barangay and is qualified to
-            <strong>register as a voter</strong> within this jurisdiction.
-        </p>
-
-        <p>
-            This certification is issued in connection with the voter registration
-            requirements of the Commission on Elections (COMELEC).
-        </p>
-
-    {{-- GUARDIANSHIP --}}
-    @elseif($certificate->certificate_type === 'Certificate of Guardianship')
-        <p>
-            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
-            is a resident of this barangay and is recognized as the
-            <strong>legal guardian</strong> of the minor/dependent under their care.
-        </p>
-
-        <p>
-            This certification is issued upon the request of the above-named person
-            for whatever legal purpose it may serve.
-        </p>
-
-    {{-- BUSINESS OPERATION (legacy) --}}
-    @elseif($certificate->certificate_type === 'Business Operation')
-        <p>
-            This is to certify that <strong>{{ $certificate->resident_name }}</strong>
-            is a resident of this barangay and is hereby granted
-            clearance to <strong>operate a business</strong> within the jurisdiction
-            of this barangay, subject to existing rules and regulations.
-        </p>
-
-        <p>
-            This certification is issued to support the application
-            for business operation.
-        </p>
-    @endif
-
-    <p>
-        <strong>Purpose:</strong> {{ $certificate->purpose }}
-    </p>
-
-    <p>
-        Issued this {{ \Carbon\Carbon::parse($certificate->issued_date)->format('jS day of F, Y') }}
-        at Barangay Cogon.
-    </p>
-
-    <div class="footer">
-        <p>
-            ___________________________<br>
-            Barangay Captain
-        </p>
-    </div>
-
+{{-- Toolbar --}}
+<div class="toolbar">
+  <a href="{{ url()->previous() }}" class="btn-back">
+    &#8592; Back
+  </a>
+  <button onclick="window.print()" class="btn-print">
+    &#128438; Print / Save as PDF
+  </button>
+  <div class="doc-info">
+    <strong>{{ $certificate->certificate_no }}</strong>
+    &nbsp;·&nbsp; {{ $certificate->certificate_type }}
+    &nbsp;·&nbsp; {{ \Carbon\Carbon::parse($certificate->issued_date)->format('F d, Y') }}
+  </div>
 </div>
 
+{{-- Paper --}}
+<div class="page-wrap">
+<div class="document">
+
+  {{-- Letterhead --}}
+  <div class="lh">
+    <img src="{{ asset('images/cogon.png') }}" alt="Barangay Seal" onerror="this.style.display='none'">
+    <div class="republic">Republic of the Philippines</div>
+    <div class="office">Office of the Punong Barangay</div>
+    <div class="location">Barangay Cogon, Ormoc City, Leyte</div>
+    <hr>
+    <div class="sub-hr"></div>
+  </div>
+
+  {{-- Title --}}
+  <div class="doc-title">{{ $certificate->certificate_type }}</div>
+
+  {{-- Body --}}
+  <div class="doc-body">
+    @if($certificate->body_content)
+      {!! $certificate->body_content !!}
+    @elseif($certificate->certificate_type === 'Certificate of Residency')
+      <p>TO WHOM IT MAY CONCERN:</p>
+      <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>{{ $certificate->resident_name }}</strong>, of legal age, Filipino Citizen, is a bona fide permanent resident of Barangay Cogon, Ormoc City.</p>
+      <p style="text-indent:2em">This certification is issued for whatever legal purpose it may serve.</p>
+    @else
+      <p>TO WHOM IT MAY CONCERN:</p>
+      <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>{{ $certificate->resident_name }}</strong>, of legal age, Filipino Citizen, is a bona fide resident of Barangay Cogon, Ormoc City.</p>
+      <p style="text-indent:2em">This certification is issued for whatever legal purpose it may serve.</p>
+    @endif
+  </div>
+
+  {{-- Issued line --}}
+  <p class="issued-line">
+    Issued this {{ \Carbon\Carbon::parse($certificate->issued_date)->format('j') }}<sup>{{ \Carbon\Carbon::parse($certificate->issued_date)->format('S') }}</sup> day of {{ \Carbon\Carbon::parse($certificate->issued_date)->format('F Y') }}
+    at Barangay Cogon, Ormoc City, Philippines.
+  </p>
+
+  {{-- Signature --}}
+  <div class="sig-block">
+    <div class="sig-name">ATTY. MA. CASSANDRA T. CODILLA, RCE</div>
+    <div class="sig-title">Punong Barangay</div>
+  </div>
+
+  {{-- Receipt --}}
+  @if($certificate->or_number || $certificate->amount)
+  <div class="receipt">
+    @if($certificate->or_number) O.R. No.: <strong>{{ $certificate->or_number }}</strong>&emsp; @endif
+    @if($certificate->amount) Amount Paid: <strong>₱{{ number_format($certificate->amount, 2) }}</strong> @endif
+  </div>
+  @endif
+
+  {{-- Doc number --}}
+  <div class="doc-no">{{ $certificate->certificate_no }}</div>
+
+</div>
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    setTimeout(window.print, 600);
+  });
+</script>
 </body>
 </html>

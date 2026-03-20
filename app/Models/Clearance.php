@@ -12,8 +12,14 @@ class Clearance extends Model
     protected $fillable = [
         'clearance_no',
         'resident_name',
+        'civil_status',
+        'purok',
+        'requestor',
         'certificate_type',
         'purpose',
+        'body_content',
+        'or_number',
+        'amount',
         'date_issued',
     ];
 }

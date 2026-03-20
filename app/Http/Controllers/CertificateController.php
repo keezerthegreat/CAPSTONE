@@ -27,8 +27,14 @@ class CertificateController extends Controller
     {
         $request->validate([
             'resident_name' => 'required|string|max:255',
-            'certificate_type' => 'required|in:Good Moral Character Clearance,Certificate of Residency,Certificate of Indigency,Certificate of Unemployment,Certificate of Residency for Voters,Certificate of Guardianship',
-            'purpose' => 'required|string|max:255',
+            'certificate_type' => 'required|string|max:255',
+            'civil_status' => 'nullable|string|max:50',
+            'purok' => 'nullable|string|max:255',
+            'requestor' => 'nullable|string|max:255',
+            'purpose' => 'nullable|string|max:500',
+            'body_content' => 'nullable|string',
+            'or_number' => 'nullable|string|max:100',
+            'amount' => 'nullable|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -39,8 +45,14 @@ class CertificateController extends Controller
             Certificate::create([
                 'certificate_no' => $certNo,
                 'resident_name' => $request->resident_name,
+                'civil_status' => $request->civil_status,
+                'purok' => $request->purok,
+                'requestor' => $request->requestor,
                 'certificate_type' => $request->certificate_type,
                 'purpose' => $request->purpose,
+                'body_content' => $request->body_content,
+                'or_number' => $request->or_number,
+                'amount' => $request->amount,
                 'issued_date' => now(),
             ]);
         });
@@ -62,16 +74,28 @@ class CertificateController extends Controller
     {
         $request->validate([
             'resident_name' => 'required|string|max:255',
-            'certificate_type' => 'required|in:Good Moral Character Clearance,Certificate of Residency,Certificate of Indigency,Certificate of Unemployment,Certificate of Residency for Voters,Certificate of Guardianship',
-            'purpose' => 'required|string|max:255',
+            'certificate_type' => 'required|string|max:255',
+            'civil_status' => 'nullable|string|max:50',
+            'purok' => 'nullable|string|max:255',
+            'requestor' => 'nullable|string|max:255',
+            'purpose' => 'nullable|string|max:500',
+            'body_content' => 'nullable|string',
+            'or_number' => 'nullable|string|max:100',
+            'amount' => 'nullable|numeric|min:0',
         ]);
 
         $certificate = Certificate::findOrFail($id);
 
         $certificate->update([
             'resident_name' => $request->resident_name,
+            'civil_status' => $request->civil_status,
+            'purok' => $request->purok,
+            'requestor' => $request->requestor,
             'certificate_type' => $request->certificate_type,
             'purpose' => $request->purpose,
+            'body_content' => $request->body_content,
+            'or_number' => $request->or_number,
+            'amount' => $request->amount,
         ]);
         ActivityLog::log('updated', 'Certificate', "Updated certificate for: {$request->resident_name}");
 

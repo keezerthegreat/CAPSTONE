@@ -271,7 +271,7 @@ tbody tr:last-child td { border-bottom:none; }
   <div class="fp-section">
     <div class="fp-section-title">III. Family Members</div>
     <table class="fp-mem-table">
-      <thead><tr><th style="width:30px">#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th><th>Relationship</th></tr></thead>
+      <thead><tr><th style="width:30px">#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th><th>HH Role</th></tr></thead>
       <tbody id="fp-mem-tbody"></tbody>
     </table>
   </div>
@@ -338,7 +338,8 @@ function printFamilyForm() {
   var others = members.filter(function(m){ return m.id !== f.head_resident_id; });
   var otherRows = others.map(function(m, i) {
     var name = (m.last_name||'') + ', ' + (m.first_name||'') + (m.middle_name ? ' '+m.middle_name : '');
-    return '<tr><td style="text-align:center">'+(i+2)+'</td><td style="font-weight:600">'+name+'</td><td>'+(m.gender||'—')+' / '+(m.age||'—')+' yrs</td><td>'+(m.civil_status||'—')+'</td><td>Member</td><td>'+(m.family_role||'—')+'</td></tr>';
+    var hhRole = m.family_role === 'head' ? 'HH Head' : (m.family_role || '—');
+    return '<tr><td style="text-align:center">'+(i+2)+'</td><td style="font-weight:600">'+name+'</td><td>'+(m.gender||'—')+' / '+(m.age||'—')+' yrs</td><td>'+(m.civil_status||'—')+'</td><td>Member</td><td>'+hhRole+'</td></tr>';
   }).join('');
   tbody.innerHTML = headRow + otherRows;
   window.print();
@@ -361,10 +362,17 @@ function openFamilyModal(f) {
   const otherMembers = members.filter(m => m.id !== f.head_resident_id);
   let rows = headRow + otherMembers.map((m, i) => {
     const name = (m.last_name || '') + ', ' + (m.first_name || '') + (m.middle_name ? ' ' + m.middle_name : '');
-    const rel = m.family_role ? `<span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">${m.family_role}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>';
-    return `<tr><td style="color:var(--muted);font-size:11px">${i+2}</td><td style="font-weight:600">${name}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td><span style="color:var(--muted);font-size:11px">Member</span></td><td>${rel}</td></tr>`;
+    let hhRoleBadge;
+    if (m.family_role === 'head') {
+      hhRoleBadge = `<span style="background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">HH Head</span>`;
+    } else if (m.family_role === 'member') {
+      hhRoleBadge = `<span style="color:var(--muted);font-size:11px">member</span>`;
+    } else {
+      hhRoleBadge = '<span style="color:var(--muted);font-size:11px">—</span>';
+    }
+    return `<tr><td style="color:var(--muted);font-size:11px">${i+2}</td><td style="font-weight:600">${name}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td><span style="color:var(--muted);font-size:11px">Member</span></td><td>${hhRoleBadge}</td></tr>`;
   }).join('');
-  body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th><th>Relationship</th></tr></thead><tbody>${rows}</tbody></table>`;
+  body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th><th>HH Role</th></tr></thead><tbody>${rows}</tbody></table>`;
   document.getElementById('fm-edit-link').innerHTML = `<a href="/families/${f.id}/edit" style="color:var(--primary);font-weight:600;text-decoration:none"><i class="fas fa-edit" style="margin-right:4px"></i>Edit this family</a>`;
 }
 function closeFamilyModal() { document.getElementById('familyModal').classList.remove('open'); }
