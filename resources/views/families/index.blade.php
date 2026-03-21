@@ -86,6 +86,13 @@ tbody tr:last-child td { border-bottom:none; }
 .fp-sign-line  { border-top:1px solid #000; width:100%; margin-top:36px; }
 .fp-sign-lbl   { font-size:7.5pt; text-align:center; margin-top:3px; color:#333; }
 .fp-note { font-size:7.5pt; font-style:italic; margin-top:10px; border-top:1px solid #ccc; padding-top:5px; color:#444; }
+.pg-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.pg-info { font-size:12px; color:var(--muted); }
+.pg-controls { display:flex; align-items:center; gap:4px; }
+.pg-btn { display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:34px; padding:0 10px; border-radius:7px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:13px; font-weight:600; text-decoration:none; cursor:pointer; transition:all .15s; font-family:inherit; }
+.pg-btn:hover:not([disabled]) { border-color:var(--primary); color:var(--primary); }
+.pg-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.pg-btn[disabled] { opacity:.35; cursor:default; }
 </style>
 
 <div class="bidb-wrap">
@@ -228,9 +235,32 @@ tbody tr:last-child td { border-bottom:none; }
     </div>
 
     @if($families->hasPages())
-    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">
-      <span>Showing {{ $families->firstItem() }}–{{ $families->lastItem() }} of {{ $families->total() }} families</span>
-      {{ $families->links() }}
+    <div class="pg-bar" style="padding:14px 16px;border-top:1px solid var(--border)">
+      <span class="pg-info">Showing {{ $families->firstItem() }}–{{ $families->lastItem() }} of {{ $families->total() }} families</span>
+      <div class="pg-controls">
+        @if($families->onFirstPage())
+          <button class="pg-btn" disabled><i class="fas fa-chevron-left"></i></button>
+        @else
+          <a href="{{ $families->previousPageUrl() }}" class="pg-btn"><i class="fas fa-chevron-left"></i></a>
+        @endif
+        @php $start = max(1, $families->currentPage() - 2); $end = min($families->lastPage(), $families->currentPage() + 2); @endphp
+        @if($start > 1)
+          <a href="{{ $families->url(1) }}" class="pg-btn">1</a>
+          @if($start > 2)<span class="pg-btn" style="border:none;cursor:default">…</span>@endif
+        @endif
+        @for($p = $start; $p <= $end; $p++)
+          <a href="{{ $families->url($p) }}" class="pg-btn {{ $p == $families->currentPage() ? 'active' : '' }}">{{ $p }}</a>
+        @endfor
+        @if($end < $families->lastPage())
+          @if($end < $families->lastPage() - 1)<span class="pg-btn" style="border:none;cursor:default">…</span>@endif
+          <a href="{{ $families->url($families->lastPage()) }}" class="pg-btn">{{ $families->lastPage() }}</a>
+        @endif
+        @if($families->hasMorePages())
+          <a href="{{ $families->nextPageUrl() }}" class="pg-btn"><i class="fas fa-chevron-right"></i></a>
+        @else
+          <button class="pg-btn" disabled><i class="fas fa-chevron-right"></i></button>
+        @endif
+      </div>
     </div>
     @endif
   </div>

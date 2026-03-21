@@ -90,6 +90,13 @@ tbody tr:last-child td { border-bottom:none; }
 .mem-table td { padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text); }
 .mem-table tbody tr:last-child td { border-bottom:none; }
 .badge-head { background:#fef3c7; color:#92400e; display:inline-flex; align-items:center; padding:2px 7px; border-radius:20px; font-size:10px; font-weight:600; }
+.pg-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.pg-info { font-size:12px; color:var(--muted); }
+.pg-controls { display:flex; align-items:center; gap:4px; }
+.pg-btn { display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:34px; padding:0 10px; border-radius:7px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:13px; font-weight:600; text-decoration:none; cursor:pointer; transition:all .15s; font-family:inherit; }
+.pg-btn:hover:not([disabled]) { border-color:var(--primary); color:var(--primary); }
+.pg-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.pg-btn[disabled] { opacity:.35; cursor:default; }
 </style>
 
 <div class="bidb-wrap">
@@ -252,9 +259,32 @@ tbody tr:last-child td { border-bottom:none; }
     </div>
 
     @if($households->hasPages())
-    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">
-      <span>Showing {{ $households->firstItem() }}–{{ $households->lastItem() }} of {{ $households->total() }} households</span>
-      {{ $households->links() }}
+    <div class="pg-bar" style="padding:14px 16px;border-top:1px solid var(--border)">
+      <span class="pg-info">Showing {{ $households->firstItem() }}–{{ $households->lastItem() }} of {{ $households->total() }} households</span>
+      <div class="pg-controls">
+        @if($households->onFirstPage())
+          <button class="pg-btn" disabled><i class="fas fa-chevron-left"></i></button>
+        @else
+          <a href="{{ $households->previousPageUrl() }}" class="pg-btn"><i class="fas fa-chevron-left"></i></a>
+        @endif
+        @php $start = max(1, $households->currentPage() - 2); $end = min($households->lastPage(), $households->currentPage() + 2); @endphp
+        @if($start > 1)
+          <a href="{{ $households->url(1) }}" class="pg-btn">1</a>
+          @if($start > 2)<span class="pg-btn" style="border:none;cursor:default">…</span>@endif
+        @endif
+        @for($p = $start; $p <= $end; $p++)
+          <a href="{{ $households->url($p) }}" class="pg-btn {{ $p == $households->currentPage() ? 'active' : '' }}">{{ $p }}</a>
+        @endfor
+        @if($end < $households->lastPage())
+          @if($end < $households->lastPage() - 1)<span class="pg-btn" style="border:none;cursor:default">…</span>@endif
+          <a href="{{ $households->url($households->lastPage()) }}" class="pg-btn">{{ $households->lastPage() }}</a>
+        @endif
+        @if($households->hasMorePages())
+          <a href="{{ $households->nextPageUrl() }}" class="pg-btn"><i class="fas fa-chevron-right"></i></a>
+        @else
+          <button class="pg-btn" disabled><i class="fas fa-chevron-right"></i></button>
+        @endif
+      </div>
     </div>
     @endif
   </div>

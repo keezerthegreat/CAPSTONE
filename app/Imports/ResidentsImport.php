@@ -69,6 +69,7 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
             || str_contains($upperCheck, 'NOTED BY')
             || str_contains($upperCheck, 'ENTER THIS')
             || str_contains($upperCheck, 'LAST NAME')
+            || str_contains($upperCheck, 'VACANT')
             || $upperCheck === 'MALEFEMALE'
             || str_contains($upperCheck, 'TOTAL')) {
             $this->skipped++;
