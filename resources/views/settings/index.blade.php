@@ -217,12 +217,11 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
                         This will <strong>replace all current data</strong> with the contents of the uploaded backup file.
                         The current database will be auto-saved as a backup before restoring.
                     </div>
-                    <form method="POST" action="{{ route('settings.backup.restore') }}" enctype="multipart/form-data"
-                        onsubmit="return confirm('Are you sure you want to restore this backup? All current data will be replaced.')">
+                    <form id="restoreForm" method="POST" action="{{ route('settings.backup.restore') }}" enctype="multipart/form-data">
                         @csrf
                         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-                            <input type="file" name="backup_file" accept=".sqlite" required class="restore-file">
-                            <button type="submit" class="btn btn-restore" style="width:auto;margin-top:0;flex-shrink:0">
+                            <input type="file" name="backup_file" accept=".sqlite" required class="restore-file" id="restoreFileInput">
+                            <button type="button" onclick="openRestoreConfirm()" class="btn btn-restore" style="width:auto;margin-top:0;flex-shrink:0">
                                 <i class="fas fa-undo"></i> Restore Now
                             </button>
                         </div>
@@ -270,5 +269,47 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
     </div>
 
 </div>
+
+{{-- Restore Confirm Modal --}}
+<div class="confirm-backdrop" id="restoreConfirmBackdrop">
+    <div class="confirm-box">
+        <div class="confirm-icon" style="background:#fff7ed;border-color:#fed7aa;color:#c2410c">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="confirm-title">Restore Database?</div>
+        <p class="confirm-msg">All current data will be replaced with the uploaded backup file. This cannot be undone. A pre-restore backup will be saved automatically.</p>
+        <div class="confirm-actions">
+            <button class="confirm-cancel" onclick="closeRestoreConfirm()"><i class="fas fa-times"></i> Cancel</button>
+            <button class="confirm-ok" style="background:#c2410c" onclick="document.getElementById('restoreForm').submit()">
+                <i class="fas fa-undo"></i> Yes, Restore
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    [data-theme="dark"] #restoreConfirmBackdrop .confirm-box { background: #161b27 !important; }
+    [data-theme="dark"] #restoreConfirmBackdrop .confirm-icon { background: #2a1a0e !important; border-color: #4a2c10 !important; color: #fb923c !important; }
+    [data-theme="dark"] #restoreConfirmBackdrop .confirm-title { color: var(--text) !important; }
+    [data-theme="dark"] #restoreConfirmBackdrop .confirm-cancel { background: var(--input-bg) !important; color: var(--muted) !important; border-color: var(--border) !important; }
+    [data-theme="dark"] #restoreConfirmBackdrop .confirm-ok { background: #9a3412 !important; }
+</style>
+
+<script>
+    function openRestoreConfirm() {
+        var fileInput = document.getElementById('restoreFileInput');
+        if (!fileInput.value) {
+            fileInput.reportValidity();
+            return;
+        }
+        document.getElementById('restoreConfirmBackdrop').classList.add('open');
+    }
+    function closeRestoreConfirm() {
+        document.getElementById('restoreConfirmBackdrop').classList.remove('open');
+    }
+    document.getElementById('restoreConfirmBackdrop').addEventListener('click', function(e) {
+        if (e.target === this) { closeRestoreConfirm(); }
+    });
+</script>
 
 @endsection

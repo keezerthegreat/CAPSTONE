@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
@@ -91,14 +92,14 @@ class SettingsController extends Controller
     public function restoreBackup(Request $request)
     {
         $request->validate([
-            'backup_file' => 'required|file|mimes:sqlite,application/octet-stream|max:102400',
+            'backup_file' => 'required|file|max:102400',
         ]);
 
         $uploadedFile = $request->file('backup_file');
 
-        // Only accept files with the expected naming pattern or a plain .sqlite extension
+        // Only accept .sqlite files by extension
         $originalName = $uploadedFile->getClientOriginalName();
-        if (! preg_match('/^database_[\d_-]+\.sqlite$/', $originalName) && ! str_ends_with($originalName, '.sqlite')) {
+        if (! str_ends_with(strtolower($originalName), '.sqlite')) {
             return redirect()->route('settings.index')
                 ->with('error', 'Invalid backup file. Please upload a valid .sqlite backup file.');
         }
@@ -113,8 +114,14 @@ class SettingsController extends Controller
         $autoBackupName = 'database_'.now()->format('Y_m_d_His').'_pre_restore.sqlite';
         copy($dbPath, $backupDir.DIRECTORY_SEPARATOR.$autoBackupName);
 
+        // Close the active SQLite connection before replacing the file
+        DB::disconnect('sqlite');
+
         // Replace the live database with the uploaded file
         $uploadedFile->move(dirname($dbPath), basename($dbPath));
+
+        // Reconnect so the rest of the request (session, redirect) uses the restored DB
+        DB::reconnect('sqlite');
 
         return redirect()->route('settings.index')
             ->with('success', 'Database restored successfully. A pre-restore backup was saved as "'.$autoBackupName.'".');
