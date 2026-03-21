@@ -119,7 +119,7 @@ input::placeholder { color:#94a3b8; }
           <label>Civil Status</label>
           <select name="civil_status">
             <option value="">Select...</option>
-            @foreach(['Single','Married','Widowed','Separated','Annulled','Live-in'] as $cs)
+            @foreach(['Single','Married','Widowed','Separated'] as $cs)
               <option value="{{ $cs }}" {{ old('civil_status')==$cs ? 'selected':'' }}>{{ $cs }}</option>
             @endforeach
           </select>

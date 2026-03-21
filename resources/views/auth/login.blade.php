@@ -237,6 +237,25 @@
         transform: translateY(0);
     }
 
+    /* Forgot password link */
+    .forgot-link {
+        display: block;
+        text-align: center;
+        margin-top: 0.9rem;
+        font-size: 0.78rem;
+        color: var(--gold);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.03em;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+    .forgot-link:hover { opacity: 1; }
+
     /* Footer note */
     .login-footer {
         text-align: center;
@@ -244,6 +263,91 @@
         font-size: 0.72rem;
         color: rgba(138,149,163,0.6);
         letter-spacing: 0.04em;
+    }
+
+    /* Forgot password modal */
+    .fp-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 500;
+        align-items: center;
+        justify-content: center;
+    }
+    .fp-backdrop.open { display: flex; }
+    .fp-modal {
+        background: #162848;
+        border: 1px solid rgba(201,168,76,0.3);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 420px;
+        padding: 2rem;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+        animation: fadeUp 0.3s ease both;
+    }
+    .fp-modal h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.3rem;
+    }
+    .fp-modal p {
+        font-size: 0.78rem;
+        color: var(--gray-soft);
+        margin-bottom: 1.3rem;
+        line-height: 1.5;
+    }
+    .fp-modal textarea {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        background: rgba(255,255,255,0.04);
+        border: 1.5px solid rgba(255,255,255,0.09);
+        border-radius: 10px;
+        color: var(--white);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+        resize: none;
+        margin-top: 0.3rem;
+        transition: border-color 0.2s;
+    }
+    .fp-modal textarea::placeholder { color: rgba(255,255,255,0.2); }
+    .fp-modal textarea:focus { border-color: var(--gold); }
+    .fp-actions { display: flex; gap: 8px; margin-top: 1.2rem; }
+    .fp-btn-submit {
+        flex: 1;
+        padding: 0.7rem;
+        background: linear-gradient(135deg, var(--gold) 0%, #a87c2a 100%);
+        color: var(--navy);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        transition: opacity 0.2s;
+    }
+    .fp-btn-submit:hover { opacity: 0.9; }
+    .fp-btn-cancel {
+        padding: 0.7rem 1.1rem;
+        background: rgba(255,255,255,0.06);
+        color: var(--gray-soft);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .fp-btn-cancel:hover { background: rgba(255,255,255,0.1); }
+    .fp-success {
+        display: none;
+        text-align: center;
+        padding: 0.5rem 0 0.2rem;
+        color: #6ee7b7;
+        font-size: 0.85rem;
     }
 </style>
 
@@ -309,8 +413,54 @@
 
         </form>
 
+        @if($errors->has('email') && !$errors->has('fp_email'))
+        <button type="button" class="forgot-link" onclick="openForgotPassword()">
+            Forgot your password?
+        </button>
+        @endif
+
         <p class="login-footer">Barangay Information System &mdash; Authorized Personnel Only</p>
 
+    </div>
+</div>
+
+{{-- Forgot Password Modal --}}
+<div class="fp-backdrop" id="fpBackdrop">
+    <div class="fp-modal">
+        <h3>🔒 Forgot Password?</h3>
+        <p>Submit a request and the admin will reset your password for you. You can leave an optional note.</p>
+
+        @if(session('fp_success'))
+            <div class="fp-success" style="display:block">
+                ✅ {{ session('fp_success') }}
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('password.request.submit') }}" id="fpForm">
+            @csrf
+            <div class="field-group">
+                <label class="field-label" for="fp_email">Your Email Address</label>
+                <input
+                    type="email"
+                    id="fp_email"
+                    name="email"
+                    placeholder="you@barangay.gov.ph"
+                    required
+                    class="field-input"
+                    value="{{ old('fp_email') }}">
+                @error('fp_email')
+                    <div style="color:#f08080;font-size:0.75rem;margin-top:4px">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="field-group">
+                <label class="field-label" for="fp_note">Note <span style="opacity:.5">(optional)</span></label>
+                <textarea id="fp_note" name="note" rows="2" placeholder="e.g. I can't remember my password..."></textarea>
+            </div>
+            <div class="fp-actions">
+                <button type="submit" class="fp-btn-submit">Send Request</button>
+                <button type="button" class="fp-btn-cancel" onclick="closeForgotPassword()">Cancel</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -326,6 +476,16 @@ function togglePassword() {
         icon.textContent = '👁';
     }
 }
+function openForgotPassword() {
+    document.getElementById('fpBackdrop').classList.add('open');
+}
+function closeForgotPassword() {
+    document.getElementById('fpBackdrop').classList.remove('open');
+}
+// Auto-open if there was a fp validation error or success
+@if($errors->has('fp_email') || session('fp_success'))
+    document.addEventListener('DOMContentLoaded', function() { openForgotPassword(); });
+@endif
 </script>
 
 @endsection

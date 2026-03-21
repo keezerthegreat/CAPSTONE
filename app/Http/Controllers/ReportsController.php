@@ -25,8 +25,10 @@ class ReportsController extends Controller
             ->groupBy('civil_status')
             ->get();
 
-        $bySitio = (clone $base)->selectRaw('barangay, count(*) as total')
-            ->groupBy('barangay')
+        $bySitio = (clone $base)->selectRaw('address as sitio, count(*) as total')
+            ->whereNotNull('address')
+            ->where('address', '!=', '')
+            ->groupBy('address')
             ->orderByDesc('total')
             ->get();
 

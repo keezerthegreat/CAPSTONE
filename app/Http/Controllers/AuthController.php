@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\PasswordResetRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -17,7 +19,7 @@ class AuthController extends Controller
     public function authenticate(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
@@ -25,6 +27,7 @@ class AuthController extends Controller
             // Block archived accounts
             if (Auth::user()->is_archived) {
                 Auth::logout();
+
                 return back()
                     ->withInput($request->only('email'))
                     ->withErrors([
@@ -33,6 +36,7 @@ class AuthController extends Controller
             }
             $request->session()->regenerate();
             ActivityLog::log('logged_in', 'Auth', 'User logged in');
+
             return redirect()->route('dashboard');
         }
 
@@ -43,11 +47,43 @@ class AuthController extends Controller
             ]);
     }
 
+    public function submitPasswordRequest(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'note' => 'nullable|string|max:500',
+        ], [], ['email' => 'fp_email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user) {
+            return back()->withErrors(['fp_email' => 'No active account found with that email.']);
+        }
+
+        // Prevent duplicate pending requests
+        $existing = PasswordResetRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($existing) {
+            return back()->with('fp_success', 'You already have a pending request. Please wait for the admin to respond.');
+        }
+
+        PasswordResetRequest::create([
+            'user_id' => $user->id,
+            'note' => $request->note,
+            'status' => 'pending',
+        ]);
+
+        return back()->with('fp_success', 'Request sent! The admin will reset your password shortly.');
+    }
+
     public function logout()
     {
         ActivityLog::log('logged_out', 'Auth', 'User logged out');
         Auth::logout();
         Session::flush();
+
         return redirect()->route('login');
     }
 }

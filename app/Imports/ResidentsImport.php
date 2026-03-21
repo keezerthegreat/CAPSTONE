@@ -196,10 +196,6 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
      */
     private function processHouseholdsAndFamilies(): void
     {
-        if (empty($this->touchedHouseholdIds)) {
-            return;
-        }
-
         foreach ($this->touchedHouseholdIds as $hhId) {
             $hh = Household::find($hhId);
             if (! $hh) {
@@ -228,6 +224,32 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
                     'head_first_name' => $head->first_name,
                     'head_middle_name' => $head->middle_name,
                     'household_id' => $hhId,
+                    'member_count' => $members->count(),
+                ]);
+                $members->each(fn ($r) => $r->update(['family_id' => $family->id]));
+            }
+        }
+
+        // Group residents with no household into families by last name
+        $unassigned = Resident::whereNull('household_id')->whereNull('family_id')->get();
+
+        foreach ($unassigned->groupBy('last_name') as $lastName => $members) {
+            $existingFamily = Family::whereNull('household_id')
+                ->where('family_name', $lastName.' Family')
+                ->first();
+
+            if ($existingFamily) {
+                $members->each(fn ($r) => $r->update(['family_id' => $existingFamily->id]));
+                $existingFamily->increment('member_count', $members->count());
+            } else {
+                $head = $members->firstWhere('family_role', 'head') ?? $members->first();
+                $family = Family::create([
+                    'family_name' => $lastName.' Family',
+                    'head_resident_id' => $head->id,
+                    'head_last_name' => $head->last_name,
+                    'head_first_name' => $head->first_name,
+                    'head_middle_name' => $head->middle_name,
+                    'household_id' => null,
                     'member_count' => $members->count(),
                 ]);
                 $members->each(fn ($r) => $r->update(['family_id' => $family->id]));

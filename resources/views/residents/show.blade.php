@@ -314,9 +314,6 @@
           <span class="rbi-check-item">
             <span class="rbi-checkbox {{ $cs === 'separated' ? 'checked' : '' }}"></span> Separated
           </span>
-          <span class="rbi-check-item">
-            <span class="rbi-checkbox {{ $cs === 'live-in' ? 'checked' : '' }}"></span> Live-in
-          </span>
         </div>
       </div>
     </div>

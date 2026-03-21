@@ -263,8 +263,6 @@ function svgDonut($segments, $size=160, $thickness=30) {
           ['value' => $civilStatus['Married'],   'color' => '#ec4899'],
           ['value' => $civilStatus['Widowed'],   'color' => '#a855f7'],
           ['value' => $civilStatus['Separated'], 'color' => '#94a3b8'],
-          ['value' => $civilStatus['Annulled'],  'color' => '#f97316'],
-          ['value' => $civilStatus['Live-in'],   'color' => '#14b8a6'],
         ]) !!}
       </div>
       <div class="donut-legend">
@@ -272,8 +270,6 @@ function svgDonut($segments, $size=160, $thickness=30) {
         <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Married: {{ $civilStatus['Married'] }}</div>
         <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div>Widowed: {{ $civilStatus['Widowed'] }}</div>
         <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>Separated: {{ $civilStatus['Separated'] }}</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Annulled: {{ $civilStatus['Annulled'] }}</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#14b8a6"></div>Live-in: {{ $civilStatus['Live-in'] }}</div>
       </div>
     </div>
 

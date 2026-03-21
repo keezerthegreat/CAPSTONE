@@ -31,8 +31,6 @@ class DashboardController extends Controller
             'Married' => (clone $living)->where('civil_status', 'Married')->count(),
             'Widowed' => (clone $living)->where('civil_status', 'Widowed')->count(),
             'Separated' => (clone $living)->where('civil_status', 'Separated')->count(),
-            'Annulled' => (clone $living)->where('civil_status', 'Annulled')->count(),
-            'Live-in' => (clone $living)->where('civil_status', 'Live-in')->count(),
         ];
 
         $recentLogs = ActivityLog::latest()->take(8)->get();

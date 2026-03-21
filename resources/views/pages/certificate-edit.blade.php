@@ -92,7 +92,6 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
             <option value="Married"    {{ ($certificate->civil_status ?? '') == 'Married'    ? 'selected' : '' }}>Married</option>
             <option value="Widowed"    {{ ($certificate->civil_status ?? '') == 'Widowed'    ? 'selected' : '' }}>Widowed</option>
             <option value="Separated"  {{ ($certificate->civil_status ?? '') == 'Separated'  ? 'selected' : '' }}>Separated</option>
-            <option value="Annulled"   {{ ($certificate->civil_status ?? '') == 'Annulled'   ? 'selected' : '' }}>Annulled</option>
           </select>
         </div>
         <div class="form-group">

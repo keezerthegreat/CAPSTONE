@@ -372,7 +372,7 @@ tbody tr:last-child td { border-bottom: none; }
           </button>
           <div class="flt-dropdown" id="dd-civil">
             <div class="flt-option {{ !$fCivil ? 'selected' : '' }}" onclick="applyFilter('civil','')">All</div>
-            @foreach(['single','married','widowed','separated','annulled','live-in'] as $cv)
+            @foreach(['single','married','widowed','separated'] as $cv)
             <div class="flt-option {{ strtolower($fCivil)===$cv ? 'selected' : '' }}" onclick="applyFilter('civil','{{ $cv }}')">{{ ucfirst($cv) }}</div>
             @endforeach
           </div>
@@ -666,7 +666,6 @@ tbody tr:last-child td { border-bottom: none; }
           <span class="rp-check-item"><span id="rp-cs-married" class="rp-cb"></span> Married</span>
           <span class="rp-check-item"><span id="rp-cs-widow" class="rp-cb"></span> Widow/er</span>
           <span class="rp-check-item"><span id="rp-cs-sep" class="rp-cb"></span> Separated</span>
-          <span class="rp-check-item"><span id="rp-cs-livein" class="rp-cb"></span> Live-in</span>
         </div>
       </div>
     </div>
@@ -910,7 +909,6 @@ function printRBIForm() {
   cb('rp-cs-married', cs === 'married');
   cb('rp-cs-widow', cs === 'widow' || cs === 'widower' || cs === 'widow/er');
   cb('rp-cs-sep',  cs === 'separated');
-  cb('rp-cs-livein', cs === 'live-in');
   cb('rp-senior',  !!r.is_senior);
   cb('rp-pwd',     !!r.is_pwd);
   cb('rp-voter',   !!r.is_voter);

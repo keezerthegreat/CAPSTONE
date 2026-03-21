@@ -7,6 +7,7 @@ use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\HouseholdController;
+use App\Http\Controllers\PasswordRequestController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\SettingsController;
@@ -25,6 +26,7 @@ Route::redirect('/', '/login');
 // Login
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->name('login.submit')->middleware('throttle:10,1');
+Route::post('/forgot-password', [AuthController::class, 'submitPasswordRequest'])->name('password.request.submit')->middleware('throttle:5,1');
 
 /*
 |--------------------------------------------------------------------------
@@ -125,6 +127,11 @@ Route::middleware('auth')->group(function () {
         // Families — destroy + bulk delete (admin only)
         Route::delete('/families/{family}', [FamilyController::class, 'destroy'])->name('families.destroy');
         Route::delete('/families-bulk', [FamilyController::class, 'bulkDestroy'])->name('families.bulkDestroy');
+
+        // Password Reset Requests
+        Route::get('/admin/password-requests', [PasswordRequestController::class, 'index'])->name('password.requests.index');
+        Route::post('/admin/password-requests/{passwordRequest}/resolve', [PasswordRequestController::class, 'resolve'])->name('password.requests.resolve');
+        Route::post('/admin/password-requests/{passwordRequest}/dismiss', [PasswordRequestController::class, 'dismiss'])->name('password.requests.dismiss');
 
         // Audit Log
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');

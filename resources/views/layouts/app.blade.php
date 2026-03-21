@@ -476,7 +476,7 @@
 </head>
 <body>
 
-<div style="display:flex">
+<div class="app-wrapper" style="display:flex">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -552,6 +552,16 @@
       <a href="{{ route('residents.import.form') }}"
          class="nav-item {{ request()->routeIs('residents.import*') ? 'active' : '' }}">
         <i class="fas fa-file-import"></i> Import Data
+      </a>
+
+      @php $pendingPasswordRequests = \App\Models\PasswordResetRequest::where('status','pending')->count(); @endphp
+      <a href="{{ route('password.requests.index') }}"
+         class="nav-item {{ request()->is('admin/password-requests*') ? 'active' : '' }}"
+         style="position:relative">
+        <i class="fas fa-key"></i> Password Requests
+        @if($pendingPasswordRequests > 0)
+          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:#ef4444;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 6px;line-height:1.6">{{ $pendingPasswordRequests }}</span>
+        @endif
       </a>
 
       <a href="{{ route('settings.index') }}"

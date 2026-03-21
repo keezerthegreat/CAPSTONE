@@ -134,20 +134,26 @@ tbody tr:last-child td { border-bottom:none; }
       </div>
       <div class="filter-controls">
         <div class="flt-wrap" id="fam-wrap-sitio">
-          <button class="flt-btn {{ $filters['sitio'] ? 'active' : '' }}" id="fam-btn-sitio" onclick="toggleFamFlt('sitio')">
+          <button class="flt-btn {{ ($filters['sitio'] && $filters['sitio'] !== '__none__') ? 'active' : '' }}" id="fam-btn-sitio" onclick="toggleFamFlt('sitio')">
             <i class="fas fa-map-pin"></i>
-            <span id="fam-lbl-sitio">{{ $filters['sitio'] ? ($filters['sitio'] === '__none__' ? 'No Household' : $filters['sitio']) : 'Purok' }}</span>
-            <i class="fas fa-chevron-down flt-caret" id="fam-caret-sitio" style="{{ $filters['sitio'] ? 'display:none' : '' }}"></i>
-            <span class="flt-x" id="fam-x-sitio" style="{{ $filters['sitio'] ? '' : 'display:none' }}" onclick="event.stopPropagation();famApplyFilter('sitio','')">×</span>
+            <span id="fam-lbl-sitio">{{ ($filters['sitio'] && $filters['sitio'] !== '__none__') ? $filters['sitio'] : 'Purok' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="fam-caret-sitio" style="{{ ($filters['sitio'] && $filters['sitio'] !== '__none__') ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="fam-x-sitio" style="{{ ($filters['sitio'] && $filters['sitio'] !== '__none__') ? '' : 'display:none' }}" onclick="event.stopPropagation();famApplyFilter('sitio','')">×</span>
           </button>
           <div class="flt-dropdown" id="fam-dd-sitio">
             <div class="flt-option {{ !$filters['sitio'] ? 'selected':'' }}" onclick="famApplyFilter('sitio','')">All Puroks</div>
             @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang','Jasmin','Rosal','Sampaguita'] as $s)
             <div class="flt-option {{ $filters['sitio']===$s ? 'selected':'' }}" onclick="famApplyFilter('sitio','{{ $s }}')">{{ $s }}</div>
             @endforeach
-            <div class="flt-option {{ $filters['sitio']==='__none__' ? 'selected':'' }}" onclick="famApplyFilter('sitio','__none__')">Not linked to household</div>
           </div>
         </div>
+        <button class="flt-btn {{ $filters['sitio'] === '__none__' ? 'active' : '' }}"
+                onclick="famApplyFilter('sitio', '{{ $filters['sitio'] === '__none__' ? '' : '__none__' }}')"
+                title="Show only families not linked to any household">
+          <i class="fas fa-unlink"></i>
+          <span>No Household</span>
+          @if($filters['sitio'] === '__none__')<span class="flt-x" onclick="event.stopPropagation();famApplyFilter('sitio','')">×</span>@endif
+        </button>
         @if($filters['search'] || $filters['sitio'])
         <button class="flt-btn" onclick="famClearAll()" style="color:var(--danger)">
           <i class="fas fa-times"></i> Clear Filters

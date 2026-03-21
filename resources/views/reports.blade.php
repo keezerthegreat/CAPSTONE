@@ -71,12 +71,92 @@
 .tab-content.active { display:block; }
 
 @media print {
-  .sidebar, .topbar, .page-hdr .btn, .tabs { display:none !important; }
-  .main-content { margin-left: 0 !important; }
-  .bidb-wrap { padding: 12px; background: #fff !important; }
-  .card { box-shadow: none; border: 1px solid #ccc; }
-  .stat-card { box-shadow: none; border: 1px solid #ccc; }
-  @page { size: A4 portrait; margin: 12mm; }
+  /* Layout */
+  .sidebar, .topbar, .page-hdr, .tabs { display:none !important; }
+  .app-wrapper { display:block !important; }
+  .main-content { margin-left:0 !important; width:100% !important; }
+  .bidb-wrap { padding:0; background:#fff !important; }
+  @page { size:A4 landscape; margin:12mm 15mm; }
+  /* List tab overrides */
+  body.printing-list .stat-grid { display:none !important; }
+  body.printing-list .card { page-break-inside:auto !important; break-inside:auto !important; }
+  body.printing-list .list-table { font-size:8.5pt !important; }
+  body.printing-list .list-table th,
+  body.printing-list .list-table td { padding:4px 6px !important; }
+
+  /* Show letterhead */
+  .print-letterhead { display:block !important; }
+
+  /* Only print the active tab */
+  .tab-content { display:none !important; }
+  .tab-content.active { display:block !important; }
+  .print-section-title { display:block !important; }
+
+  /* Force black text everywhere, no shadows */
+  * { color:#000 !important; box-shadow:none !important; border-color:#bbb !important; }
+
+  /* White backgrounds only on containers — NOT on bar fills */
+  body, .bidb-wrap, .card, .card-body, .stat-card, .stat-grid,
+  .breakdown-table, .breakdown-table td, .breakdown-table tr,
+  .two-col, .two-col > div { background:#fff !important; }
+
+  /* Cards */
+  .card { border:none !important; border-top:2px solid #000 !important; border-radius:0 !important; margin-bottom:6px !important; page-break-inside:auto !important; break-inside:auto !important; overflow:visible !important; }
+  .card-body { padding:6px 10px !important; }
+
+  /* Stat grid */
+  .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:6px; }
+  .stat-card { border:1px solid #999 !important; border-radius:0 !important; padding:5px 8px !important; text-align:center; }
+  .stat-icon { display:none !important; }
+  .stat-info { display:block !important; }
+  .slabel { font-size:7pt !important; font-weight:700 !important; text-transform:uppercase; letter-spacing:.04em; }
+  .svalue { font-size:13pt !important; font-weight:800 !important; }
+
+  /* Progress bars */
+  .prog-bar { border:1px solid #888 !important; border-radius:2px !important; height:6px !important; background:#ddd !important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  .prog-fill { background:#333 !important; height:6px !important; display:block !important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+
+  /* Tables — consistent column widths and alignment */
+  .breakdown-table { width:100% !important; table-layout:fixed !important; }
+  .breakdown-table td { border-bottom:1px dotted #ccc !important; border-color:#ccc !important; padding:3px 6px !important; font-size:8.5pt !important; vertical-align:middle !important; }
+  .label-col { width:36% !important; text-align:left !important; }
+  .bar-col   { width:32% !important; }
+  .value-col { width:16% !important; text-align:right !important; font-weight:700 !important; }
+  .pct-col   { width:16% !important; text-align:right !important; }
+
+  /* Section headings inside tabs */
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* Demographics sub-headings */
+  .demo-subhead { margin:6px 0 4px !important; font-size:8pt !important; }
+
+  /* List tables (seniors, pwd, voters, minors) */
+  table th { background:#eee !important; font-size:8pt !important; border-bottom:1.5px solid #999 !important; }
+  table td { font-size:9pt !important; }
+}
+
+.print-letterhead {
+  display: none;
+  text-align: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2.5px solid #000;
+}
+.print-letterhead img { width: 52px; height: 52px; object-fit: contain; display: block; margin: 0 auto 4px; }
+.print-letterhead .lh-republic { font-size: 9pt; font-style: italic; color: #000; }
+.print-letterhead .lh-office   { font-size: 10.5pt; font-weight: bold; text-transform: uppercase; margin-top: 1px; color: #000; }
+.print-letterhead .lh-location { font-size: 9pt; margin-top: 1px; color: #000; }
+
+/* Section dividers shown only when printing — separates each tab section */
+.print-section-title {
+  display: none;
+  font-size: 9.5pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-bottom: 1.5px solid #000;
+  padding-bottom: 3px;
+  margin: 6px 0 6px;
 }
 </style>
 
@@ -88,7 +168,15 @@
       <h1><i class="fas fa-chart-bar" style="margin-right:8px"></i>Reports</h1>
       <div class="breadcrumb">Home › <span>Reports</span></div>
     </div>
-    <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print"></i> Print Report</button>
+    <button onclick="doPrint()" class="btn btn-primary"><i class="fas fa-print"></i> Print Report</button>
+  </div>
+
+  <!-- Print Letterhead (hidden on screen, shown on print) -->
+  <div class="print-letterhead">
+    <img src="{{ asset('images/cogon.png') }}" alt="Barangay Seal" onerror="this.style.display='none'">
+    <div class="lh-republic">Republic of the Philippines</div>
+    <div class="lh-office">Office of the Punong Barangay</div>
+    <div class="lh-location">Barangay Cogon, Ormoc City, Leyte</div>
   </div>
 
   <!-- Stat Cards -->
@@ -124,6 +212,7 @@
 
     <!-- Population Summary Tab -->
     <div id="tab-population" class="tab-content active">
+      <div class="print-section-title">I. Population Summary</div>
       <div class="card-body">
         <div class="two-col">
 
@@ -213,12 +302,13 @@
 
     <!-- Demographics Tab -->
     <div id="tab-demographics" class="tab-content">
+      <div class="print-section-title">II. Demographics</div>
       <div class="card-body">
-        <div style="font-weight:700;color:var(--primary);margin-bottom:14px;font-size:13px"><i class="fas fa-map-marker-alt" style="margin-right:6px"></i>Population by Sitio / Area</div>
+        <div class="demo-subhead" style="font-weight:700;color:var(--primary);margin-bottom:14px;font-size:13px"><i class="fas fa-map-marker-alt" style="margin-right:6px"></i>Population by Sitio / Area</div>
         <table class="breakdown-table">
           @forelse($bySitio as $s)
           <tr>
-            <td class="label-col">{{ $s->barangay ?? 'Not specified' }}</td>
+            <td class="label-col">{{ $s->sitio ?? 'Not specified' }}</td>
             <td class="bar-col"><div class="prog-bar"><div class="prog-fill" style="width:{{ $totalResidents > 0 ? round(($s->total/$totalResidents)*100) : 0 }}%;background:#1a3a6b"></div></div></td>
             <td class="value-col">{{ $s->total }}</td>
             <td class="pct-col">{{ $totalResidents > 0 ? round(($s->total/$totalResidents)*100,1) : 0 }}%</td>
@@ -228,7 +318,7 @@
           @endforelse
         </table>
 
-        <div style="font-weight:700;color:var(--primary);margin:24px 0 14px;font-size:13px"><i class="fas fa-graduation-cap" style="margin-right:6px"></i>Education Level Breakdown</div>
+        <div class="demo-subhead" style="font-weight:700;color:var(--primary);margin:24px 0 14px;font-size:13px"><i class="fas fa-graduation-cap" style="margin-right:6px"></i>Education Level Breakdown</div>
         <table class="breakdown-table">
           @forelse($byEducation as $ed)
           <tr>
@@ -246,6 +336,7 @@
 
     <!-- Senior Citizens Tab -->
     <div id="tab-seniors" class="tab-content">
+      <div class="print-section-title">III. Senior Citizens</div>
       <div class="card-body" style="padding:0">
         <div style="padding:16px 20px;font-size:13px;color:var(--muted)">Total: <strong style="color:var(--primary)">{{ $seniors }}</strong> senior citizen(s)</div>
         <table class="list-table">
@@ -257,7 +348,7 @@
               <td><strong>{{ $r->last_name }}, {{ $r->first_name }} {{ $r->middle_name }}</strong></td>
               <td>{{ $r->age }} yrs</td>
               <td>{{ $r->gender }}</td>
-              <td>{{ $r->barangay }}, {{ $r->city }}</td>
+              <td>{{ $r->address ?? '—' }}</td>
               <td>{{ $r->contact_number ?? '—' }}</td>
             </tr>
             @empty
@@ -270,6 +361,7 @@
 
     <!-- PWD Tab -->
     <div id="tab-pwd" class="tab-content">
+      <div class="print-section-title">IV. Persons with Disability (PWD)</div>
       <div class="card-body" style="padding:0">
         <div style="padding:16px 20px;font-size:13px;color:var(--muted)">Total: <strong style="color:var(--primary)">{{ $pwd }}</strong> person(s) with disability</div>
         <table class="list-table">
@@ -281,7 +373,7 @@
               <td><strong>{{ $r->last_name }}, {{ $r->first_name }} {{ $r->middle_name }}</strong></td>
               <td>{{ $r->age }} yrs</td>
               <td>{{ $r->gender }}</td>
-              <td>{{ $r->barangay }}, {{ $r->city }}</td>
+              <td>{{ $r->address ?? '—' }}</td>
               <td>{{ $r->contact_number ?? '—' }}</td>
             </tr>
             @empty
@@ -294,6 +386,7 @@
 
     <!-- Voters Tab -->
     <div id="tab-voters" class="tab-content">
+      <div class="print-section-title">V. Registered Voters</div>
       <div class="card-body" style="padding:0">
         <div style="padding:16px 20px;font-size:13px;color:var(--muted)">Total: <strong style="color:var(--primary)">{{ $voters }}</strong> registered voter(s)</div>
         <table class="list-table">
@@ -305,7 +398,7 @@
               <td><strong>{{ $r->last_name }}, {{ $r->first_name }} {{ $r->middle_name }}</strong></td>
               <td>{{ $r->age }} yrs</td>
               <td>{{ $r->gender }}</td>
-              <td>{{ $r->barangay }}, {{ $r->city }}</td>
+              <td>{{ $r->address ?? '—' }}</td>
               <td>{{ $r->contact_number ?? '—' }}</td>
             </tr>
             @empty
@@ -318,6 +411,7 @@
 
     <!-- Minors Tab -->
     <div id="tab-minors" class="tab-content">
+      <div class="print-section-title">VI. Minors (Below 18)</div>
       <div class="card-body" style="padding:0">
         <div style="padding:16px 20px;font-size:13px;color:var(--muted)">Total: <strong style="color:var(--primary)">{{ $minors }}</strong> minor(s) below 18</div>
         <table class="list-table">
@@ -329,7 +423,7 @@
               <td><strong>{{ $r->last_name }}, {{ $r->first_name }} {{ $r->middle_name }}</strong></td>
               <td>{{ $r->age }} yrs</td>
               <td>{{ $r->gender }}</td>
-              <td>{{ $r->barangay }}, {{ $r->city }}</td>
+              <td>{{ $r->address ?? '—' }}</td>
               <td>{{ $r->contact_number ?? '—' }}</td>
             </tr>
             @empty
@@ -344,11 +438,26 @@
 </div>
 
 <script>
+const LIST_TABS = ['tab-seniors', 'tab-pwd', 'tab-voters', 'tab-minors'];
+
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
+}
+
+function doPrint() {
+  const active = document.querySelector('.tab-content.active');
+  const isList = active && LIST_TABS.includes(active.id);
+
+  if (isList) {
+    document.body.classList.add('printing-list');
+  }
+
+  window.print();
+
+  document.body.classList.remove('printing-list');
 }
 </script>
 
