@@ -144,7 +144,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
         <div class="sc-tooltip-row"><span class="tl" style="color:#94a3b8;font-style:italic">Click to expand</span></div>
       </div>
       <div class="sc-expand" id="residentExpand">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Residents by Sitio</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Residents by Purok</div>
         <div class="expand-grid">
           @forelse($bySitio as $row)
           <div class="expand-item">
@@ -180,7 +180,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
         <div class="sc-tooltip-row"><span class="tl" style="color:#94a3b8;font-style:italic">Click to expand</span></div>
       </div>
       <div class="sc-expand" id="householdExpand">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Households by Sitio</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Households by Purok</div>
         <div class="expand-grid">
           @forelse($householdsBySitio as $row)
           <div class="expand-item">
@@ -203,7 +203,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
       <div class="sc-value">{{ $totalFamilies }}</div>
       <div class="sc-sub">Registered families</div>
       <div class="sc-expand" id="familyExpand">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Families by Sitio</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Families by Purok</div>
         <div class="expand-grid">
           @forelse($familiesBySitio as $row)
           <div class="expand-item">
