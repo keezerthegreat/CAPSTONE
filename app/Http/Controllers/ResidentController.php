@@ -73,7 +73,7 @@ class ResidentController extends Controller
 
     public function create()
     {
-        $sitios = ['Chrysanthemum', 'Dahlia', 'Dama de Noche', 'Ilang-Ilang 1', 'Ilang-Ilang 2', 'Jasmin', 'Rosal', 'Sampaguita'];
+        $sitios = ['Chrysanthemum', 'Dahlia', 'Dama de Noche', 'Ilang-Ilang', 'Ilang-Ilang 1', 'Ilang-Ilang 2', 'Jasmin', 'Rosal', 'Sampaguita'];
 
         return view('residents.create', compact('sitios'));
     }
@@ -155,7 +155,7 @@ class ResidentController extends Controller
     public function edit($id)
     {
         $resident = Resident::findOrFail($id);
-        $sitios = ['Chrysanthemum', 'Dahlia', 'Dama de Noche', 'Ilang-Ilang 1', 'Ilang-Ilang 2', 'Jasmin', 'Rosal', 'Sampaguita'];
+        $sitios = ['Chrysanthemum', 'Dahlia', 'Dama de Noche', 'Ilang-Ilang', 'Ilang-Ilang 1', 'Ilang-Ilang 2', 'Jasmin', 'Rosal', 'Sampaguita'];
 
         return view('residents.edit', compact('resident', 'sitios'));
     }

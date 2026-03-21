@@ -158,7 +158,7 @@ tbody tr:last-child td { border-bottom:none; }
           </button>
           <div class="flt-dropdown" id="hh-dd-sitio">
             <div class="flt-option {{ !$filters['sitio'] ? 'selected':'' }}" onclick="hhApplyFilter('sitio','')">All</div>
-            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $sitioOpt)
+            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang','Jasmin','Rosal','Sampaguita'] as $sitioOpt)
             <div class="flt-option {{ $filters['sitio']===$sitioOpt ? 'selected':'' }}" onclick="hhApplyFilter('sitio','{{ $sitioOpt }}')">{{ $sitioOpt }}</div>
             @endforeach
           </div>

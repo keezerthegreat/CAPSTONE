@@ -135,7 +135,7 @@ tbody tr:last-child td { border-bottom:none; }
           </button>
           <div class="flt-dropdown" id="fam-dd-sitio">
             <div class="flt-option {{ !$filters['sitio'] ? 'selected':'' }}" onclick="famApplyFilter('sitio','')">All Puroks</div>
-            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $s)
+            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang','Jasmin','Rosal','Sampaguita'] as $s)
             <div class="flt-option {{ $filters['sitio']===$s ? 'selected':'' }}" onclick="famApplyFilter('sitio','{{ $s }}')">{{ $s }}</div>
             @endforeach
             <div class="flt-option {{ $filters['sitio']==='__none__' ? 'selected':'' }}" onclick="famApplyFilter('sitio','__none__')">Not linked to household</div>

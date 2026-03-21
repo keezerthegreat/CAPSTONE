@@ -388,7 +388,7 @@ tbody tr:last-child td { border-bottom: none; }
           </button>
           <div class="flt-dropdown" id="dd-sitio">
             <div class="flt-option {{ !$fPurok ? 'selected' : '' }}" onclick="applyFilter('purok','')">All</div>
-            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $s)
+            @foreach(['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang','Jasmin','Rosal','Sampaguita'] as $s)
             <div class="flt-option {{ strtolower($fPurok)===strtolower($s) ? 'selected' : '' }}" onclick="applyFilter('purok','{{ $s }}')">{{ $s }}</div>
             @endforeach
           </div>
@@ -471,7 +471,7 @@ tbody tr:last-child td { border-bottom: none; }
           @php
             $trSitio = strtolower($resident->household?->sitio ?? '');
             if (! $trSitio) {
-                foreach (['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'] as $_pn) {
+                foreach (['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang','Jasmin','Rosal','Sampaguita'] as $_pn) {
                     if (stripos($resident->address ?? '', $_pn) === 0) { $trSitio = strtolower($_pn); break; }
                 }
             }
@@ -834,7 +834,7 @@ tbody tr:last-child td { border-bottom: none; }
 <script>
 var _rbiResident = null;
 
-const PUROK_NAMES = ['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang 1','Ilang-Ilang 2','Jasmin','Rosal','Sampaguita'];
+const PUROK_NAMES = ['Chrysanthemum','Dahlia','Dama de Noche','Ilang-Ilang','Jasmin','Rosal','Sampaguita'];
 function extractPurok(r) {
   if (r.household && r.household.sitio) return r.household.sitio;
   const addr = (r.address || '').toLowerCase();
