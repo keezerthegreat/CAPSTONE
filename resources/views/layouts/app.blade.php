@@ -728,6 +728,15 @@
     });
   });
 
+  // ── GLOBAL LOADER ──
+  function showLoader() {
+    var loader = document.getElementById('pageLoader');
+    var bar    = document.getElementById('loaderBar');
+    loader.classList.add('visible');
+    bar.style.width = '0%';
+    setTimeout(function() { bar.style.width = '70%'; }, 20);
+  }
+
   // ── DELETE CONFIRM ──
   var _delForm = null;
   function confirmDelete(form, msg) {
@@ -737,8 +746,8 @@
     return false;
   }
   document.getElementById('confirmOk').addEventListener('click', function() {
-    if (_delForm) _delForm.submit();
     document.getElementById('confirmBackdrop').classList.remove('open');
+    if (_delForm) { showLoader(); _delForm.submit(); }
   });
   document.getElementById('confirmCancel').addEventListener('click', function() {
     document.getElementById('confirmBackdrop').classList.remove('open');

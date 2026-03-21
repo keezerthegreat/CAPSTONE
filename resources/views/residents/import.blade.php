@@ -82,7 +82,7 @@ label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppe
         <div class="card-title"><i class="fas fa-upload"></i> Upload File</div>
       </div>
       <div class="card-body">
-        <form method="POST" action="{{ route('residents.import') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('residents.import') }}" enctype="multipart/form-data" onsubmit="showLoader()">
           @csrf
           <label>Excel / CSV File</label>
           <div class="drop-zone" id="dropZone">

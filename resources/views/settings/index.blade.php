@@ -196,7 +196,7 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
                     class="btn btn-restore-toggle" style="width:auto;margin-top:0;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa">
                     <i class="fas fa-upload"></i> Restore from Backup
                 </button>
-                <form method="POST" action="{{ route('settings.backup') }}">
+                <form method="POST" action="{{ route('settings.backup') }}" onsubmit="showLoader()">
                     @csrf
                     <button type="submit" class="btn btn-green" style="width:auto;margin-top:0">
                         <i class="fas fa-download"></i> Backup Now
@@ -280,7 +280,7 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
         <p class="confirm-msg">All current data will be replaced with the uploaded backup file. This cannot be undone. A pre-restore backup will be saved automatically.</p>
         <div class="confirm-actions">
             <button class="confirm-cancel" onclick="closeRestoreConfirm()"><i class="fas fa-times"></i> Cancel</button>
-            <button class="confirm-ok" style="background:#c2410c" onclick="document.getElementById('restoreForm').submit()">
+            <button class="confirm-ok" style="background:#c2410c" onclick="showLoader(); document.getElementById('restoreForm').submit()">
                 <i class="fas fa-undo"></i> Yes, Restore
             </button>
         </div>
