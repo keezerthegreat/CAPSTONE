@@ -205,40 +205,31 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
                 continue;
             }
 
-            $head = Resident::where('household_id', $hhId)
-                ->where('family_role', 'head')
-                ->first();
+            $residents = Resident::where('household_id', $hhId)->get();
 
+            // Update household head and member count
+            $hhHead = $residents->firstWhere('family_role', 'head');
             $hh->update([
-                'head_resident_id' => $head?->id,
-                'member_count' => Resident::where('household_id', $hhId)->count(),
+                'head_resident_id' => $hhHead?->id,
+                'member_count' => $residents->count(),
             ]);
 
-            // Auto-create or restore a family for this household
-            if ($head) {
-                $existingFamily = Family::withTrashed()->where('household_id', $hhId)->first();
-                if (! $existingFamily) {
-                    $family = Family::create([
-                        'family_name' => $head->last_name.' Family',
-                        'head_resident_id' => $head->id,
-                        'head_last_name' => $head->last_name,
-                        'head_first_name' => $head->first_name,
-                        'head_middle_name' => $head->middle_name,
-                        'household_id' => $hhId,
-                        'member_count' => Resident::where('household_id', $hhId)->count(),
-                    ]);
-                    Resident::where('household_id', $hhId)->update(['family_id' => $family->id]);
-                } elseif ($existingFamily->trashed()) {
-                    $existingFamily->restore();
-                    $existingFamily->update([
-                        'head_resident_id' => $head->id,
-                        'head_last_name' => $head->last_name,
-                        'head_first_name' => $head->first_name,
-                        'head_middle_name' => $head->middle_name,
-                        'member_count' => Resident::where('household_id', $hhId)->count(),
-                    ]);
-                    Resident::where('household_id', $hhId)->update(['family_id' => $existingFamily->id]);
-                }
+            // Clear old families for this household and rebuild by last name
+            Family::where('household_id', $hhId)->forceDelete();
+
+            // Group residents by last name — one family per surname
+            foreach ($residents->groupBy('last_name') as $lastName => $members) {
+                $head = $members->firstWhere('family_role', 'head') ?? $members->first();
+                $family = Family::create([
+                    'family_name' => $lastName.' Family',
+                    'head_resident_id' => $head->id,
+                    'head_last_name' => $head->last_name,
+                    'head_first_name' => $head->first_name,
+                    'head_middle_name' => $head->middle_name,
+                    'household_id' => $hhId,
+                    'member_count' => $members->count(),
+                ]);
+                $members->each(fn ($r) => $r->update(['family_id' => $family->id]));
             }
         }
     }

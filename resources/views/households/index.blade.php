@@ -474,10 +474,15 @@ function printHouseholdForm() {
   t('hp-today', today); t('hp-hhno', h.household_number);
   var tbody = document.getElementById('hp-mem-tbody');
   if (!members.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;font-style:italic;color:#666">No members linked.</td></tr>'; }
-  else { tbody.innerHTML = members.map(function(m, i) {
+  else {
+    var sorted = members.slice().sort(function(a,b){ return (a.last_name||'').localeCompare(b.last_name||''); });
+    var currentLn = null; var counter = 0;
+    tbody.innerHTML = sorted.map(function(m) {
     var name = (m.last_name||'') + ', ' + (m.first_name||'') + (m.middle_name ? ' '+m.middle_name : '');
     var role = (m.id === h.head_resident_id) ? 'Head' : 'Member';
-    return '<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:600">'+name+'</td><td>'+(m.gender||'—')+' / '+(m.age||'—')+' yrs</td><td>'+(m.civil_status||'—')+'</td><td>'+role+'</td></tr>';
+    var sep = (m.last_name !== currentLn) ? '<tr><td colspan="5" style="padding:2px 4px;font-size:10px;font-weight:700;letter-spacing:.5px;color:#888;border-bottom:1px solid #e2e8f0;background:#f8fafc">'+(m.last_name||'')+'</td></tr>' : '';
+    currentLn = m.last_name; counter++;
+    return sep+'<tr><td style="text-align:center">'+counter+'</td><td style="font-weight:600">'+name+'</td><td>'+(m.gender||'—')+' / '+(m.age||'—')+' yrs</td><td>'+(m.civil_status||'—')+'</td><td>'+role+'</td></tr>';
   }).join(''); }
   window.print();
 }
@@ -500,11 +505,15 @@ function openHouseholdModal(h) {
   const members = h.members || [];
   if (!members.length) { body.innerHTML = '<p style="color:var(--muted);font-size:13px;font-style:italic;margin:0">No members linked yet.</p>'; }
   else {
-    let rows = members.map((m, i) => {
+    const sorted = members.slice().sort((a, b) => (a.last_name || '').localeCompare(b.last_name || ''));
+    let currentLn = null; let counter = 0;
+    const rows = sorted.map(m => {
       const isHead = m.id === h.head_resident_id;
       const role = isHead ? '<span class="badge-head"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span>' : '<span style="color:var(--muted);font-size:11px">Member</span>';
       const name = (m.last_name || '') + ', ' + (m.first_name || '') + (m.middle_name ? ' ' + m.middle_name : '');
-      return `<tr><td style="color:var(--muted);font-size:11px">${i+1}</td><td style="font-weight:600">${name}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td>${role}</td></tr>`;
+      const sep = m.last_name !== currentLn ? `<tr><td colspan="5" style="padding:3px 6px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--header-bg)">${m.last_name || ''}</td></tr>` : '';
+      currentLn = m.last_name; counter++;
+      return `${sep}<tr><td style="color:var(--muted);font-size:11px">${counter}</td><td style="font-weight:600">${name}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td>${role}</td></tr>`;
     }).join('');
     body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
