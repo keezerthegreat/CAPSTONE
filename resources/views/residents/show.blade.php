@@ -165,6 +165,7 @@
         <div class="info-item"><div class="label">Last Name</div><div class="value">{{ $resident->last_name }}</div></div>
         <div class="info-item"><div class="label">First Name</div><div class="value">{{ $resident->first_name }}</div></div>
         <div class="info-item"><div class="label">Middle Name</div><div class="value">{{ $resident->middle_name ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">Suffix</div><div class="value">{{ $resident->suffix ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Sex</div><div class="value">{{ $resident->gender }}</div></div>
         <div class="info-item"><div class="label">Date of Birth</div><div class="value">{{ \Carbon\Carbon::parse($resident->birthdate)->format('F d, Y') }}</div></div>
         <div class="info-item"><div class="label">Age</div><div class="value">{{ $resident->age }} years old</div></div>
@@ -265,7 +266,7 @@
           <div class="rbi-col-sub">Middle Name</div>
         </div>
         <div class="rbi-named-col">
-          <div class="rbi-underline"> </div>
+          <div class="rbi-underline">{{ $resident->suffix ?? '' }}</div>
           <div class="rbi-col-sub">Ext.</div>
         </div>
       </div>

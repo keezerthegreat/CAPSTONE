@@ -102,6 +102,10 @@ input::placeholder { color:#94a3b8; }
           <input type="text" name="middle_name" value="{{ old('middle_name') }}" placeholder="e.g. Santos">
         </div>
         <div class="form-group">
+          <label>Suffix</label>
+          <input type="text" name="suffix" value="{{ old('suffix') }}" placeholder="e.g. Jr., Sr., II">
+        </div>
+        <div class="form-group">
           <label>Sex <span class="req">*</span></label>
           <select name="gender" required>
             <option value="">Select...</option>

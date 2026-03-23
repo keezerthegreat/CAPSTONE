@@ -73,6 +73,10 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             <input type="text" name="middle_name" value="{{ old('middle_name', $resident->middle_name) }}">
           </div>
           <div class="form-group">
+            <label>Suffix</label>
+            <input type="text" name="suffix" value="{{ old('suffix', $resident->suffix) }}" placeholder="e.g. Jr., Sr., II">
+          </div>
+          <div class="form-group">
             <label>Sex *</label>
             <select name="gender" required>
               <option value="">Select...</option>
