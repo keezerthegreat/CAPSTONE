@@ -117,6 +117,13 @@ class ResidentController extends Controller
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
             'is_solo_parent' => 'nullable|boolean',
+            'is_labor_force' => 'nullable|boolean',
+            'is_unemployed' => 'nullable|boolean',
+            'is_ofw' => 'nullable|boolean',
+            'is_indigenous' => 'nullable|boolean',
+            'is_out_of_school_child' => 'nullable|boolean',
+            'is_out_of_school_youth' => 'nullable|boolean',
+            'is_student' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
@@ -134,6 +141,13 @@ class ResidentController extends Controller
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
         $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
+        $validated['is_labor_force'] = $request->has('is_labor_force') ? 1 : 0;
+        $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
+        $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
+        $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
+        $validated['is_out_of_school_child'] = $request->has('is_out_of_school_child') ? 1 : 0;
+        $validated['is_out_of_school_youth'] = $request->has('is_out_of_school_youth') ? 1 : 0;
+        $validated['is_student'] = $request->has('is_student') ? 1 : 0;
         $validated['status'] = 'pending';
 
         // Duplicate check: same name + birthdate already in the system
@@ -203,6 +217,13 @@ class ResidentController extends Controller
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
             'is_solo_parent' => 'nullable|boolean',
+            'is_labor_force' => 'nullable|boolean',
+            'is_unemployed' => 'nullable|boolean',
+            'is_ofw' => 'nullable|boolean',
+            'is_indigenous' => 'nullable|boolean',
+            'is_out_of_school_child' => 'nullable|boolean',
+            'is_out_of_school_youth' => 'nullable|boolean',
+            'is_student' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'is_deceased' => 'nullable|boolean',
@@ -222,6 +243,13 @@ class ResidentController extends Controller
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
         $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
+        $validated['is_labor_force'] = $request->has('is_labor_force') ? 1 : 0;
+        $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
+        $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
+        $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
+        $validated['is_out_of_school_child'] = $request->has('is_out_of_school_child') ? 1 : 0;
+        $validated['is_out_of_school_youth'] = $request->has('is_out_of_school_youth') ? 1 : 0;
+        $validated['is_student'] = $request->has('is_student') ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
 
         if (! $validated['is_deceased']) {

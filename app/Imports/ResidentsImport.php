@@ -93,7 +93,15 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
         };
 
         $sector = strtolower(trim($this->val($row, 17) ?? ''));
+        $isLaborForce = $sector === 'a';
+        $isUnemployed = $sector === 'b';
+        $isOfw = $sector === 'c';
         $isPwd = $sector === 'd';
+        $isSoloParent = $sector === 'e';
+        $isIndigenous = $sector === 'f';
+        $isOutOfSchoolChild = $sector === 'g';
+        $isOutOfSchoolYouth = $sector === 'h';
+        $isStudent = $sector === 'i';
 
         $birthdateRaw = $row[11] ?? null;
         $birthdate = $this->parseDate($birthdateRaw);
@@ -183,6 +191,14 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
             'is_pwd' => $isPwd,
             'is_senior' => $age !== null && $age >= 60,
             'is_voter' => false,
+            'is_solo_parent' => $isSoloParent,
+            'is_labor_force' => $isLaborForce,
+            'is_unemployed' => $isUnemployed,
+            'is_ofw' => $isOfw,
+            'is_indigenous' => $isIndigenous,
+            'is_out_of_school_child' => $isOutOfSchoolChild,
+            'is_out_of_school_youth' => $isOutOfSchoolYouth,
+            'is_student' => $isStudent,
             'family_role' => $familyRole,
             'household_id' => $householdId,
             'status' => 'approved',

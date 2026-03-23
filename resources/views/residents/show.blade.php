@@ -151,6 +151,13 @@
         @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
         @if($resident->is_voter)<span class="badge badge-voter">Registered Voter</span>@endif
         @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
+        @if($resident->is_labor_force)<span class="badge" style="background:#e0f2fe;color:#075985">Labor Force</span>@endif
+        @if($resident->is_unemployed)<span class="badge" style="background:#fee2e2;color:#991b1b">Unemployed</span>@endif
+        @if($resident->is_ofw)<span class="badge" style="background:#d1fae5;color:#065f46">OFW</span>@endif
+        @if($resident->is_indigenous)<span class="badge" style="background:#fdf4ff;color:#6b21a8">Indigenous</span>@endif
+        @if($resident->is_out_of_school_child)<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Child</span>@endif
+        @if($resident->is_out_of_school_youth)<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Youth</span>@endif
+        @if($resident->is_student)<span class="badge" style="background:#eff6ff;color:#1e40af">Student</span>@endif
       </div>
     </div>
     <div class="card-body">

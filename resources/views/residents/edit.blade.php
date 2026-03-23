@@ -248,6 +248,43 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
   </div>
 </div>
 
+{{-- Sector --}}
+<div class="card">
+  <div class="card-header"><div class="card-title"><i class="fas fa-tags"></i> Sector</div></div>
+  <div class="card-body">
+    <div style="display:flex;gap:32px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_labor_force" value="1" {{ $resident->is_labor_force ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Labor Force
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_unemployed" value="1" {{ $resident->is_unemployed ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Unemployed
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_ofw" value="1" {{ $resident->is_ofw ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        OFW
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_indigenous" value="1" {{ $resident->is_indigenous ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Indigenous Person
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_out_of_school_child" value="1" {{ $resident->is_out_of_school_child ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Out of School Child
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_out_of_school_youth" value="1" {{ $resident->is_out_of_school_youth ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Out of School Youth
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_student" value="1" {{ $resident->is_student ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Student
+      </label>
+    </div>
+  </div>
+</div>
+
 <!-- Deceased Status -->
 <div class="card" style="border:1.5px solid #fecdd3">
   <div class="card-header" style="background:#fff1f2"><div class="card-title" style="color:#be123c"><i class="fas fa-cross" style="margin-right:6px"></i>Deceased Status</div></div>

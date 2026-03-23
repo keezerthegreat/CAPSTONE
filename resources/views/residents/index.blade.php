@@ -991,7 +991,14 @@ function openResidentModal(r, pendingStatus) {
   if (r.is_senior)   badges += '<span class="badge badge-senior">Senior Citizen</span> ';
   if (r.is_pwd)      badges += '<span class="badge badge-pwd">PWD</span> ';
   if (r.is_voter)       badges += '<span class="badge" style="background:#f3e8ff;color:#6b21a8">Registered Voter</span> ';
-  if (r.is_solo_parent) badges += '<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span> ';
+  if (r.is_solo_parent)         badges += '<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span> ';
+  if (r.is_labor_force)         badges += '<span class="badge" style="background:#e0f2fe;color:#075985">Labor Force</span> ';
+  if (r.is_unemployed)          badges += '<span class="badge" style="background:#fee2e2;color:#991b1b">Unemployed</span> ';
+  if (r.is_ofw)                 badges += '<span class="badge" style="background:#d1fae5;color:#065f46">OFW</span> ';
+  if (r.is_indigenous)          badges += '<span class="badge" style="background:#fdf4ff;color:#6b21a8">Indigenous</span> ';
+  if (r.is_out_of_school_child) badges += '<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Child</span> ';
+  if (r.is_out_of_school_youth) badges += '<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Youth</span> ';
+  if (r.is_student)             badges += '<span class="badge" style="background:#eff6ff;color:#1e40af">Student</span> ';
   document.getElementById('rm-badges').innerHTML = badges;
 }
 function closeResidentModal() {
