@@ -1061,7 +1061,7 @@ document.getElementById('residentModal').addEventListener('click', function(e) {
 });
 
 // Filter state
-const fltKeys = ['gender', 'civil', 'sitio', 'class'];
+const fltKeys = ['gender', 'civil', 'sitio', 'class', 'citizenship', 'sector'];
 
 function positionDropdown(el, btn) {
   const r = btn.getBoundingClientRect();
