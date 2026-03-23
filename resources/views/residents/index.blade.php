@@ -331,6 +331,7 @@ tbody tr:last-child td { border-bottom: none; }
       $fAgeMax = $filters['ageMax'] ?? null;
       $fSearch = $filters['search'] ?? '';
       $fSector = $filters['sector'] ?? '';
+      $fCitizenship = $filters['citizenship'] ?? '';
       $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
       $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter','solo_parent'=>'Solo Parent',default=>'Classification' };
       $sectorLabel = match($fSector) { 'labor_force'=>'Labor Force','unemployed'=>'Unemployed','ofw'=>'OFW','indigenous'=>'Indigenous','out_of_school_child'=>'Out of School Child','out_of_school_youth'=>'Out of School Youth','student'=>'Student',default=>'Sector' };
@@ -413,6 +414,21 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
+        <!-- Citizenship -->
+        <div class="flt-wrap" id="wrap-citizenship">
+          <button class="flt-btn {{ $fCitizenship ? 'active' : '' }}" id="btn-citizenship" onclick="toggleFlt('citizenship')">
+            <i class="fas fa-flag"></i>
+            <span id="lbl-citizenship">{{ $fCitizenship ?: 'Citizenship' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-citizenship" style="{{ $fCitizenship ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-citizenship" style="{{ $fCitizenship ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('citizenship','')">×</span>
+          </button>
+          <div class="flt-dropdown" id="dd-citizenship">
+            <div class="flt-option {{ !$fCitizenship ? 'selected' : '' }}" onclick="applyFilter('citizenship','')">All</div>
+            <div class="flt-option {{ $fCitizenship==='Filipino' ? 'selected' : '' }}" onclick="applyFilter('citizenship','Filipino')">Filipino</div>
+            <div class="flt-option {{ $fCitizenship==='Foreigner' ? 'selected' : '' }}" onclick="applyFilter('citizenship','Foreigner')">Foreigner</div>
+          </div>
+        </div>
+
         <!-- Sector -->
         <div class="flt-wrap" id="wrap-sector">
           <button class="flt-btn {{ $fSector ? 'active' : '' }}" id="btn-sector" onclick="toggleFlt('sector')">
@@ -456,7 +472,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
-        @if($fGender || $fCivil || $fPurok || $fClass || $fSector || $fAgeMin || $fAgeMax || $fSearch)
+        @if($fGender || $fCivil || $fPurok || $fClass || $fSector || $fCitizenship || $fAgeMin || $fAgeMax || $fSearch)
         <a href="{{ route('residents.index') }}" class="flt-btn" style="margin-left:auto;text-decoration:none;color:var(--muted);border-color:var(--border);white-space:nowrap;">
           <i class="fas fa-times"></i> Clear Filters
         </a>

@@ -19,6 +19,7 @@ class ResidentController extends Controller
         $purok = $request->get('purok', '');
         $classification = $request->get('classification', '');
         $sector = $request->get('sector', '');
+        $citizenship = $request->get('citizenship', '');
         $ageMin = $request->filled('age_min') ? (int) $request->age_min : null;
         $ageMax = $request->filled('age_max') ? (int) $request->age_max : null;
         $search = $request->get('search', '');
@@ -45,6 +46,9 @@ class ResidentController extends Controller
         }
         if ($sector) {
             $query->where("is_{$sector}", true);
+        }
+        if ($citizenship) {
+            $query->whereRaw('LOWER(nationality) = ?', [strtolower($citizenship)]);
         }
         if ($ageMin !== null) {
             $query->where('age', '>=', $ageMin);
@@ -75,7 +79,7 @@ class ResidentController extends Controller
         $pendingResidents = Resident::where('status', 'pending')->latest()->get();
         $pendingEdits = ResidentPendingEdit::with('resident')->latest()->get();
 
-        $filters = compact('gender', 'civil', 'purok', 'classification', 'sector', 'ageMin', 'ageMax', 'search');
+        $filters = compact('gender', 'civil', 'purok', 'classification', 'sector', 'citizenship', 'ageMin', 'ageMax', 'search');
 
         return view('residents.index', compact(
             'residents', 'pendingResidents', 'pendingEdits',
