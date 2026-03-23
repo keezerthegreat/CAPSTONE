@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\PasswordRequestController;
+use App\Http\Controllers\PollController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\SettingsController;
@@ -38,6 +39,7 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/poll/counts', [PollController::class, 'counts'])->name('poll.counts');
 
     // Certificates (EMPLOYEE + ADMIN — delete is admin-only below)
     Route::controller(CertificateController::class)->group(function () {

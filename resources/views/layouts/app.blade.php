@@ -559,9 +559,7 @@
          class="nav-item {{ request()->is('admin/password-requests*') ? 'active' : '' }}"
          style="position:relative">
         <i class="fas fa-key"></i> Password Requests
-        @if($pendingPasswordRequests > 0)
-          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:#ef4444;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 6px;line-height:1.6">{{ $pendingPasswordRequests }}</span>
-        @endif
+        <span id="pw-req-badge" style="display:{{ $pendingPasswordRequests > 0 ? 'inline-block' : 'none' }};position:absolute;right:12px;top:50%;transform:translateY(-50%);background:#ef4444;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 6px;line-height:1.6">{{ $pendingPasswordRequests }}</span>
       </a>
 
       <a href="{{ route('settings.index') }}"
@@ -770,6 +768,47 @@
     if (e.key === 'Escape') { document.getElementById('confirmBackdrop').classList.remove('open'); _delForm = null; }
   });
 </script>
+
+@auth
+<script>
+(function () {
+    function updateBadge(el, count) {
+        if (!el) return;
+        el.textContent = count;
+        el.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+
+    function setText(id, val) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = val; }
+    }
+
+    function poll() {
+        fetch('{{ route('poll.counts') }}')
+            .then(r => r.json())
+            .then(data => {
+                updateBadge(document.getElementById('pw-req-badge'), data.password_requests);
+
+                const pendingEl = document.getElementById('poll-pending-count');
+                if (pendingEl) {
+                    const total = data.pending_residents + data.pending_edits;
+                    if (parseInt(pendingEl.dataset.count) !== total) {
+                        pendingEl.dataset.count = total;
+                        location.reload();
+                    }
+                }
+
+                setText('dash-total-residents', data.total_residents);
+                setText('dash-total-households', data.total_households);
+                setText('dash-total-families', data.total_families);
+            })
+            .catch(() => {});
+    }
+
+    setInterval(poll, 5000);
+})();
+</script>
+@endauth
 
 </body>
 </html>

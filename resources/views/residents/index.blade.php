@@ -178,7 +178,7 @@ tbody tr:last-child td { border-bottom: none; }
     @php $totalPendingCount = $pendingResidents->count() + $pendingEdits->count(); @endphp
     <div class="res-stat" style="{{ $totalPendingCount > 0 ? 'border-color:#fcd34d;background:#fffbeb;' : '' }}">
       <div class="slabel" style="{{ $totalPendingCount > 0 ? 'color:#92400e;' : '' }}">Pending Verification</div>
-      <div class="svalue" style="{{ $totalPendingCount > 0 ? 'color:#d97706;' : '' }}">{{ $totalPendingCount }}</div>
+      <div class="svalue" style="{{ $totalPendingCount > 0 ? 'color:#d97706;' : '' }}" id="poll-pending-count" data-count="{{ $totalPendingCount }}">{{ $totalPendingCount }}</div>
     </div>
   </div>
 
