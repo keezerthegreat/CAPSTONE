@@ -18,7 +18,7 @@ class CertificateController extends Controller
             ->whereYear('issued_date', now()->year)->count();
         $residents = Resident::where('status', 'approved')->where('is_deceased', false)
             ->orderBy('last_name')->orderBy('first_name')
-            ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay']);
+            ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay', 'civil_status']);
 
         return view('pages.certificate', compact('certificates', 'residents', 'totalCertificates', 'monthCertificates'));
     }

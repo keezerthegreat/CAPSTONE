@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -n \"street\|household_number\" c:/Users/User/CAPSTONE/database/migrations/*households*)",
+      "Bash(grep -n \"street\\|household_number\" c:/Users/User/CAPSTONE/database/migrations/*households*)",
       "Bash(find c:/Users/User/CAPSTONE/database/migrations -name *household*)",
       "Bash(xargs grep:*)",
       "Bash(php artisan:*)",
