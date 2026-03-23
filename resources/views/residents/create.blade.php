@@ -115,19 +115,28 @@ input::placeholder { color:#94a3b8; }
           <input type="date" name="birthdate" id="birthdate" value="{{ old('birthdate') }}" required>
         </div>
         <input type="hidden" name="age" id="age" value="{{ old('age') }}">
+
         <div class="form-group">
           <label>Civil Status</label>
           <select name="civil_status">
             <option value="">Select...</option>
-            @foreach(['Single','Married','Widowed','Separated'] as $cs)
+            @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law','Divorced','Live-in'] as $cs)
               <option value="{{ $cs }}" {{ old('civil_status')==$cs ? 'selected':'' }}>{{ $cs }}</option>
             @endforeach
           </select>
         </div>
+
+        
         <div class="form-group">
-          <label>Nationality</label>
-          <input type="text" name="nationality" value="{{ old('nationality', 'Filipino') }}">
+          <label>Citizenship</label>
+          <select name="nationality">
+            <option value="">Select...</option>
+            @foreach(['Filipino', 'Foreigner'] as $cs)
+              <option value="{{ $cs }}" {{ old('citizenship')==$cs ? 'selected':'' }}>{{ $cs }}</option>
+            @endforeach
+          </select>
         </div>
+        
         <div class="form-group">
           <label>Religion</label>
           <input type="text" name="religion" value="{{ old('religion') }}" placeholder="e.g. Roman Catholic">
@@ -267,7 +276,7 @@ input::placeholder { color:#94a3b8; }
     <!-- Submit -->
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
-      @if(auth()->user()->role === 'admin')
+      @if(true)
       <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Resident Record</button>
       @else
       <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit for Verification</button>

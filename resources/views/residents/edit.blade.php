@@ -90,15 +90,23 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             <label>Civil Status</label>
             <select name="civil_status">
               <option value="">Select...</option>
-              @foreach(['Single','Married','Widowed','Separated'] as $cs)
+              @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law','Divorced','Live-in'] as $cs)
                 <option value="{{ $cs }}" {{ $resident->civil_status == $cs ? 'selected' : '' }}>{{ $cs }}</option>
               @endforeach
             </select>
           </div>
-          <div class="form-group">
-            <label>Nationality</label>
-            <input type="text" name="nationality" value="{{ old('nationality', $resident->nationality) }}">
-          </div>
+
+          
+           <div class="form-group">
+          <label>Citizenship</label>
+          <select name="citizenship">
+            <option value="">Select...</option>
+            @foreach(['Filipino', 'Foreigner'] as $cs)
+              <option value="{{ $cs }}" {{ old('citizenship', $resident->citizenship)==$cs ? 'selected':'' }}>{{ $cs }}</option>
+            @endforeach
+          </select>
+        </div>
+
           <div class="form-group">
             <label>Religion</label>
             <input type="text" name="religion" value="{{ old('religion', $resident->religion) }}">
@@ -253,7 +261,7 @@ document.getElementById('isDeceased').addEventListener('change', function() {
 
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
-      @if(auth()->user()->role === 'admin')
+      @if(true)
         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
       @else
         <button type="submit" class="btn btn-primary" style="background:#2563eb"><i class="fas fa-paper-plane"></i> Submit for Verification</button>

@@ -372,9 +372,9 @@ tbody tr:last-child td { border-bottom: none; }
           </button>
           <div class="flt-dropdown" id="dd-civil">
             <div class="flt-option {{ !$fCivil ? 'selected' : '' }}" onclick="applyFilter('civil','')">All</div>
-            @foreach(['single','married','widowed','separated'] as $cv)
-            <div class="flt-option {{ strtolower($fCivil)===$cv ? 'selected' : '' }}" onclick="applyFilter('civil','{{ $cv }}')">{{ ucfirst($cv) }}</div>
-            @endforeach
+           @foreach(['single','married','widowed','separated','annulled','common law','divorced'] as $cv)
+<div class="flt-option {{ strtolower($fCivil)===$cv ? 'selected' : '' }}" onclick="applyFilter('civil','{{ $cv }}')">{{ ucwords($cv) }}</div>
+@endforeach
           </div>
         </div>
 
@@ -669,9 +669,9 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
       </div>
     </div>
-    <!-- Nationality + Religion -->
+    <!-- Citizenship + Religion -->
     <div class="rp-field-row">
-      <span class="rp-field-lbl">NATIONALITY:</span>
+      <span class="rp-field-lbl">CITIZENSHIP:</span>
       <div id="rp-nat" class="rp-uline md"></div>
       <span class="rp-field-lbl" style="margin-left:20px">RELIGION:</span>
       <div id="rp-rel" class="rp-uline"></div>
@@ -782,7 +782,7 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="mi"><span class="ml">Date of Birth</span><span class="mv" id="rm-birth"></span></div>
           <div class="mi"><span class="ml">Age</span><span class="mv" id="rm-age"></span></div>
           <div class="mi"><span class="ml">Civil Status</span><span class="mv" id="rm-civil"></span></div>
-          <div class="mi"><span class="ml">Nationality</span><span class="mv" id="rm-nat"></span></div>
+          <div class="mi"><span class="ml">Citizenship</span><span class="mv" id="rm-nat"></span></div>
           <div class="mi"><span class="ml">Religion</span><span class="mv" id="rm-rel"></span></div>
         </div>
       </div>
