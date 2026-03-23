@@ -329,6 +329,8 @@ class ResidentController extends Controller
     {
         $request->validate(['file' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
 
+        set_time_limit(300);
+
         $import = new ResidentsImport;
 
         try {

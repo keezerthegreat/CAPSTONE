@@ -226,7 +226,7 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
                     'household_id' => $hhId,
                     'member_count' => $members->count(),
                 ]);
-                $members->each(fn ($r) => $r->update(['family_id' => $family->id]));
+                Resident::whereIn('id', $members->pluck('id'))->update(['family_id' => $family->id]);
             }
         }
 
@@ -239,7 +239,7 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
                 ->first();
 
             if ($existingFamily) {
-                $members->each(fn ($r) => $r->update(['family_id' => $existingFamily->id]));
+                Resident::whereIn('id', $members->pluck('id'))->update(['family_id' => $existingFamily->id]);
                 $existingFamily->increment('member_count', $members->count());
             } else {
                 $head = $members->firstWhere('family_role', 'head') ?? $members->first();
@@ -252,7 +252,7 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
                     'household_id' => null,
                     'member_count' => $members->count(),
                 ]);
-                $members->each(fn ($r) => $r->update(['family_id' => $family->id]));
+                Resident::whereIn('id', $members->pluck('id'))->update(['family_id' => $family->id]);
             }
         }
     }
