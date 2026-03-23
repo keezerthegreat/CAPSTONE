@@ -132,11 +132,21 @@ input::placeholder { color:#94a3b8; }
           <select name="nationality">
             <option value="">Select...</option>
             @foreach(['Filipino', 'Foreigner'] as $cs)
-              <option value="{{ $cs }}" {{ old('citizenship')==$cs ? 'selected':'' }}>{{ $cs }}</option>
+              <option value="{{ $cs }}" {{ old('nationality')==$cs ? 'selected':'' }}>{{ $cs }}</option>
             @endforeach
           </select>
         </div>
-        
+
+        <div class="form-group">
+          <label>Type of Resident</label>
+          <select name="resident_type">
+            <option value="">Select...</option>
+            @foreach(['Migrant','Non-Migrant','Transient'] as $rt)
+              <option value="{{ $rt }}" {{ old('resident_type')==$rt ? 'selected':'' }}>{{ $rt }}</option>
+            @endforeach
+          </select>
+        </div>
+
         <div class="form-group">
           <label>Religion</label>
           <input type="text" name="religion" value="{{ old('religion') }}" placeholder="e.g. Roman Catholic">
