@@ -49,6 +49,7 @@ class Resident extends Model
         'age',
         'civil_status',
         'nationality',
+        'resident_type',
         'religion',
 
         // Contact

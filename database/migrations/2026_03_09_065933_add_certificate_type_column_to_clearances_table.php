@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('clearances', function (Blueprint $table) {
-            $table->string('certificate_type')->nullable()->after('resident_name');
-        });
+        if (!Schema::hasColumn('clearances', 'certificate_type')) {
+            Schema::table('clearances', function (Blueprint $table) {
+                $table->string('certificate_type')->nullable()->after('resident_name');
+            });
+        }
     }
 
     /**

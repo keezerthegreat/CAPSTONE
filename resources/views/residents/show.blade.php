@@ -161,7 +161,8 @@
         <div class="info-item"><div class="label">Date of Birth</div><div class="value">{{ \Carbon\Carbon::parse($resident->birthdate)->format('F d, Y') }}</div></div>
         <div class="info-item"><div class="label">Age</div><div class="value">{{ $resident->age }} years old</div></div>
         <div class="info-item"><div class="label">Civil Status</div><div class="value">{{ $resident->civil_status ?? '—' }}</div></div>
-        <div class="info-item"><div class="label">Nationality</div><div class="value">{{ $resident->nationality ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">Citizenship</div><div class="value">{{ $resident->nationality ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">Type of Resident</div><div class="value">{{ $resident->resident_type ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Religion</div><div class="value">{{ $resident->religion ?? '—' }}</div></div>
       </div>
     </div>
@@ -318,9 +319,9 @@
       </div>
     </div>
 
-    <!-- Nationality & Religion -->
+    <!-- Citizenship & Religion -->
     <div class="rbi-field-row">
-      <span class="rbi-field-lbl">NATIONALITY:</span>
+      <span class="rbi-field-lbl">CITIZENSHIP:</span>
       <div class="rbi-underline md">{{ $resident->nationality ?? '' }}</div>
       <span class="rbi-field-lbl" style="margin-left:20px">RELIGION:</span>
       <div class="rbi-underline">{{ $resident->religion ?? '' }}</div>

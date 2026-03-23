@@ -90,6 +90,7 @@ class ResidentController extends Controller
             'age' => 'required|integer|min:0|max:120',
             'civil_status' => 'nullable|string|max:255',
             'nationality' => 'nullable|string|max:255',
+            'resident_type' => 'nullable|string|max:255',
             'religion' => 'nullable|string|max:255',
             'contact_number' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -173,6 +174,7 @@ class ResidentController extends Controller
             'age' => 'required|integer|min:0|max:120',
             'civil_status' => 'nullable|string|max:255',
             'nationality' => 'nullable|string|max:255',
+            'resident_type' => 'nullable|string|max:255',
             'religion' => 'nullable|string|max:255',
             'contact_number' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -326,6 +328,8 @@ class ResidentController extends Controller
     public function import(Request $request)
     {
         $request->validate(['file' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+
+        set_time_limit(300);
 
         $import = new ResidentsImport;
 
