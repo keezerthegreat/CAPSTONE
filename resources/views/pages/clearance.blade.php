@@ -138,6 +138,10 @@ tbody tr:last-child td { border-bottom:none; }
             <option value="Married">Married</option>
             <option value="Widowed">Widowed</option>
             <option value="Separated">Separated</option>
+            <option value="Annulled">Annulled</option>
+            <option value="Common Law">Common Law</option>
+            <option value="Divorced">Divorced</option>
+            <option value="Live-in">Live-in</option>
           </select>
         </div>
         <div class="form-group">
@@ -374,16 +378,25 @@ function filterResidents(q) {
   list.innerHTML = filtered.map(r => {
     const name = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
     const meta = [r.address, r.barangay].filter(Boolean).join(', ') || 'Barangay Cogon';
-    return `<div class="rpicker-item" onclick="selectResident('${name.replace(/'/g,"\\'")}')">
+    return `<div class="rpicker-item" onclick="selectResident(${r.id})">
       <div class="ri-name">${name}</div>
       <div class="ri-meta">${meta}</div>
     </div>`;
   }).join('');
 }
-function selectResident(name) {
+function selectResident(id) {
+  const r = allResidents.find(res => res.id === id);
+  if (!r) return;
+  const name = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
   document.getElementById('cl-resident-name').value = name;
   document.getElementById('cl-picker-label').textContent = name;
   document.getElementById('cl-picker-btn').classList.add('selected');
+  if (r.civil_status) {
+    const csEl = document.getElementById('cl-civil-status');
+    csEl.value = r.civil_status;
+    if (!csEl.value) csEl.add(new Option(r.civil_status, r.civil_status, true, true));
+  }
+  if (r.address) document.getElementById('cl-purok').value = r.address;
   closeResPicker();
   clUpdate();
 }

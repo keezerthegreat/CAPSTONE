@@ -6,7 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Clearance;
 use App\Models\Resident;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request;    
 use Illuminate\Support\Facades\DB;
 
 class ClearanceController extends Controller
@@ -19,7 +19,7 @@ class ClearanceController extends Controller
             ->whereYear('date_issued', now()->year)->count();
         $residents = Resident::where('status', 'approved')->where('is_deceased', false)
             ->orderBy('last_name')->orderBy('first_name')
-            ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay']);
+            ->get(['id', 'last_name', 'first_name', 'middle_name', 'address', 'barangay', 'civil_status']);
 
         return view('pages.clearance', compact('clearances', 'residents', 'totalClearances', 'monthClearances'));
     }
@@ -28,7 +28,7 @@ class ClearanceController extends Controller
     {
         $request->validate([
             'resident_name' => 'required|string|max:255',
-            'certificate_type' => 'required|string|max:255',
+            'certificate_ty     pe' => 'required|string|max:255',
             'civil_status' => 'nullable|string|max:50',
             'purok' => 'nullable|string|max:255',
             'requestor' => 'nullable|string|max:255',
