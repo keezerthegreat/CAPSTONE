@@ -331,7 +331,7 @@ tbody tr:last-child td { border-bottom: none; }
       $fAgeMax = $filters['ageMax'] ?? null;
       $fSearch = $filters['search'] ?? '';
       $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
-      $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter',default=>'Classification' };
+      $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter','solo_parent'=>'Solo Parent',default=>'Classification' };
     @endphp
     <div class="filter-area">
       <div class="search-wrap" style="display:flex;gap:6px">
@@ -407,6 +407,7 @@ tbody tr:last-child td { border-bottom: none; }
             <div class="flt-option {{ $fClass==='senior' ? 'selected' : '' }}" onclick="applyFilter('classification','senior')">Senior Citizen</div>
             <div class="flt-option {{ $fClass==='pwd' ? 'selected' : '' }}" onclick="applyFilter('classification','pwd')">PWD</div>
             <div class="flt-option {{ $fClass==='voter' ? 'selected' : '' }}" onclick="applyFilter('classification','voter')">Registered Voter</div>
+            <div class="flt-option {{ $fClass==='solo_parent' ? 'selected' : '' }}" onclick="applyFilter('classification','solo_parent')">Solo Parent</div>
           </div>
         </div>
 
@@ -508,7 +509,8 @@ tbody tr:last-child td { border-bottom: none; }
               @if($resident->is_senior)<span class="badge badge-senior">Senior</span>@endif
               @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
               @if($resident->is_voter)<span class="badge" style="background:#f3e8ff;color:#6b21a8">Voter</span>@endif
-              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter)
+              @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
+              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter && !$resident->is_solo_parent)
               <span style="color:var(--muted);font-size:12px">—</span>
               @endif
             </td>
@@ -729,6 +731,7 @@ tbody tr:last-child td { border-bottom: none; }
       <span class="rp-check-item"><span id="rp-senior" class="rp-cb"></span> Senior Citizen (60+)</span>
       <span class="rp-check-item"><span id="rp-pwd" class="rp-cb"></span> Person with Disability (PWD)</span>
       <span class="rp-check-item"><span id="rp-voter" class="rp-cb"></span> Registered Voter</span>
+      <span class="rp-check-item"><span id="rp-solo-parent" class="rp-cb"></span> Solo Parent</span>
       <span class="rp-check-item"><span id="rp-deceased" class="rp-cb"></span> Deceased</span>
     </div>
   </div>
@@ -918,8 +921,9 @@ function printRBIForm() {
   cb('rp-cs-sep',  cs === 'separated');
   cb('rp-senior',  !!r.is_senior);
   cb('rp-pwd',     !!r.is_pwd);
-  cb('rp-voter',   !!r.is_voter);
-  cb('rp-deceased',!!r.is_deceased);
+  cb('rp-voter',       !!r.is_voter);
+  cb('rp-solo-parent', !!r.is_solo_parent);
+  cb('rp-deceased',    !!r.is_deceased);
 
   window.print();
 }
@@ -986,7 +990,8 @@ function openResidentModal(r, pendingStatus) {
   if (r.is_deceased) badges += '<span class="badge" style="background:#fee2e2;color:#be123c">Deceased</span> ';
   if (r.is_senior)   badges += '<span class="badge badge-senior">Senior Citizen</span> ';
   if (r.is_pwd)      badges += '<span class="badge badge-pwd">PWD</span> ';
-  if (r.is_voter)    badges += '<span class="badge" style="background:#f3e8ff;color:#6b21a8">Registered Voter</span> ';
+  if (r.is_voter)       badges += '<span class="badge" style="background:#f3e8ff;color:#6b21a8">Registered Voter</span> ';
+  if (r.is_solo_parent) badges += '<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span> ';
   document.getElementById('rm-badges').innerHTML = badges;
 }
 function closeResidentModal() {

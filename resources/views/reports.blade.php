@@ -208,6 +208,10 @@
       <div class="stat-icon purple"><i class="fas fa-vote-yea"></i></div>
       <div class="stat-info"><div class="slabel">Registered Voters</div><div class="svalue">{{ $voters }}</div></div>
     </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef9c3;color:#854d0e"><i class="fas fa-user-shield"></i></div>
+      <div class="stat-info"><div class="slabel">Solo Parents</div><div class="svalue">{{ $soloParents }}</div></div>
+    </div>
   </div>
 
   <!-- Tabs -->
@@ -218,6 +222,7 @@
       <div class="tab" onclick="switchTab('seniors')">Senior Citizens</div>
       <div class="tab" onclick="switchTab('pwd')">PWD</div>
       <div class="tab" onclick="switchTab('voters')">Voters</div>
+      <div class="tab" onclick="switchTab('solo-parents')">Solo Parents</div>
       <div class="tab" onclick="switchTab('minors')">Minors</div>
     </div>
 
@@ -414,6 +419,31 @@
             </tr>
             @empty
             <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No registered voters found.</td></tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Solo Parents Tab -->
+    <div id="tab-solo-parents" class="tab-content">
+      <div class="print-section-title">VI. Solo Parents</div>
+      <div class="card-body" style="padding:0">
+        <div style="padding:16px 20px;font-size:13px;color:var(--muted)">Total: <strong style="color:var(--primary)">{{ $soloParents }}</strong> solo parent(s)</div>
+        <table class="list-table">
+          <thead><tr><th>#</th><th>Full Name</th><th>Age</th><th>Sex</th><th>Address</th><th>Contact</th></tr></thead>
+          <tbody>
+            @forelse($soloParentList as $i => $r)
+            <tr>
+              <td style="color:var(--muted)">{{ $i+1 }}</td>
+              <td><strong>{{ $r->last_name }}, {{ $r->first_name }} {{ $r->middle_name ? strtoupper(substr($r->middle_name, 0, 1)).'.' : '' }}</strong></td>
+              <td>{{ $r->age }} yrs</td>
+              <td>{{ $r->gender }}</td>
+              <td>{{ $r->address ?? '—' }}</td>
+              <td>{{ $r->contact_number ?? '—' }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No solo parents found.</td></tr>
             @endforelse
           </tbody>
         </table>

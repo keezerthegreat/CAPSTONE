@@ -73,6 +73,7 @@ class Resident extends Model
         'is_senior',
         'is_pwd',
         'is_voter',
+        'is_solo_parent',
 
         // Location
         'latitude',

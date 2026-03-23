@@ -150,6 +150,7 @@
         @if($resident->is_senior)<span class="badge badge-senior">Senior Citizen</span>@endif
         @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
         @if($resident->is_voter)<span class="badge badge-voter">Registered Voter</span>@endif
+        @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
       </div>
     </div>
     <div class="card-body">
@@ -402,6 +403,9 @@
       </span>
       <span class="rbi-check-item">
         <span class="rbi-checkbox {{ $resident->is_voter ? 'checked' : '' }}"></span> Registered Voter
+      </span>
+      <span class="rbi-check-item">
+        <span class="rbi-checkbox {{ $resident->is_solo_parent ? 'checked' : '' }}"></span> Solo Parent
       </span>
       <span class="rbi-check-item">
         <span class="rbi-checkbox {{ $resident->is_deceased ? 'checked' : '' }}"></span> Deceased

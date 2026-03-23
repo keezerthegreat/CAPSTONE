@@ -140,6 +140,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
         <div class="sc-tooltip-row"><span class="tl">Senior Citizens</span><span class="tv">{{ $seniors }}</span></div>
         <div class="sc-tooltip-row"><span class="tl">Persons w/ Disability</span><span class="tv">{{ $pwd }}</span></div>
         <div class="sc-tooltip-row"><span class="tl">Registered Voters</span><span class="tv">{{ $voters }}</span></div>
+        <div class="sc-tooltip-row"><span class="tl">Solo Parents</span><span class="tv">{{ $soloParents }}</span></div>
         <div class="sc-tooltip-row"><span class="tl">Male / Female</span><span class="tv">{{ $male }} / {{ $female }}</span></div>
         <div class="sc-tooltip-row"><span class="tl" style="color:#94a3b8;font-style:italic">Click to expand</span></div>
       </div>

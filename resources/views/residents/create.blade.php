@@ -279,6 +279,10 @@ input::placeholder { color:#94a3b8; }
             <input type="checkbox" name="is_voter" value="1" {{ old('is_voter') ? 'checked':'' }}>
             <span>Registered Voter</span>
           </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_solo_parent" value="1" {{ old('is_solo_parent') ? 'checked':'' }}>
+            <span>Solo Parent</span>
+          </label>
         </div>
       </div>
     </div>

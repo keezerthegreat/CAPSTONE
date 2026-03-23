@@ -39,6 +39,8 @@ class ResidentController extends Controller
             $query->where('is_pwd', true);
         } elseif ($classification === 'voter') {
             $query->where('is_voter', true);
+        } elseif ($classification === 'solo_parent') {
+            $query->where('is_solo_parent', true);
         }
         if ($ageMin !== null) {
             $query->where('age', '>=', $ageMin);
@@ -51,6 +53,12 @@ class ResidentController extends Controller
             $query->where(function ($q) use ($s) {
                 $q->whereRaw('LOWER(first_name) like ?', ["%{$s}%"])
                     ->orWhereRaw('LOWER(last_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(middle_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw("LOWER(first_name || ' ' || last_name) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(last_name || ' ' || first_name) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(first_name || ' ' || middle_name) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(last_name || ', ' || first_name || ' ' || COALESCE(middle_name, '')) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) like ?", ["%{$s}%"])
                     ->orWhereRaw('LOWER(address) like ?', ["%{$s}%"]);
             });
         }
@@ -108,6 +116,7 @@ class ResidentController extends Controller
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
+            'is_solo_parent' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
@@ -124,6 +133,7 @@ class ResidentController extends Controller
         $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
+        $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
         $validated['status'] = 'pending';
 
         // Duplicate check: same name + birthdate already in the system
@@ -192,6 +202,7 @@ class ResidentController extends Controller
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
+            'is_solo_parent' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'is_deceased' => 'nullable|boolean',
@@ -210,6 +221,7 @@ class ResidentController extends Controller
         $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
+        $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
 
         if (! $validated['is_deceased']) {

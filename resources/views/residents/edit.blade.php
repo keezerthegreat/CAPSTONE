@@ -240,6 +240,10 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
         <input type="checkbox" name="is_voter" value="1" {{ $resident->is_voter ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
         Registered Voter
       </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+        <input type="checkbox" name="is_solo_parent" value="1" {{ $resident->is_solo_parent ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        Solo Parent
+      </label>
     </div>
   </div>
 </div>
