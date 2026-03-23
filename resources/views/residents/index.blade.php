@@ -330,8 +330,10 @@ tbody tr:last-child td { border-bottom: none; }
       $fAgeMin = $filters['ageMin'] ?? null;
       $fAgeMax = $filters['ageMax'] ?? null;
       $fSearch = $filters['search'] ?? '';
+      $fSector = $filters['sector'] ?? '';
       $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
       $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter','solo_parent'=>'Solo Parent',default=>'Classification' };
+      $sectorLabel = match($fSector) { 'labor_force'=>'Labor Force','unemployed'=>'Unemployed','ofw'=>'OFW','indigenous'=>'Indigenous','out_of_school_child'=>'Out of School Child','out_of_school_youth'=>'Out of School Youth','student'=>'Student',default=>'Sector' };
     @endphp
     <div class="filter-area">
       <div class="search-wrap" style="display:flex;gap:6px">
@@ -411,6 +413,26 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
+        <!-- Sector -->
+        <div class="flt-wrap" id="wrap-sector">
+          <button class="flt-btn {{ $fSector ? 'active' : '' }}" id="btn-sector" onclick="toggleFlt('sector')">
+            <i class="fas fa-tags"></i>
+            <span id="lbl-sector">{{ $sectorLabel }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-sector" style="{{ $fSector ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-sector" style="{{ $fSector ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('sector','')">×</span>
+          </button>
+          <div class="flt-dropdown" id="dd-sector">
+            <div class="flt-option {{ !$fSector ? 'selected' : '' }}" onclick="applyFilter('sector','')">All</div>
+            <div class="flt-option {{ $fSector==='labor_force' ? 'selected' : '' }}" onclick="applyFilter('sector','labor_force')">Labor Force</div>
+            <div class="flt-option {{ $fSector==='unemployed' ? 'selected' : '' }}" onclick="applyFilter('sector','unemployed')">Unemployed</div>
+            <div class="flt-option {{ $fSector==='ofw' ? 'selected' : '' }}" onclick="applyFilter('sector','ofw')">OFW</div>
+            <div class="flt-option {{ $fSector==='indigenous' ? 'selected' : '' }}" onclick="applyFilter('sector','indigenous')">Indigenous</div>
+            <div class="flt-option {{ $fSector==='out_of_school_child' ? 'selected' : '' }}" onclick="applyFilter('sector','out_of_school_child')">Out of School Child</div>
+            <div class="flt-option {{ $fSector==='out_of_school_youth' ? 'selected' : '' }}" onclick="applyFilter('sector','out_of_school_youth')">Out of School Youth</div>
+            <div class="flt-option {{ $fSector==='student' ? 'selected' : '' }}" onclick="applyFilter('sector','student')">Student</div>
+          </div>
+        </div>
+
         <!-- Age Range -->
         <div class="flt-wrap" id="wrap-age">
           <button class="flt-btn {{ ($fAgeMin || $fAgeMax) ? 'active' : '' }}" id="ageFilterBtn" onclick="toggleAgePopup()">
@@ -434,7 +456,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
-        @if($fGender || $fCivil || $fPurok || $fClass || $fAgeMin || $fAgeMax || $fSearch)
+        @if($fGender || $fCivil || $fPurok || $fClass || $fSector || $fAgeMin || $fAgeMax || $fSearch)
         <a href="{{ route('residents.index') }}" class="flt-btn" style="margin-left:auto;text-decoration:none;color:var(--muted);border-color:var(--border);white-space:nowrap;">
           <i class="fas fa-times"></i> Clear Filters
         </a>
@@ -463,6 +485,7 @@ tbody tr:last-child td { border-bottom: none; }
             <th>Civil Status</th>
             <th>Address</th>
             <th>Classifications</th>
+            <th>Sector</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -511,6 +534,19 @@ tbody tr:last-child td { border-bottom: none; }
               @if($resident->is_voter)<span class="badge" style="background:#f3e8ff;color:#6b21a8">Voter</span>@endif
               @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
               @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter && !$resident->is_solo_parent)
+              <span style="color:var(--muted);font-size:12px">—</span>
+              @endif
+            </td>
+
+            <td>
+              @if($resident->is_labor_force)<span class="badge" style="background:#e0f2fe;color:#075985">Labor Force</span>@endif
+              @if($resident->is_unemployed)<span class="badge" style="background:#fee2e2;color:#991b1b">Unemployed</span>@endif
+              @if($resident->is_ofw)<span class="badge" style="background:#d1fae5;color:#065f46">OFW</span>@endif
+              @if($resident->is_indigenous)<span class="badge" style="background:#fdf4ff;color:#6b21a8">Indigenous</span>@endif
+              @if($resident->is_out_of_school_child)<span class="badge" style="background:#fff7ed;color:#9a3412">OSC</span>@endif
+              @if($resident->is_out_of_school_youth)<span class="badge" style="background:#fff7ed;color:#9a3412">OSY</span>@endif
+              @if($resident->is_student)<span class="badge" style="background:#eff6ff;color:#1e40af">Student</span>@endif
+              @if(!$resident->is_labor_force && !$resident->is_unemployed && !$resident->is_ofw && !$resident->is_indigenous && !$resident->is_out_of_school_child && !$resident->is_out_of_school_youth && !$resident->is_student)
               <span style="color:var(--muted);font-size:12px">—</span>
               @endif
             </td>
