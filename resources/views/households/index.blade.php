@@ -114,7 +114,7 @@ tbody tr:last-child td { border-bottom:none; }
         <i class="fas fa-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
       </button>
       @endif
-      <a href="{{ route('residents.location') }}" class="btn" style="background:#f1f5f9;color:var(--text);border:1.5px solid var(--border)">
+      <a href="{{ route('households.map') }}" class="btn" style="background:#f1f5f9;color:var(--text);border:1.5px solid var(--border)">
         <i class="fas fa-map-marker-alt"></i> View Map
       </a>
       <a href="{{ route('households.create') }}" class="btn btn-primary">

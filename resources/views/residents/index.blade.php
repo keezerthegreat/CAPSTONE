@@ -1082,6 +1082,16 @@ document.getElementById('searchInput').addEventListener('keydown', function(e) {
   }
 });
 
+// Auto-update when search is cleared
+document.getElementById('searchInput').addEventListener('input', function() {
+  if (this.value === '') {
+    const url = new URL(window.location);
+    url.searchParams.delete('search');
+    url.searchParams.delete('page');
+    navigate(url);
+  }
+});
+
 
 // ── REJECT CONFIRM ──
 var _rejectForm = null;
