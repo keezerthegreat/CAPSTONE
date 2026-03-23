@@ -176,9 +176,10 @@ class HouseholdController extends Controller
     {
         $households = Household::whereNotNull('latitude')
             ->whereNotNull('longitude')
+            ->with('members')
             ->get();
 
-        return view('households.map', compact('households'));
+        return view('residents.location', compact('households'));
     }
 
     public function bulkDestroy(Request $request)
