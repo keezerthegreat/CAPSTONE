@@ -335,7 +335,7 @@ tbody tr:last-child td { border-bottom: none; }
       $fCitizenship = $filters['citizenship'] ?? '';
       $fResidentStatus = $filters['residentStatus'] ?? '';
       $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
-      $residentStatusLabel = match($fResidentStatus) { 'active'=>'Active','deceased'=>'Deceased','transferred'=>'Transferred',default=>'Status' };
+      $residentStatusLabel = match($fResidentStatus) { 'deceased'=>'Deceased','transferred'=>'Transferred',default=>'Status' };
       $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter','solo_parent'=>'Solo Parent',default=>'Classification' };
       $sectorLabel = match($fSector) { 'labor_force'=>'Labor Force','unemployed'=>'Unemployed','ofw'=>'OFW','indigenous'=>'Indigenous','out_of_school_child'=>'Out of School Child','out_of_school_youth'=>'Out of School Youth','student'=>'Student',default=>'Sector' };
     @endphp
@@ -461,8 +461,6 @@ tbody tr:last-child td { border-bottom: none; }
             <span class="flt-x" id="x-resident_status" style="{{ $fResidentStatus ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('resident_status','')">×</span>
           </button>
           <div class="flt-dropdown" id="dd-resident_status">
-            <div class="flt-option {{ !$fResidentStatus ? 'selected' : '' }}" onclick="applyFilter('resident_status','')">All</div>
-            <div class="flt-option {{ $fResidentStatus==='active' ? 'selected' : '' }}" onclick="applyFilter('resident_status','active')">Active</div>
             <div class="flt-option {{ $fResidentStatus==='deceased' ? 'selected' : '' }}" onclick="applyFilter('resident_status','deceased')">Deceased</div>
             <div class="flt-option {{ $fResidentStatus==='transferred' ? 'selected' : '' }}" onclick="applyFilter('resident_status','transferred')">Transferred</div>
           </div>

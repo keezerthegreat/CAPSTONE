@@ -55,8 +55,6 @@ class ResidentController extends Controller
             $query->where('is_deceased', true);
         } elseif ($residentStatus === 'transferred') {
             $query->whereNotNull('transferred_to');
-        } elseif ($residentStatus === 'active') {
-            $query->where('is_deceased', false)->whereNull('transferred_to');
         }
         if ($ageMin !== null) {
             $query->where('age', '>=', $ageMin);
