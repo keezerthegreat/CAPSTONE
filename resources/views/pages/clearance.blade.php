@@ -138,6 +138,9 @@ tbody tr:last-child td { border-bottom:none; }
             <option value="Married">Married</option>
             <option value="Widowed">Widowed</option>
             <option value="Separated">Separated</option>
+            <option value="Annulled">Annulled</option>
+            <option value="Common Law (Live-in)">Common Law (Live-in)</option>
+            <option value="Divorced">Divorced</option>
           </select>
         </div>
         <div class="form-group">

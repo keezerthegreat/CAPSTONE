@@ -120,7 +120,7 @@ input::placeholder { color:#94a3b8; }
           <label>Civil Status</label>
           <select name="civil_status">
             <option value="">Select...</option>
-            @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law','Divorced','Live-in'] as $cs)
+            @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law (Live-in)','Divorced'] as $cs)
               <option value="{{ $cs }}" {{ old('civil_status')==$cs ? 'selected':'' }}>{{ $cs }}</option>
             @endforeach
           </select>
@@ -138,7 +138,7 @@ input::placeholder { color:#94a3b8; }
         </div>
 
         <div class="form-group">
-          <label>Type of Resident</label>
+          <label>Inhabitant</label>
           <select name="resident_type">
             <option value="">Select...</option>
             @foreach(['Migrant','Non-Migrant','Transient'] as $rt)

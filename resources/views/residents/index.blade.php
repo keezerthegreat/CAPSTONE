@@ -372,7 +372,7 @@ tbody tr:last-child td { border-bottom: none; }
           </button>
           <div class="flt-dropdown" id="dd-civil">
             <div class="flt-option {{ !$fCivil ? 'selected' : '' }}" onclick="applyFilter('civil','')">All</div>
-           @foreach(['single','married','widowed','separated','annulled','common law','divorced','live-in'] as $cv)
+           @foreach(['single','married','widowed','separated','annulled','common law (live-in)','divorced'] as $cv)
 <div class="flt-option {{ strtolower($fCivil)===$cv ? 'selected' : '' }}" onclick="applyFilter('civil','{{ $cv }}')">{{ ucwords($cv) }}</div>
 @endforeach
           </div>
@@ -788,7 +788,7 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="mi"><span class="ml">Age</span><span class="mv" id="rm-age"></span></div>
           <div class="mi"><span class="ml">Civil Status</span><span class="mv" id="rm-civil"></span></div>
           <div class="mi"><span class="ml">Citizenship</span><span class="mv" id="rm-nat"></span></div>
-          <div class="mi"><span class="ml">Type of Resident</span><span class="mv" id="rm-restype"></span></div>
+          <div class="mi"><span class="ml">Inhabitant</span><span class="mv" id="rm-restype"></span></div>
           <div class="mi"><span class="ml">Religion</span><span class="mv" id="rm-rel"></span></div>
         </div>
       </div>
@@ -1072,7 +1072,9 @@ document.addEventListener('click', function(e) {
 });
 
 // Search submits on Enter
-document.getElementById('searchInput').addEventListener('keydown', function(e) {
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
     const url = new URL(window.location);
     const val = this.value.trim();

@@ -80,6 +80,9 @@ Route::middleware('auth')->group(function () {
     // Resident map — available to all authenticated users
     Route::get('/resident-location', [ResidentController::class, 'location'])->name('residents.location');
 
+    // Resident autocomplete suggestions
+    Route::get('/residents-suggest', [ResidentController::class, 'suggest'])->name('residents.suggest');
+
     // Theme toggle — available to all authenticated users
     Route::post('/settings/theme', [SettingsController::class, 'setTheme'])->name('settings.theme');
 

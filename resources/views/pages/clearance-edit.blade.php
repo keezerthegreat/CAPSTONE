@@ -88,10 +88,9 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
         <div class="form-group">
           <label>Civil Status</label>
           <select name="civil_status" id="cl-civil-status" onchange="clUpdateMeta()">
-            <option value="Single"     {{ ($clearance->civil_status ?? 'Single') == 'Single'     ? 'selected' : '' }}>Single</option>
-            <option value="Married"    {{ ($clearance->civil_status ?? '') == 'Married'    ? 'selected' : '' }}>Married</option>
-            <option value="Widowed"    {{ ($clearance->civil_status ?? '') == 'Widowed'    ? 'selected' : '' }}>Widowed</option>
-            <option value="Separated"  {{ ($clearance->civil_status ?? '') == 'Separated'  ? 'selected' : '' }}>Separated</option>
+            @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law (Live-in)','Divorced'] as $cs)
+            <option value="{{ $cs }}" {{ ($clearance->civil_status ?? 'Single') == $cs ? 'selected' : '' }}>{{ $cs }}</option>
+            @endforeach
           </select>
         </div>
         <div class="form-group">
