@@ -292,7 +292,7 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
             return null;
         }
         $s = trim((string) $v);
-        if ($s === '' || str_starts_with($s, '=')) {
+        if ($s === '' || str_starts_with($s, '=') || strtolower($s) === 'n/a') {
             return null;
         }
 
