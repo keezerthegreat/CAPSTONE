@@ -87,9 +87,10 @@ class Resident extends Model
         'latitude',
         'longitude',
 
-        // Deceased
+        // Deceased / Transferred
         'is_deceased',
         'date_of_death',
+        'transferred_to',
 
         // Family link
         'family_id',

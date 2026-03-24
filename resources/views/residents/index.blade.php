@@ -877,7 +877,14 @@ tbody tr:last-child td { border-bottom: none; }
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-tags"></i> Sector Classifications</div>
         <div class="modal-section-body">
-          <div id="rm-sectors"></div>
+          <div id="rm-badges"></div>
+        </div>
+      </div>
+
+      <div id="rm-transferred-section" style="display:none">
+        <div class="modal-section-title"><i class="fas fa-plane-departure"></i> Transfer Status</div>
+        <div class="mgrid">
+          <div class="mi span3"><span class="ml">Transferred To</span><span class="mv" id="rm-transferred-dest" style="background:#eff6ff;border-color:#bfdbfe;color:#1e40af;font-weight:600"></span></div>
         </div>
       </div>
 
@@ -1092,7 +1099,7 @@ function openResidentModal(r, pendingStatus) {
     famSection.style.display = 'none';
   }
 
-  // Badges
+  // Sector / Classification Badges
   const sectorDefs = [
     { field: 'is_deceased',            label: 'Deceased',            color: '#be123c', bg: '#fee2e2' },
     { field: 'is_senior',              label: 'Senior Citizen',      color: '#92400e', bg: '#fef3c7' },
@@ -1107,11 +1114,20 @@ function openResidentModal(r, pendingStatus) {
     { field: 'is_out_of_school_youth', label: 'Out of School Youth', color: '#4c1d95', bg: '#ede9fe' },
     { field: 'is_student',             label: 'Student',             color: '#134e4a', bg: '#ccfbf1' },
   ];
-  const badges = sectorDefs
+  const badgesHtml = sectorDefs
     .filter(s => r[s.field])
     .map(s => `<span class="badge" style="background:${s.bg};color:${s.color}">${s.label}</span>`)
     .join(' ');
-  document.getElementById('rm-badges').innerHTML = badges;
+  document.getElementById('rm-badges').innerHTML = badgesHtml || '<span style="color:var(--muted);font-size:13px">None</span>';
+
+  // Transferred To
+  const transferredSection = document.getElementById('rm-transferred-section');
+  if (r.transferred_to) {
+    document.getElementById('rm-transferred-dest').textContent = 'Transferred to ' + r.transferred_to;
+    transferredSection.style.display = '';
+  } else {
+    transferredSection.style.display = 'none';
+  }
 }
 function closeResidentModal() {
   document.getElementById('residentModal').classList.remove('open');

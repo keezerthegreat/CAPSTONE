@@ -245,6 +245,7 @@ class ResidentController extends Controller
             'longitude' => 'nullable|numeric',
             'is_deceased' => 'nullable|boolean',
             'date_of_death' => 'nullable|date',
+            'transferred_to' => 'nullable|string|max:255',
         ]);
 
         // Build address from sub-fields
@@ -271,6 +272,10 @@ class ResidentController extends Controller
 
         if (! $validated['is_deceased']) {
             $validated['date_of_death'] = null;
+        }
+
+        if (empty($validated['transferred_to'])) {
+            $validated['transferred_to'] = null;
         }
 
         // Admin applies changes directly; employee sends for verification

@@ -289,21 +289,40 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
   </div>
 </div>
 
-<!-- Deceased Status -->
+<!-- Deceased Status / Transferred -->
 <div class="card" style="border:1.5px solid #fecdd3">
   <div class="card-header" style="background:#fff1f2"><div class="card-title" style="color:#be123c"><i class="fas fa-cross" style="margin-right:6px"></i>Deceased Status</div></div>
   <div class="card-body">
-    <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:center">
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_deceased" value="1" id="isDeceased" {{ $resident->is_deceased ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Mark as Deceased
-      </label>
-      <div id="deathDateField" style="{{ $resident->is_deceased ? '' : 'display:none' }}">
-        <div style="display:flex;flex-direction:column;gap:5px">
-          <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Date of Death</label>
-          <input type="date" name="date_of_death" value="{{ $resident->date_of_death }}" style="padding:9px 12px;border:1.5px solid #fecdd3;border-radius:8px;font-size:14px;font-family:inherit;width:200px">
+    <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
+
+      {{-- Mark as Deceased --}}
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+          <input type="checkbox" name="is_deceased" value="1" id="isDeceased" {{ $resident->is_deceased ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+          Mark as Deceased
+        </label>
+        <div id="deathDateField" style="{{ $resident->is_deceased ? '' : 'display:none' }}">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Date of Death</label>
+            <input type="date" name="date_of_death" value="{{ $resident->date_of_death }}" style="padding:9px 12px;border:1.5px solid #fecdd3;border-radius:8px;font-size:14px;font-family:inherit;width:200px">
+          </div>
         </div>
       </div>
+
+      {{-- Transferred To --}}
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
+          <input type="checkbox" id="isTransferred" {{ $resident->transferred_to ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+          Transferred to
+        </label>
+        <div id="transferredField" style="{{ $resident->transferred_to ? '' : 'display:none' }}">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Destination / Location</label>
+            <input type="text" name="transferred_to" id="transferredToInput" value="{{ $resident->transferred_to }}" placeholder="e.g. Japan, Manila, Cebu City…" style="padding:9px 12px;border:1.5px solid #fecdd3;border-radius:8px;font-size:14px;font-family:inherit;width:280px">
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -311,6 +330,12 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
 <script>
 document.getElementById('isDeceased').addEventListener('change', function() {
   document.getElementById('deathDateField').style.display = this.checked ? '' : 'none';
+});
+document.getElementById('isTransferred').addEventListener('change', function() {
+  const field = document.getElementById('transferredField');
+  const input = document.getElementById('transferredToInput');
+  field.style.display = this.checked ? '' : 'none';
+  if (!this.checked) { input.value = ''; }
 });
 </script>
 
