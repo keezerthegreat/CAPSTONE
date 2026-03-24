@@ -351,11 +351,11 @@ input::placeholder { color:#94a3b8; }
           </label>
           <label class="check-item">
             <input type="checkbox" name="is_out_of_school_child" value="1" {{ old('is_out_of_school_child') ? 'checked':'' }}>
-            <span>Out of School Child</span>
+            <span>Out of School Child <small style="color:var(--muted);font-weight:400">(ages 6–14 only)</small></span>
           </label>
           <label class="check-item">
             <input type="checkbox" name="is_out_of_school_youth" value="1" {{ old('is_out_of_school_youth') ? 'checked':'' }}>
-            <span>Out of School Youth</span>
+            <span>Out of School Youth <small style="color:var(--muted);font-weight:400">(ages 15–24 only)</small></span>
           </label>
           <label class="check-item">
             <input type="checkbox" name="is_student" value="1" {{ old('is_student') ? 'checked':'' }}>

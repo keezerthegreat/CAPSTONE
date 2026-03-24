@@ -141,6 +141,17 @@
   </div>
   @endif
 
+  {{-- Transferred Banner --}}
+  @if($resident->transferred_to)
+  <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+    <i class="fas fa-map-marker-alt" style="color:#1d4ed8;font-size:20px"></i>
+    <div>
+      <div style="font-weight:700;color:#1d4ed8;font-size:15px">This resident has been transferred</div>
+      <div style="font-size:13px;color:#64748b;margin-top:2px">Transferred to: <strong>{{ $resident->transferred_to }}</strong></div>
+    </div>
+  </div>
+  @endif
+
   <!-- Personal Info -->
   <div class="card">
     <div class="card-header">
@@ -488,6 +499,12 @@
           <span style="margin-left:6px;font-size:8.5pt">({{ \Carbon\Carbon::parse($resident->date_of_death)->format('M d, Y') }})</span>
         @endif
       </span>
+      @if($resident->transferred_to)
+      <span class="rbi-check-item" style="grid-column:span 2">
+        <span class="rbi-checkbox checked"></span> Transferred
+        <span style="margin-left:6px;font-size:8.5pt">to <strong>{{ $resident->transferred_to }}</strong></span>
+      </span>
+      @endif
     </div>
   </div>
 

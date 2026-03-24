@@ -312,11 +312,11 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
       </label>
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
         <input type="checkbox" name="is_out_of_school_child" value="1" {{ $resident->is_out_of_school_child ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Out of School Child
+        Out of School Child <small style="color:var(--muted);font-weight:400">(ages 6–14 only)</small>
       </label>
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
         <input type="checkbox" name="is_out_of_school_youth" value="1" {{ $resident->is_out_of_school_youth ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Out of School Youth
+        Out of School Youth <small style="color:var(--muted);font-weight:400">(ages 15–24 only)</small>
       </label>
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
         <input type="checkbox" name="is_student" value="1" {{ $resident->is_student ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">

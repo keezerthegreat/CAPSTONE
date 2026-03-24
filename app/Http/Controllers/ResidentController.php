@@ -46,7 +46,13 @@ class ResidentController extends Controller
             $query->where('is_solo_parent', true);
         }
         if ($sector) {
-            $query->where("is_{$sector}", true);
+            if ($sector === 'out_of_school_child') {
+                $query->whereBetween('age', [6, 14]);
+            } elseif ($sector === 'out_of_school_youth') {
+                $query->whereBetween('age', [15, 24]);
+            } else {
+                $query->where("is_{$sector}", true);
+            }
         }
         if ($citizenship) {
             $query->whereRaw('LOWER(nationality) = ?', [strtolower($citizenship)]);
@@ -167,8 +173,8 @@ class ResidentController extends Controller
         $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
         $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
         $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
-        $validated['is_out_of_school_child'] = $request->has('is_out_of_school_child') ? 1 : 0;
-        $validated['is_out_of_school_youth'] = $request->has('is_out_of_school_youth') ? 1 : 0;
+        $validated['is_out_of_school_child'] = ($request->has('is_out_of_school_child') && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
+        $validated['is_out_of_school_youth'] = ($request->has('is_out_of_school_youth') && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['is_student'] = $request->has('is_student') ? 1 : 0;
         $validated['status'] = 'pending';
 
@@ -279,8 +285,8 @@ class ResidentController extends Controller
         $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
         $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
         $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
-        $validated['is_out_of_school_child'] = $request->has('is_out_of_school_child') ? 1 : 0;
-        $validated['is_out_of_school_youth'] = $request->has('is_out_of_school_youth') ? 1 : 0;
+        $validated['is_out_of_school_child'] = ($request->has('is_out_of_school_child') && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
+        $validated['is_out_of_school_youth'] = ($request->has('is_out_of_school_youth') && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['is_student'] = $request->has('is_student') ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
 
