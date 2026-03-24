@@ -114,11 +114,27 @@ class SettingsController extends Controller
         $autoBackupName = 'database_'.now()->format('Y_m_d_His').'_pre_restore.sqlite';
         copy($dbPath, $backupDir.DIRECTORY_SEPARATOR.$autoBackupName);
 
+        // Read the uploaded file contents before disconnecting
+        $newDbContents = file_get_contents($uploadedFile->getRealPath());
+
+        if ($newDbContents === false || strlen($newDbContents) < 1024) {
+            return redirect()->route('settings.index')
+                ->with('error', 'Failed to read the uploaded backup file. Please try again.');
+        }
+
         // Close the active SQLite connection before replacing the file
         DB::disconnect('sqlite');
 
-        // Replace the live database with the uploaded file
-        $uploadedFile->move(dirname($dbPath), basename($dbPath));
+        // Write the new database contents directly — more reliable than rename() on Windows
+        // when SQLite may still hold a brief file lock after disconnect
+        $written = file_put_contents($dbPath, $newDbContents);
+
+        if ($written === false) {
+            DB::reconnect('sqlite');
+
+            return redirect()->route('settings.index')
+                ->with('error', 'Failed to overwrite the database file. Check file permissions and try again.');
+        }
 
         // Reconnect so the rest of the request (session, redirect) uses the restored DB
         DB::reconnect('sqlite');
