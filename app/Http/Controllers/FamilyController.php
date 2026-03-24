@@ -101,6 +101,9 @@ class FamilyController extends Controller
             'notes' => $request->notes,
         ]);
 
+        // Always set family_id on the head resident
+        Resident::where('id', $resident->id)->update(['family_id' => $family->id]);
+
         foreach ($memberData as $residentId => $role) {
             Resident::where('id', $residentId)->update([
                 'family_id' => $family->id,
@@ -152,6 +155,9 @@ class FamilyController extends Controller
 
         // Clear old member links
         Resident::where('family_id', $family->id)->update(['family_id' => null, 'family_role' => null]);
+
+        // Always set family_id on the head resident
+        Resident::where('id', $resident->id)->update(['family_id' => $family->id]);
 
         // Re-assign with roles
         foreach ($memberData as $residentId => $role) {

@@ -31,7 +31,7 @@
 .alert-error { background:#fff1f2; border:1px solid #fecdd3; color:#be123c; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; }
 /* Resident search widget */
 .res-search-wrap { position:relative; }
-.res-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--primary); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:100; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+.res-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--primary); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:999; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
 .res-dropdown.open { display:block; }
 .res-option { padding:9px 14px; cursor:pointer; font-size:14px; color:var(--text); border-bottom:1px solid var(--border); }
 .res-option:last-child { border-bottom:none; }
@@ -129,7 +129,7 @@
     </div>
 
     <!-- Family Members -->
-    <div class="card">
+    <div class="card" style="overflow:visible">
       <div class="card-header">
         <div class="card-title"><i class="fas fa-users"></i> Family Members</div>
       </div>

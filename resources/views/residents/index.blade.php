@@ -71,7 +71,7 @@ tbody tr:last-child td { border-bottom: none; }
 .mi .mv { font-size:13px; color:var(--text); font-weight:500; background:#f8fafc; border:1px solid var(--border); border-radius:7px; padding:7px 10px; }
 .mi.span2 { grid-column:span 2; }
 .mi.span3 { grid-column:span 3; }
-.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; }
 /* ── RBI Print Frame ── */
 #rbi-print-frame { display:none; }
 @media print {
@@ -879,14 +879,36 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
       </div>
 
+      <div id="rm-household-section" style="display:none">
+        <div class="modal-section-title"><i class="fas fa-home"></i> Household</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Household No.</span><span class="mv" id="rm-hh-number"></span></div>
+          <div class="mi"><span class="ml">Head</span><span class="mv" id="rm-hh-head"></span></div>
+          <div class="mi"><span class="ml">Purok</span><span class="mv" id="rm-hh-sitio"></span></div>
+          <div class="mi"><span class="ml">Members</span><span class="mv" id="rm-hh-members"></span></div>
+        </div>
+      </div>
+
+      <div id="rm-family-section" style="display:none">
+        <div class="modal-section-title"><i class="fas fa-users"></i> Family</div>
+        <div class="mgrid">
+          <div class="mi"><span class="ml">Family Name</span><span class="mv" id="rm-fam-name"></span></div>
+          <div class="mi"><span class="ml">Head</span><span class="mv" id="rm-fam-head"></span></div>
+          <div class="mi"><span class="ml">Members</span><span class="mv" id="rm-fam-members"></span></div>
+        </div>
+      </div>
+
     </div>
     <div class="modal-footer">
-      <button id="rm-print-btn" type="button" onclick="printRBIForm()" class="btn btn-sm" style="background:#fff;color:#374151;border:1.5px solid #d1d5db;display:none">
-        <i class="fas fa-print"></i> Print RBI Form
-      </button>
-      <button onclick="closeResidentModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
-        <i class="fas fa-times"></i> Close
-      </button>
+      <span id="rm-edit-link"></span>
+      <div style="display:flex;gap:8px">
+        <button id="rm-print-btn" type="button" onclick="printRBIForm()" class="btn btn-sm" style="background:#fff;color:#374151;border:1.5px solid #d1d5db;display:none">
+          <i class="fas fa-print"></i> Print RBI Form
+        </button>
+        <button onclick="closeResidentModal()" class="btn btn-sm" style="background:#f1f5f9;color:var(--muted);border:1px solid var(--border)">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -1015,6 +1037,9 @@ function openResidentModal(r, pendingStatus) {
   }
   _rbiResident = r;
   document.getElementById('rm-print-btn').style.display = (!pendingStatus && r.id) ? 'inline-flex' : 'none';
+  document.getElementById('rm-edit-link').innerHTML = (!pendingStatus && r.id)
+    ? `<a href="/residents/${r.id}/edit" style="color:var(--primary);font-weight:600;text-decoration:none"><i class="fas fa-edit" style="margin-right:4px"></i>Edit this resident</a>`
+    : '';
   document.getElementById('rm-last').textContent    = r.last_name   || '—';
   document.getElementById('rm-first').textContent   = r.first_name  || '—';
   document.getElementById('rm-middle').textContent  = r.middle_name || '—';
@@ -1038,6 +1063,31 @@ function openResidentModal(r, pendingStatus) {
   document.getElementById('rm-emp').textContent     = r.employer        || '—';
   document.getElementById('rm-inc').textContent     = r.monthly_income ? '₱' + parseFloat(r.monthly_income).toLocaleString() : '—';
   document.getElementById('rm-edu').textContent     = r.education_level || '—';
+
+  // Household
+  const hhSection = document.getElementById('rm-household-section');
+  if (r.household) {
+    const hhMiddle = r.household.head_middle_name ? ' ' + r.household.head_middle_name.charAt(0).toUpperCase() + '.' : '';
+    document.getElementById('rm-hh-number').textContent  = 'HH #' + r.household.household_number;
+    document.getElementById('rm-hh-head').textContent    = r.household.head_last_name + ', ' + r.household.head_first_name + hhMiddle;
+    document.getElementById('rm-hh-sitio').textContent   = r.household.sitio || '—';
+    document.getElementById('rm-hh-members').textContent = r.household.member_count + ' member(s)';
+    hhSection.style.display = '';
+  } else {
+    hhSection.style.display = 'none';
+  }
+
+  // Family
+  const famSection = document.getElementById('rm-family-section');
+  if (r.family) {
+    const famMiddle = r.family.head_middle_name ? ' ' + r.family.head_middle_name.charAt(0).toUpperCase() + '.' : '';
+    document.getElementById('rm-fam-name').textContent    = r.family.family_name;
+    document.getElementById('rm-fam-head').textContent    = r.family.head_last_name + ', ' + r.family.head_first_name + famMiddle;
+    document.getElementById('rm-fam-members').textContent = r.family.member_count + ' member(s)';
+    famSection.style.display = '';
+  } else {
+    famSection.style.display = 'none';
+  }
   let badges = '';
   if (r.is_deceased) badges += '<span class="badge" style="background:#fee2e2;color:#be123c">Deceased</span> ';
   if (r.is_senior)   badges += '<span class="badge badge-senior">Senior Citizen</span> ';

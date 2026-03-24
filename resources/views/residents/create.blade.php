@@ -344,10 +344,34 @@ input::placeholder { color:#94a3b8; }
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-const map = L.map('map').setView([11.0064, 124.6076], 15);
+const cogonBounds = L.latLngBounds([11.0112, 124.5982], [11.0307, 124.6100]);
+const map = L.map('map', { maxBounds: cogonBounds, maxBoundsViscosity: 1.0, minZoom: 14 }).setView([11.0207, 124.6047], 15);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+const cogonBoundary = [
+  [11.030234977356443,124.60167151058135],[11.024138850617248,124.59993112167416],[11.023602921343993,124.60191038749116],
+  [11.02199841553464,124.60224272719506],[11.013176512837916,124.60085297739778],[11.012933130596423,124.6015926549021],
+  [11.012495960590513,124.60222183066207],[11.01147589471995,124.60307015753074],[11.012275845430722,124.60427413224107],
+  [11.011819200932948,124.60627281394892],[11.012111976063025,124.60680203532627],[11.01277768276465,124.60734798244658],
+  [11.013342546617736,124.60780452150698],[11.013330502643186,124.60781209246971],[11.015173877780228,124.60767381484305],
+  [11.016824805731105,124.60713467157808],[11.019523490106792,124.60689925198847],[11.021487652923867,124.60695810706932],
+  [11.023801055019462,124.6070467555349],[11.025545638342095,124.6096972420873],[11.026218983523677,124.60994669964413],
+  [11.027841126946072,124.60905800709384],[11.02966220170373,124.608652639154],[11.030656901704731,124.6078574931883],
+  [11.03023536631963,124.60167118828224]
+];
+L.polygon(cogonBoundary, { color: '#2563eb', weight: 2, fillColor: '#2563eb', fillOpacity: 0.05 }).addTo(map);
+function isInsideCogon(lat, lng) {
+  let inside = false;
+  for (let i = 0, j = cogonBoundary.length - 1; i < cogonBoundary.length; j = i++) {
+    const yi = cogonBoundary[i][0], xi = cogonBoundary[i][1];
+    const yj = cogonBoundary[j][0], xj = cogonBoundary[j][1];
+    if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+
 let marker;
 map.on('click', function(e) {
+    if (!isInsideCogon(e.latlng.lat, e.latlng.lng)) return;
     document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
     document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
     if (marker) map.removeLayer(marker);

@@ -215,6 +215,40 @@
     </div>
   </div>
 
+  @if($resident->household)
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-home"></i> Household</div>
+      <a href="{{ route('households.show', $resident->household->id) }}" class="btn btn-outline" style="font-size:12px;padding:5px 12px">View Household</a>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item"><div class="label">Household No.</div><div class="value">HH #{{ $resident->household->household_number }}</div></div>
+        <div class="info-item"><div class="label">Head</div><div class="value">{{ $resident->household->head_last_name }}, {{ $resident->household->head_first_name }}{{ $resident->household->head_middle_name ? ' '.strtoupper(substr($resident->household->head_middle_name,0,1)).'.' : '' }}</div></div>
+        <div class="info-item"><div class="label">Purok</div><div class="value">{{ $resident->household->sitio ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">Residency Type</div><div class="value">{{ $resident->household->residency_type ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">Members</div><div class="value">{{ $resident->household->member_count }} member(s)</div></div>
+      </div>
+    </div>
+  </div>
+  @endif
+
+  @if($resident->family)
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-users"></i> Family</div>
+      <a href="{{ route('families.show', $resident->family->id) }}" class="btn btn-outline" style="font-size:12px;padding:5px 12px">View Family</a>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item"><div class="label">Family Name</div><div class="value">{{ $resident->family->family_name }}</div></div>
+        <div class="info-item"><div class="label">Head</div><div class="value">{{ $resident->family->head_last_name }}, {{ $resident->family->head_first_name }}{{ $resident->family->head_middle_name ? ' '.strtoupper(substr($resident->family->head_middle_name,0,1)).'.' : '' }}</div></div>
+        <div class="info-item"><div class="label">Members</div><div class="value">{{ $resident->family->member_count }} member(s)</div></div>
+      </div>
+    </div>
+  </div>
+  @endif
+
 </div>
 
 <!-- ════════════════════════════════════════════════════ -->

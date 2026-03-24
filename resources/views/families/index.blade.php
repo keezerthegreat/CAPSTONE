@@ -394,10 +394,12 @@ function openFamilyModal(f) {
   const members = f.members || [];
   const headName = (f.head_last_name || '—') + ', ' + (f.head_first_name || '') + (f.head_middle_name ? ' ' + f.head_middle_name : '');
   const hr = f.head_resident || {};
-  const headRow = `<tr><td style="color:var(--muted);font-size:11px">1</td><td style="font-weight:600">${headName}</td><td>${hr.gender || '—'} / ${hr.age || '—'} yrs</td><td>${hr.civil_status || '—'}</td><td><span class="badge-head"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span></td><td>${f.head_role ? `<span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">${f.head_role}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}</td></tr>`;
+  const headNameLink = f.head_resident_id ? `<a href="#" onclick="event.preventDefault();openResidentPreview(${f.head_resident_id})" style="color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer">${headName}</a>` : `<span style="font-weight:600">${headName}</span>`;
+  const headRow = `<tr><td style="color:var(--muted);font-size:11px">1</td><td>${headNameLink}</td><td>${hr.gender || '—'} / ${hr.age || '—'} yrs</td><td>${hr.civil_status || '—'}</td><td><span class="badge-head"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span></td><td>${f.head_role ? `<span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">${f.head_role}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}</td></tr>`;
   const otherMembers = members.filter(m => m.id !== f.head_resident_id);
   let rows = headRow + otherMembers.map((m, i) => {
     const name = (m.last_name || '') + ', ' + (m.first_name || '') + (m.middle_name ? ' ' + m.middle_name : '');
+    const nameLink = `<a href="#" onclick="event.preventDefault();openResidentPreview(${m.id})" style="color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer">${name}</a>`;
     let hhRoleBadge;
     if (m.family_role === 'head') {
       hhRoleBadge = `<span style="background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">HH Head</span>`;
@@ -406,7 +408,7 @@ function openFamilyModal(f) {
     } else {
       hhRoleBadge = '<span style="color:var(--muted);font-size:11px">—</span>';
     }
-    return `<tr><td style="color:var(--muted);font-size:11px">${i+2}</td><td style="font-weight:600">${name}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td><span style="color:var(--muted);font-size:11px">Member</span></td><td>${hhRoleBadge}</td></tr>`;
+    return `<tr><td style="color:var(--muted);font-size:11px">${i+2}</td><td>${nameLink}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td><span style="color:var(--muted);font-size:11px">Member</span></td><td>${hhRoleBadge}</td></tr>`;
   }).join('');
   body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th><th>HH Role</th></tr></thead><tbody>${rows}</tbody></table>`;
   document.getElementById('fm-edit-link').innerHTML = `<a href="/families/${f.id}/edit" style="color:var(--primary);font-weight:600;text-decoration:none"><i class="fas fa-edit" style="margin-right:4px"></i>Edit this family</a>`;
@@ -502,5 +504,7 @@ function submitBulkDelete() {
   }
 }
 </script>
+
+@include('partials.resident-preview-modal')
 
 @endsection

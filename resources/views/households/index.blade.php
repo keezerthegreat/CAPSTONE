@@ -541,9 +541,10 @@ function openHouseholdModal(h) {
       const isHead = m.id === h.head_resident_id;
       const role = isHead ? '<span class="badge-head"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span>' : '<span style="color:var(--muted);font-size:11px">Member</span>';
       const name = (m.last_name || '') + ', ' + (m.first_name || '') + (m.middle_name ? ' ' + m.middle_name : '');
+      const nameLink = `<a href="#" onclick="event.preventDefault();openResidentPreview(${m.id})" style="color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer">${name}</a>`;
       const sep = m.last_name !== currentLn ? `<tr><td colspan="5" style="padding:3px 6px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--header-bg)">${m.last_name || ''}</td></tr>` : '';
       currentLn = m.last_name; counter++;
-      return `${sep}<tr><td style="color:var(--muted);font-size:11px">${counter}</td><td style="font-weight:600">${name}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td>${role}</td></tr>`;
+      return `${sep}<tr><td style="color:var(--muted);font-size:11px">${counter}</td><td>${nameLink}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td>${role}</td></tr>`;
     }).join('');
     body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
@@ -552,5 +553,7 @@ function openHouseholdModal(h) {
 function closeHouseholdModal() { document.getElementById('householdModal').classList.remove('open'); }
 document.getElementById('householdModal').addEventListener('click', function(e) { if (e.target === this) closeHouseholdModal(); });
 </script>
+
+@include('partials.resident-preview-modal')
 
 @endsection

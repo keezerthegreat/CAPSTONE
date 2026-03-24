@@ -79,6 +79,9 @@ Route::middleware('auth')->group(function () {
     // Reports
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
+    // Resident JSON — for modal previews
+    Route::get('/residents/{resident}/json', [ResidentController::class, 'json'])->name('residents.json');
+
     // Resident map — available to all authenticated users
     Route::get('/resident-location', [ResidentController::class, 'location'])->name('residents.location');
 

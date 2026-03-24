@@ -74,7 +74,7 @@ class ResidentController extends Controller
         $totalResidents = (clone $query)->where('is_deceased', false)->count();
         $totalSeniors = (clone $query)->where('is_deceased', false)->where('age', '>=', 60)->count();
         $totalPwd = (clone $query)->where('is_deceased', false)->where('is_pwd', true)->count();
-        $residents = (clone $query)->with('household')->orderBy('last_name')->orderBy('first_name')->paginate(50)->withQueryString();
+        $residents = (clone $query)->with(['household', 'family'])->orderBy('last_name')->orderBy('first_name')->paginate(50)->withQueryString();
 
         $pendingResidents = Resident::where('status', 'pending')->latest()->get();
         $pendingEdits = ResidentPendingEdit::with('resident')->latest()->get();
@@ -181,9 +181,16 @@ class ResidentController extends Controller
 
     public function show($id)
     {
-        $resident = Resident::findOrFail($id);
+        $resident = Resident::with(['household', 'family'])->findOrFail($id);
 
         return view('residents.show', compact('resident'));
+    }
+
+    public function json($id): \Illuminate\Http\JsonResponse
+    {
+        $resident = Resident::with(['household', 'family'])->findOrFail($id);
+
+        return response()->json($resident);
     }
 
     public function edit($id)
