@@ -290,8 +290,8 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
 </div>
 
 <!-- Current Status -->
-<div class="card" style="border:1.5px solid #fecdd3">
-  <div class="card-header" style="background:#fff1f2"><div class="card-title" style="color:#be123c"><i class="fas fa-info-circle" style="margin-right:6px"></i>Current Status</div></div>
+<div class="card">
+  <div class="card-header"><div class="card-title"><i class="fas fa-info-circle" style="margin-right:6px"></i>Current Status</div></div>
   <div class="card-body">
     <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
 
@@ -304,7 +304,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
         <div id="deathDateField" style="{{ $resident->is_deceased ? '' : 'display:none' }}">
           <div style="display:flex;flex-direction:column;gap:5px">
             <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Date of Death</label>
-            <input type="date" name="date_of_death" value="{{ $resident->date_of_death }}" style="padding:9px 12px;border:1.5px solid #fecdd3;border-radius:8px;font-size:14px;font-family:inherit;width:200px">
+            <input type="date" name="date_of_death" value="{{ $resident->date_of_death }}" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;width:200px">
           </div>
         </div>
       </div>
@@ -318,7 +318,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
         <div id="transferredField" style="{{ $resident->transferred_to ? '' : 'display:none' }}">
           <div style="display:flex;flex-direction:column;gap:5px">
             <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Destination / Location</label>
-            <input type="text" name="transferred_to" id="transferredToInput" value="{{ $resident->transferred_to }}" placeholder="e.g. Japan, Manila, Cebu City…" style="padding:9px 12px;border:1.5px solid #fecdd3;border-radius:8px;font-size:14px;font-family:inherit;width:280px">
+            <input type="text" name="transferred_to" id="transferredToInput" value="{{ $resident->transferred_to }}" placeholder="e.g. Japan, Manila, Cebu City…" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;width:280px">
           </div>
         </div>
       </div>
