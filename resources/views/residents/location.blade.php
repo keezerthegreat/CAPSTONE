@@ -68,9 +68,11 @@
   z-index:9999;
   border-radius:0;
   margin:0;
+  overflow:hidden;
 }
 .map-fullscreen #map {
   height:100vh;
+  width:100vw;
   border-radius:0;
 }
 </style>
@@ -151,6 +153,7 @@ L.polygon(cogonBoundary, { color: '#2563eb', weight: 2, fillColor: '#2563eb', fi
 // Household data store for modal
 const hhData = @json($households->keyBy('id'));
 
+
 // Plot household pins
 @foreach($households as $hh)
 L.marker([{{ $hh->latitude }}, {{ $hh->longitude }}])
@@ -175,14 +178,10 @@ function toggleFullscreen() {
   const wrap = document.getElementById('mapWrap');
   if (isFullscreen) {
     wrap.classList.add('map-fullscreen');
-    document.getElementById('fs-icon').className = 'fas fa-compress';
-    document.getElementById('fs-text').textContent = 'Exit Fullscreen';
     document.getElementById('fs-icon2').className = 'fas fa-compress';
     document.getElementById('fs-text2').textContent = 'Exit';
   } else {
     wrap.classList.remove('map-fullscreen');
-    document.getElementById('fs-icon').className = 'fas fa-expand';
-    document.getElementById('fs-text').textContent = 'Fullscreen';
     document.getElementById('fs-icon2').className = 'fas fa-expand';
     document.getElementById('fs-text2').textContent = 'Fullscreen';
   }

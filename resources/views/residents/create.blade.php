@@ -151,9 +151,41 @@ input::placeholder { color:#94a3b8; }
           </select>
         </div>
 
+        @php
+          $religionOptions = [
+            'Roman Catholic',
+            'Islam',
+            'Iglesia ni Cristo',
+            "Jehovah's Witness",
+            'Seventh-Day Adventist Church',
+            'The Church of Jesus Christ of Latter-day Saints (Mormons)',
+            'Baptist Church',
+            'Born Again Christians',
+            'Philippine Independent Church (Aglipayan)',
+            'United Church of Christ in the Philippines (UCCP)',
+            'United Methodist Church',
+            'Episcopal Church in the Philippines',
+            'Ang Dating Daan',
+            'Bread of Life Ministries',
+            'Lutheran Church in the Philippines',
+          ];
+          $oldReligion   = old('religion');
+          $isOtherCreate = $oldReligion && !in_array($oldReligion, $religionOptions);
+        @endphp
         <div class="form-group">
           <label>Religion</label>
-          <input type="text" name="religion" value="{{ old('religion') }}" placeholder="e.g. Roman Catholic">
+          <input type="hidden" name="religion" id="religion_value" value="{{ $oldReligion }}">
+          <select id="religion_select" onchange="handleReligionChange(this)">
+            <option value="">Select...</option>
+            @foreach($religionOptions as $rel)
+              <option value="{{ $rel }}" {{ (!$isOtherCreate && $oldReligion === $rel) ? 'selected' : '' }}>{{ $rel }}</option>
+            @endforeach
+            <option value="Others" {{ $isOtherCreate ? 'selected' : '' }}>Others</option>
+          </select>
+          <input type="text" id="religion_other" placeholder="Please specify religion"
+            value="{{ $isOtherCreate ? $oldReligion : '' }}"
+            style="{{ $isOtherCreate ? '' : 'display:none;' }} margin-top:6px;"
+            oninput="document.getElementById('religion_value').value = this.value">
         </div>
       </div>
     </div>
@@ -414,6 +446,19 @@ document.getElementById('birthdate').addEventListener('change', function() {
 })();
 </script>
 
+<script>
+function handleReligionChange(select) {
+  const otherInput = document.getElementById('religion_other');
+  const hiddenVal  = document.getElementById('religion_value');
+  if (select.value === 'Others') {
+    otherInput.style.display = '';
+    hiddenVal.value = otherInput.value;
+  } else {
+    otherInput.style.display = 'none';
+    hiddenVal.value = select.value;
+  }
+}
+</script>
 <script>
 (function() {
   const barangayInput = document.querySelector('input[name="barangay"][type="hidden"]');

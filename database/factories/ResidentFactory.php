@@ -49,7 +49,13 @@ class ResidentFactory extends Factory
         $isSenior  = $age >= 60;
 
         $civilStatuses = ['Single', 'Married', 'Widowed', 'Separated', 'Annulled', 'Common Law (Live-in)', 'Divorced'];
-        $religions     = ['Roman Catholic', 'Iglesia ni Cristo', 'Born Again Christian', 'Islam', 'Seventh Day Adventist', 'Baptist'];
+        $religions     = [
+            'Roman Catholic', 'Islam', 'Iglesia ni Cristo', "Jehovah's Witness",
+            'Seventh-Day Adventist Church', 'Baptist Church', 'Born Again Christians',
+            'Philippine Independent Church (Aglipayan)', 'United Church of Christ in the Philippines (UCCP)',
+            'United Methodist Church', 'Episcopal Church in the Philippines',
+            'Ang Dating Daan', 'Bread of Life Ministries', 'Lutheran Church in the Philippines',
+        ];
         $occupations   = ['Farmer', 'Vendor', 'Teacher', 'Driver', 'Carpenter', 'Fisherman', 'Nurse', 'Housewife', null];
         $educLevels    = ['Elementary Graduate', 'High School Graduate', 'Vocational', 'College Graduate', 'Post Graduate', null];
 
