@@ -139,7 +139,7 @@ label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppe
           </tbody>
         </table>
         <div style="padding:12px 20px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)">
-          <strong>Sector codes:</strong> a=Labor Force &nbsp;b=Unemployed &nbsp;c=OFW &nbsp;<strong>d=PWD</strong> &nbsp;e=Solo Parent &nbsp;f=Indigenous &nbsp;g=Out of School Child &nbsp;h=Out of School Youth &nbsp;i=Student
+          <strong>Sector codes:</strong> a=Labor Force &nbsp;b=Unemployed &nbsp;c=OFW &nbsp;<strong>d=PWD</strong> &nbsp;e=Solo Parent &nbsp;f=Indigenous &nbsp;g=Out of School Child &nbsp;h=Out of School Child &nbsp;i=Student
         </div>
       </div>
     </div>

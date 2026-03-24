@@ -20,11 +20,20 @@
       <div id="rpp-content" style="display:none">
 
         {{-- Deceased Banner --}}
-        <div id="rpp-deceased-banner" style="display:none;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+        <div id="rpp-deceased-banner" style="display:none;background:#fff1f2;border:1.5px solid #fecdd3;border-radius:10px;padding:12px 16px;margin-bottom:12px;align-items:center;gap:10px">
           <i class="fas fa-cross" style="color:#be123c;font-size:16px"></i>
           <div>
             <div style="font-weight:700;color:#be123c;font-size:14px">This resident has been marked as Deceased</div>
             <div id="rpp-death-date" style="font-size:12px;color:#64748b;margin-top:2px"></div>
+          </div>
+        </div>
+
+        {{-- Transferred Banner --}}
+        <div id="rpp-transferred-banner" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:12px;align-items:center;gap:10px">
+          <i class="fas fa-map-marker-alt" style="color:#1d4ed8;font-size:16px"></i>
+          <div>
+            <div style="font-weight:700;color:#1d4ed8;font-size:14px">This resident has been transferred</div>
+            <div id="rpp-transferred-dest" style="font-size:12px;color:#64748b;margin-top:2px"></div>
           </div>
         </div>
 
@@ -154,6 +163,15 @@ function openResidentPreview(id) {
         banner.style.display = 'none';
       }
 
+      // Transferred banner
+      const transferredBanner = document.getElementById('rpp-transferred-banner');
+      if (r.transferred_to) {
+        transferredBanner.style.display = 'flex';
+        document.getElementById('rpp-transferred-dest').textContent = 'Transferred to: ' + r.transferred_to;
+      } else {
+        transferredBanner.style.display = 'none';
+      }
+
       // Top badges (personal card header) — deceased & senior only
       let topBadges = '';
       if (r.is_deceased) topBadges += '<span style="background:#fee2e2;color:#be123c;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600"><i class="fas fa-cross" style="margin-right:3px;font-size:9px"></i>Deceased</span>';
@@ -203,7 +221,7 @@ function openResidentPreview(id) {
       if (r.is_ofw)                 sectors += '<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">OFW</span>';
       if (r.is_indigenous)          sectors += '<span style="background:#fdf4ff;color:#6b21a8;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Indigenous</span>';
       if (r.is_out_of_school_child) sectors += '<span style="background:#fff7ed;color:#9a3412;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Out of School Child</span>';
-      if (r.is_out_of_school_youth) sectors += '<span style="background:#fff7ed;color:#9a3412;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Out of School Youth</span>';
+      if (r.is_out_of_school_youth) sectors += '<span style="background:#ede9fe;color:#4c1d95;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Out of School Youth</span>';
       if (r.is_student)             sectors += '<span style="background:#eff6ff;color:#1e40af;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">Student</span>';
       const sectorSection = document.getElementById('rpp-sector-section');
       if (sectors) {
