@@ -26,7 +26,7 @@
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead tr { background: #f8fafc; border-bottom: 2px solid var(--border); }
 th { padding: 12px 16px; text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
-td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
 tbody tr { cursor:pointer; }
 tbody tr:hover { background: #f0f7ff; }
 tbody tr:last-child td { border-bottom: none; }
@@ -53,25 +53,26 @@ tbody tr:last-child td { border-bottom: none; }
 .btn-view   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 .btn-edit   { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 .btn-delete { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
-.action-btns { display: flex; gap: 5px; }
+.action-btns { display: flex; gap: 5px; justify-content: flex-end; }
 .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
 .alert-success { background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; }
 .modal-backdrop.open { display:flex; }
-.modal { background:#fff; border-radius:16px; width:600px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
-.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal { background:var(--bg,#f1f5f9); border-radius:16px; width:680px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); background:var(--card,#fff); border-radius:16px 16px 0 0; display:flex; align-items:center; justify-content:space-between; }
 .modal-header h2 { font-size:16px; font-weight:700; color:var(--primary); margin:0; }
 .modal-close { background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1; padding:0; }
-.modal-body { padding:24px; }
-.modal-section { margin-bottom:20px; }
-.modal-section-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; }
+.modal-body { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.modal-section { background:var(--card,#fff); border-radius:12px; border:1px solid var(--border); overflow:hidden; }
+.modal-section-title { font-size:13px; font-weight:700; color:var(--primary); padding:12px 16px; border-bottom:1px solid var(--border); background:#f8fafc; display:flex; align-items:center; gap:8px; }
+.modal-section-body { padding:16px; }
 .mgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-.mi { display:flex; flex-direction:column; gap:3px; }
-.mi .ml { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
-.mi .mv { font-size:13px; color:var(--text); font-weight:500; background:#f8fafc; border:1px solid var(--border); border-radius:7px; padding:7px 10px; }
+.mi { display:flex; flex-direction:column; gap:5px; }
+.mi .ml { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.mi .mv { font-size:14px; color:var(--text); font-weight:400; background:#fff; border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; min-height:38px; }
 .mi.span2 { grid-column:span 2; }
 .mi.span3 { grid-column:span 3; }
-.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); background:var(--card,#fff); border-radius:0 0 16px 16px; display:flex; justify-content:flex-end; gap:8px; }
 /* ── RBI Print Frame ── */
 #rbi-print-frame { display:none; }
 @media print {
@@ -178,7 +179,7 @@ tbody tr:last-child td { border-bottom: none; }
     @php $totalPendingCount = $pendingResidents->count() + $pendingEdits->count(); @endphp
     <div class="res-stat" style="{{ $totalPendingCount > 0 ? 'border-color:#fcd34d;background:#fffbeb;' : '' }}">
       <div class="slabel" style="{{ $totalPendingCount > 0 ? 'color:#92400e;' : '' }}">Pending Verification</div>
-      <div class="svalue" style="{{ $totalPendingCount > 0 ? 'color:#d97706;' : '' }}">{{ $totalPendingCount }}</div>
+      <div class="svalue" style="{{ $totalPendingCount > 0 ? 'color:#d97706;' : '' }}" id="poll-pending-count" data-count="{{ $totalPendingCount }}">{{ $totalPendingCount }}</div>
     </div>
   </div>
 
@@ -209,7 +210,7 @@ tbody tr:last-child td { border-bottom: none; }
             <th>Civil Status</th>
             <th>Address</th>
             <th>Submitted</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -330,8 +331,11 @@ tbody tr:last-child td { border-bottom: none; }
       $fAgeMin = $filters['ageMin'] ?? null;
       $fAgeMax = $filters['ageMax'] ?? null;
       $fSearch = $filters['search'] ?? '';
+      $fSector = $filters['sector'] ?? '';
+      $fCitizenship = $filters['citizenship'] ?? '';
       $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
-      $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter',default=>'Classification' };
+      $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter','solo_parent'=>'Solo Parent',default=>'Classification' };
+      $sectorLabel = match($fSector) { 'labor_force'=>'Labor Force','unemployed'=>'Unemployed','ofw'=>'OFW','indigenous'=>'Indigenous','out_of_school_child'=>'Out of School Child','out_of_school_youth'=>'Out of School Youth','student'=>'Student',default=>'Sector' };
     @endphp
     <div class="filter-area">
       <div class="search-wrap" style="display:flex;gap:6px">
@@ -407,6 +411,42 @@ tbody tr:last-child td { border-bottom: none; }
             <div class="flt-option {{ $fClass==='senior' ? 'selected' : '' }}" onclick="applyFilter('classification','senior')">Senior Citizen</div>
             <div class="flt-option {{ $fClass==='pwd' ? 'selected' : '' }}" onclick="applyFilter('classification','pwd')">PWD</div>
             <div class="flt-option {{ $fClass==='voter' ? 'selected' : '' }}" onclick="applyFilter('classification','voter')">Registered Voter</div>
+            <div class="flt-option {{ $fClass==='solo_parent' ? 'selected' : '' }}" onclick="applyFilter('classification','solo_parent')">Solo Parent</div>
+          </div>
+        </div>
+
+        <!-- Citizenship -->
+        <div class="flt-wrap" id="wrap-citizenship">
+          <button class="flt-btn {{ $fCitizenship ? 'active' : '' }}" id="btn-citizenship" onclick="toggleFlt('citizenship')">
+            <i class="fas fa-flag"></i>
+            <span id="lbl-citizenship">{{ $fCitizenship ?: 'Citizenship' }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-citizenship" style="{{ $fCitizenship ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-citizenship" style="{{ $fCitizenship ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('citizenship','')">×</span>
+          </button>
+          <div class="flt-dropdown" id="dd-citizenship">
+            <div class="flt-option {{ !$fCitizenship ? 'selected' : '' }}" onclick="applyFilter('citizenship','')">All</div>
+            <div class="flt-option {{ $fCitizenship==='Filipino' ? 'selected' : '' }}" onclick="applyFilter('citizenship','Filipino')">Filipino</div>
+            <div class="flt-option {{ $fCitizenship==='Foreigner' ? 'selected' : '' }}" onclick="applyFilter('citizenship','Foreigner')">Foreigner</div>
+          </div>
+        </div>
+
+        <!-- Sector -->
+        <div class="flt-wrap" id="wrap-sector">
+          <button class="flt-btn {{ $fSector ? 'active' : '' }}" id="btn-sector" onclick="toggleFlt('sector')">
+            <i class="fas fa-tags"></i>
+            <span id="lbl-sector">{{ $sectorLabel }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-sector" style="{{ $fSector ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-sector" style="{{ $fSector ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('sector','')">×</span>
+          </button>
+          <div class="flt-dropdown" id="dd-sector">
+            <div class="flt-option {{ !$fSector ? 'selected' : '' }}" onclick="applyFilter('sector','')">All</div>
+            <div class="flt-option {{ $fSector==='labor_force' ? 'selected' : '' }}" onclick="applyFilter('sector','labor_force')">Labor Force</div>
+            <div class="flt-option {{ $fSector==='unemployed' ? 'selected' : '' }}" onclick="applyFilter('sector','unemployed')">Unemployed</div>
+            <div class="flt-option {{ $fSector==='ofw' ? 'selected' : '' }}" onclick="applyFilter('sector','ofw')">OFW</div>
+            <div class="flt-option {{ $fSector==='indigenous' ? 'selected' : '' }}" onclick="applyFilter('sector','indigenous')">Indigenous</div>
+            <div class="flt-option {{ $fSector==='out_of_school_child' ? 'selected' : '' }}" onclick="applyFilter('sector','out_of_school_child')">Out of School Child</div>
+            <div class="flt-option {{ $fSector==='out_of_school_youth' ? 'selected' : '' }}" onclick="applyFilter('sector','out_of_school_youth')">Out of School Youth</div>
+            <div class="flt-option {{ $fSector==='student' ? 'selected' : '' }}" onclick="applyFilter('sector','student')">Student</div>
           </div>
         </div>
 
@@ -433,7 +473,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
-        @if($fGender || $fCivil || $fPurok || $fClass || $fAgeMin || $fAgeMax || $fSearch)
+        @if($fGender || $fCivil || $fPurok || $fClass || $fSector || $fCitizenship || $fAgeMin || $fAgeMax || $fSearch)
         <a href="{{ route('residents.index') }}" class="flt-btn" style="margin-left:auto;text-decoration:none;color:var(--muted);border-color:var(--border);white-space:nowrap;">
           <i class="fas fa-times"></i> Clear Filters
         </a>
@@ -462,7 +502,7 @@ tbody tr:last-child td { border-bottom: none; }
             <th>Civil Status</th>
             <th>Address</th>
             <th>Classifications</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
           </tr>
         </thead>
 
@@ -508,7 +548,8 @@ tbody tr:last-child td { border-bottom: none; }
               @if($resident->is_senior)<span class="badge badge-senior">Senior</span>@endif
               @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
               @if($resident->is_voter)<span class="badge" style="background:#f3e8ff;color:#6b21a8">Voter</span>@endif
-              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter)
+              @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
+              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter && !$resident->is_solo_parent)
               <span style="color:var(--muted);font-size:12px">—</span>
               @endif
             </td>
@@ -729,6 +770,7 @@ tbody tr:last-child td { border-bottom: none; }
       <span class="rp-check-item"><span id="rp-senior" class="rp-cb"></span> Senior Citizen (60+)</span>
       <span class="rp-check-item"><span id="rp-pwd" class="rp-cb"></span> Person with Disability (PWD)</span>
       <span class="rp-check-item"><span id="rp-voter" class="rp-cb"></span> Registered Voter</span>
+      <span class="rp-check-item"><span id="rp-solo-parent" class="rp-cb"></span> Solo Parent</span>
       <span class="rp-check-item"><span id="rp-deceased" class="rp-cb"></span> Deceased</span>
     </div>
   </div>
@@ -777,50 +819,65 @@ tbody tr:last-child td { border-bottom: none; }
     <div class="modal-body">
 
       <div class="modal-section">
-        <div class="modal-section-title"><i class="fas fa-user"></i> Personal Information</div>
-        <div id="rm-badges" style="margin-bottom:12px"></div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Last Name</span><span class="mv" id="rm-last"></span></div>
-          <div class="mi"><span class="ml">First Name</span><span class="mv" id="rm-first"></span></div>
-          <div class="mi"><span class="ml">Middle Name</span><span class="mv" id="rm-middle"></span></div>
-          <div class="mi"><span class="ml">Sex</span><span class="mv" id="rm-gender"></span></div>
-          <div class="mi"><span class="ml">Date of Birth</span><span class="mv" id="rm-birth"></span></div>
-          <div class="mi"><span class="ml">Age</span><span class="mv" id="rm-age"></span></div>
-          <div class="mi"><span class="ml">Civil Status</span><span class="mv" id="rm-civil"></span></div>
-          <div class="mi"><span class="ml">Citizenship</span><span class="mv" id="rm-nat"></span></div>
-          <div class="mi"><span class="ml">Inhabitant</span><span class="mv" id="rm-restype"></span></div>
-          <div class="mi"><span class="ml">Religion</span><span class="mv" id="rm-rel"></span></div>
+        <div class="modal-section-title"><i class="fas fa-id-card"></i> Personal Information</div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Last Name</span><span class="mv" id="rm-last"></span></div>
+            <div class="mi"><span class="ml">First Name</span><span class="mv" id="rm-first"></span></div>
+            <div class="mi"><span class="ml">Middle Name</span><span class="mv" id="rm-middle"></span></div>
+            <div class="mi"><span class="ml">Suffix</span><span class="mv" id="rm-suffix"></span></div>
+            <div class="mi"><span class="ml">Sex</span><span class="mv" id="rm-gender"></span></div>
+            <div class="mi"><span class="ml">Date of Birth</span><span class="mv" id="rm-birth"></span></div>
+            <div class="mi"><span class="ml">Age</span><span class="mv" id="rm-age"></span></div>
+            <div class="mi"><span class="ml">Civil Status</span><span class="mv" id="rm-civil"></span></div>
+            <div class="mi"><span class="ml">Citizenship</span><span class="mv" id="rm-nat"></span></div>
+            <div class="mi"><span class="ml">Inhabitant</span><span class="mv" id="rm-restype"></span></div>
+            <div class="mi"><span class="ml">Religion</span><span class="mv" id="rm-rel"></span></div>
+          </div>
         </div>
       </div>
 
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-phone"></i> Contact Information</div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Contact Number</span><span class="mv" id="rm-contact"></span></div>
-          <div class="mi"><span class="ml">Email</span><span class="mv" id="rm-email"></span></div>
-          <div class="mi"><span class="ml">PhilSys Card No.</span><span class="mv" id="rm-philsys"></span></div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Contact Number</span><span class="mv" id="rm-contact"></span></div>
+            <div class="mi"><span class="ml">Email</span><span class="mv" id="rm-email"></span></div>
+            <div class="mi"><span class="ml">PhilSys Card No.</span><span class="mv" id="rm-philsys"></span></div>
+          </div>
         </div>
       </div>
 
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Province</span><span class="mv" id="rm-prov"></span></div>
-          <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="rm-city"></span></div>
-          <div class="mi"><span class="ml">Barangay</span><span class="mv" id="rm-brgy"></span></div>
-          <div class="mi"><span class="ml">Purok</span><span class="mv" id="rm-purok"></span></div>
-          <div class="mi"><span class="ml">Street / House No.</span><span class="mv" id="rm-street"></span></div>
-          <div class="mi span3"><span class="ml">Complete Address</span><span class="mv" id="rm-addr"></span></div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Province</span><span class="mv" id="rm-prov"></span></div>
+            <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="rm-city"></span></div>
+            <div class="mi"><span class="ml">Barangay</span><span class="mv" id="rm-brgy"></span></div>
+            <div class="mi"><span class="ml">Purok</span><span class="mv" id="rm-purok"></span></div>
+            <div class="mi"><span class="ml">Street / House No.</span><span class="mv" id="rm-street"></span></div>
+            <div class="mi span3"><span class="ml">Complete Address</span><span class="mv" id="rm-addr"></span></div>
+          </div>
         </div>
       </div>
 
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-briefcase"></i> Socio-Economic</div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Occupation</span><span class="mv" id="rm-occ"></span></div>
-          <div class="mi"><span class="ml">Employer</span><span class="mv" id="rm-emp"></span></div>
-          <div class="mi"><span class="ml">Monthly Income</span><span class="mv" id="rm-inc"></span></div>
-          <div class="mi span3"><span class="ml">Education Level</span><span class="mv" id="rm-edu"></span></div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Occupation</span><span class="mv" id="rm-occ"></span></div>
+            <div class="mi"><span class="ml">Employer</span><span class="mv" id="rm-emp"></span></div>
+            <div class="mi"><span class="ml">Monthly Income</span><span class="mv" id="rm-inc"></span></div>
+            <div class="mi span3"><span class="ml">Education Level</span><span class="mv" id="rm-edu"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-tags"></i> Sector Classifications</div>
+        <div class="modal-section-body">
+          <div id="rm-sectors"></div>
         </div>
       </div>
 
@@ -918,8 +975,9 @@ function printRBIForm() {
   cb('rp-cs-sep',  cs === 'separated');
   cb('rp-senior',  !!r.is_senior);
   cb('rp-pwd',     !!r.is_pwd);
-  cb('rp-voter',   !!r.is_voter);
-  cb('rp-deceased',!!r.is_deceased);
+  cb('rp-voter',       !!r.is_voter);
+  cb('rp-solo-parent', !!r.is_solo_parent);
+  cb('rp-deceased',    !!r.is_deceased);
 
   window.print();
 }
@@ -962,6 +1020,7 @@ function openResidentModal(r, pendingStatus) {
   document.getElementById('rm-last').textContent    = r.last_name   || '—';
   document.getElementById('rm-first').textContent   = r.first_name  || '—';
   document.getElementById('rm-middle').textContent  = r.middle_name || '—';
+  document.getElementById('rm-suffix').textContent  = r.suffix      || '—';
   document.getElementById('rm-gender').textContent  = r.gender      || '—';
   document.getElementById('rm-birth').textContent   = r.birthdate   || '—';
   document.getElementById('rm-age').textContent     = r.age ? r.age + ' yrs' : '—';
@@ -982,12 +1041,28 @@ function openResidentModal(r, pendingStatus) {
   document.getElementById('rm-emp').textContent     = r.employer        || '—';
   document.getElementById('rm-inc').textContent     = r.monthly_income ? '₱' + parseFloat(r.monthly_income).toLocaleString() : '—';
   document.getElementById('rm-edu').textContent     = r.education_level || '—';
-  let badges = '';
-  if (r.is_deceased) badges += '<span class="badge" style="background:#fee2e2;color:#be123c">Deceased</span> ';
-  if (r.is_senior)   badges += '<span class="badge badge-senior">Senior Citizen</span> ';
-  if (r.is_pwd)      badges += '<span class="badge badge-pwd">PWD</span> ';
-  if (r.is_voter)    badges += '<span class="badge" style="background:#f3e8ff;color:#6b21a8">Registered Voter</span> ';
-  document.getElementById('rm-badges').innerHTML = badges;
+  const sectorDefs = [
+    { field: 'is_senior',              label: 'Senior Citizen',      color: '#92400e', bg: '#fef3c7' },
+    { field: 'is_pwd',                 label: 'PWD',                 color: '#991b1b', bg: '#fee2e2' },
+    { field: 'is_voter',               label: 'Registered Voter',    color: '#6b21a8', bg: '#f3e8ff' },
+    { field: 'is_solo_parent',         label: 'Solo Parent',         color: '#065f46', bg: '#d1fae5' },
+    { field: 'is_labor_force',         label: 'Labor Force',         color: '#1e40af', bg: '#dbeafe' },
+    { field: 'is_unemployed',          label: 'Unemployed',          color: '#9a3412', bg: '#ffedd5' },
+    { field: 'is_ofw',                 label: 'OFW',                 color: '#164e63', bg: '#cffafe' },
+    { field: 'is_indigenous',          label: 'Indigenous Person',   color: '#713f12', bg: '#fef9c3' },
+    { field: 'is_out_of_school_child', label: 'Out of School Child', color: '#831843', bg: '#fce7f3' },
+    { field: 'is_out_of_school_youth', label: 'Out of School Youth', color: '#4c1d95', bg: '#ede9fe' },
+    { field: 'is_student',             label: 'Student',             color: '#134e4a', bg: '#ccfbf1' },
+  ];
+  const activeSectors = sectorDefs.filter(s => r[s.field]);
+  const sectorsEl = document.getElementById('rm-sectors');
+  if (activeSectors.length) {
+    sectorsEl.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
+      activeSectors.map(s => `<span class="badge" style="background:${s.bg};color:${s.color}">${s.label}</span>`).join('') +
+      '</div>';
+  } else {
+    sectorsEl.innerHTML = '<span style="color:var(--muted);font-size:13px">No sector classifications assigned.</span>';
+  }
 }
 function closeResidentModal() {
   document.getElementById('residentModal').classList.remove('open');
@@ -997,7 +1072,7 @@ document.getElementById('residentModal').addEventListener('click', function(e) {
 });
 
 // Filter state
-const fltKeys = ['gender', 'civil', 'sitio', 'class'];
+const fltKeys = ['gender', 'civil', 'sitio', 'class', 'citizenship', 'sector'];
 
 function positionDropdown(el, btn) {
   const r = btn.getBoundingClientRect();
@@ -1079,6 +1154,16 @@ searchInput.addEventListener('keydown', function(e) {
     const url = new URL(window.location);
     const val = this.value.trim();
     if (val) { url.searchParams.set('search', val); } else { url.searchParams.delete('search'); }
+    url.searchParams.delete('page');
+    navigate(url);
+  }
+});
+
+// Auto-update when search is cleared
+document.getElementById('searchInput').addEventListener('input', function() {
+  if (this.value === '') {
+    const url = new URL(window.location);
+    url.searchParams.delete('search');
     url.searchParams.delete('page');
     navigate(url);
   }

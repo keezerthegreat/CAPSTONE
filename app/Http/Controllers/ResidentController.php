@@ -18,6 +18,8 @@ class ResidentController extends Controller
         $civil = $request->get('civil', '');
         $purok = $request->get('purok', '');
         $classification = $request->get('classification', '');
+        $sector = $request->get('sector', '');
+        $citizenship = $request->get('citizenship', '');
         $ageMin = $request->filled('age_min') ? (int) $request->age_min : null;
         $ageMax = $request->filled('age_max') ? (int) $request->age_max : null;
         $search = $request->get('search', '');
@@ -39,6 +41,14 @@ class ResidentController extends Controller
             $query->where('is_pwd', true);
         } elseif ($classification === 'voter') {
             $query->where('is_voter', true);
+        } elseif ($classification === 'solo_parent') {
+            $query->where('is_solo_parent', true);
+        }
+        if ($sector) {
+            $query->where("is_{$sector}", true);
+        }
+        if ($citizenship) {
+            $query->whereRaw('LOWER(nationality) = ?', [strtolower($citizenship)]);
         }
         if ($ageMin !== null) {
             $query->where('age', '>=', $ageMin);
@@ -51,6 +61,12 @@ class ResidentController extends Controller
             $query->where(function ($q) use ($s) {
                 $q->whereRaw('LOWER(first_name) like ?', ["%{$s}%"])
                     ->orWhereRaw('LOWER(last_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(middle_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw("LOWER(first_name || ' ' || last_name) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(last_name || ' ' || first_name) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(first_name || ' ' || middle_name) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(last_name || ', ' || first_name || ' ' || COALESCE(middle_name, '')) like ?", ["%{$s}%"])
+                    ->orWhereRaw("LOWER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) like ?", ["%{$s}%"])
                     ->orWhereRaw('LOWER(address) like ?', ["%{$s}%"]);
             });
         }
@@ -63,7 +79,7 @@ class ResidentController extends Controller
         $pendingResidents = Resident::where('status', 'pending')->latest()->get();
         $pendingEdits = ResidentPendingEdit::with('resident')->latest()->get();
 
-        $filters = compact('gender', 'civil', 'purok', 'classification', 'ageMin', 'ageMax', 'search');
+        $filters = compact('gender', 'civil', 'purok', 'classification', 'sector', 'citizenship', 'ageMin', 'ageMax', 'search');
 
         return view('residents.index', compact(
             'residents', 'pendingResidents', 'pendingEdits',
@@ -85,6 +101,7 @@ class ResidentController extends Controller
             'last_name' => 'required|string|max:255',
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
+            'suffix' => 'nullable|string|max:20',
             'gender' => 'required|in:Male,Female,Other',
             'birthdate' => 'required|date',
             'age' => 'required|integer|min:0|max:120',
@@ -108,6 +125,14 @@ class ResidentController extends Controller
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
+            'is_solo_parent' => 'nullable|boolean',
+            'is_labor_force' => 'nullable|boolean',
+            'is_unemployed' => 'nullable|boolean',
+            'is_ofw' => 'nullable|boolean',
+            'is_indigenous' => 'nullable|boolean',
+            'is_out_of_school_child' => 'nullable|boolean',
+            'is_out_of_school_youth' => 'nullable|boolean',
+            'is_student' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
@@ -124,6 +149,14 @@ class ResidentController extends Controller
         $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
+        $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
+        $validated['is_labor_force'] = $request->has('is_labor_force') ? 1 : 0;
+        $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
+        $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
+        $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
+        $validated['is_out_of_school_child'] = $request->has('is_out_of_school_child') ? 1 : 0;
+        $validated['is_out_of_school_youth'] = $request->has('is_out_of_school_youth') ? 1 : 0;
+        $validated['is_student'] = $request->has('is_student') ? 1 : 0;
         $validated['status'] = 'pending';
 
         // Duplicate check: same name + birthdate already in the system
@@ -169,6 +202,7 @@ class ResidentController extends Controller
             'last_name' => 'required|string|max:255',
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
+            'suffix' => 'nullable|string|max:20',
             'gender' => 'required|in:Male,Female,Other',
             'birthdate' => 'required|date',
             'age' => 'required|integer|min:0|max:120',
@@ -192,6 +226,14 @@ class ResidentController extends Controller
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
+            'is_solo_parent' => 'nullable|boolean',
+            'is_labor_force' => 'nullable|boolean',
+            'is_unemployed' => 'nullable|boolean',
+            'is_ofw' => 'nullable|boolean',
+            'is_indigenous' => 'nullable|boolean',
+            'is_out_of_school_child' => 'nullable|boolean',
+            'is_out_of_school_youth' => 'nullable|boolean',
+            'is_student' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'is_deceased' => 'nullable|boolean',
@@ -210,6 +252,14 @@ class ResidentController extends Controller
         $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
+        $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
+        $validated['is_labor_force'] = $request->has('is_labor_force') ? 1 : 0;
+        $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
+        $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
+        $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
+        $validated['is_out_of_school_child'] = $request->has('is_out_of_school_child') ? 1 : 0;
+        $validated['is_out_of_school_youth'] = $request->has('is_out_of_school_youth') ? 1 : 0;
+        $validated['is_student'] = $request->has('is_student') ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
 
         if (! $validated['is_deceased']) {

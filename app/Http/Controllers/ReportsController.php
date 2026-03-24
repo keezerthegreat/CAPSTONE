@@ -18,6 +18,7 @@ class ReportsController extends Controller
         $seniors = (clone $base)->where('age', '>=', 60)->count();
         $pwd = (clone $base)->where('is_pwd', true)->count();
         $voters = (clone $base)->where('is_voter', true)->count();
+        $soloParents = (clone $base)->where('is_solo_parent', true)->count();
         $minors = (clone $base)->where('age', '<', 18)->count();
         $adults = (clone $base)->whereBetween('age', [18, 59])->count();
 
@@ -38,10 +39,11 @@ class ReportsController extends Controller
             ->orderByDesc('total')
             ->get();
 
-        $listFields = ['id', 'first_name', 'last_name', 'age', 'gender', 'address', 'contact_number'];
+        $listFields = ['id', 'first_name', 'last_name', 'middle_name', 'age', 'gender', 'address', 'contact_number'];
         $seniorList = (clone $base)->where('age', '>=', 60)->orderBy('last_name')->get($listFields);
         $pwdList = (clone $base)->where('is_pwd', true)->orderBy('last_name')->get($listFields);
         $voterList = (clone $base)->where('is_voter', true)->orderBy('last_name')->get($listFields);
+        $soloParentList = (clone $base)->where('is_solo_parent', true)->orderBy('last_name')->get($listFields);
         $minorList = (clone $base)->where('age', '<', 18)->orderBy('last_name')->get($listFields);
 
         $totalClearances = Clearance::count();
@@ -49,9 +51,9 @@ class ReportsController extends Controller
 
         return view('reports', compact(
             'totalResidents', 'male', 'female',
-            'seniors', 'pwd', 'voters', 'minors', 'adults',
+            'seniors', 'pwd', 'voters', 'soloParents', 'minors', 'adults',
             'civilStatus', 'bySitio', 'byEducation',
-            'seniorList', 'pwdList', 'voterList', 'minorList',
+            'seniorList', 'pwdList', 'voterList', 'soloParentList', 'minorList',
             'totalClearances', 'totalCertificates'
         ));
     }

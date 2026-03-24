@@ -134,12 +134,13 @@ function svgDonut($segments, $size=160, $thickness=30) {
     <div class="summary-card" id="residentCard">
       <div class="sc-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-users"></i></div>
       <div class="sc-label">Total Residents</div>
-      <div class="sc-value">{{ $totalResidents }}</div>
+      <div class="sc-value" id="dash-total-residents">{{ $totalResidents }}</div>
       <div class="sc-sub">Living residents in system</div>
       <div class="sc-tooltip">
         <div class="sc-tooltip-row"><span class="tl">Senior Citizens</span><span class="tv">{{ $seniors }}</span></div>
         <div class="sc-tooltip-row"><span class="tl">Persons w/ Disability</span><span class="tv">{{ $pwd }}</span></div>
         <div class="sc-tooltip-row"><span class="tl">Registered Voters</span><span class="tv">{{ $voters }}</span></div>
+        <div class="sc-tooltip-row"><span class="tl">Solo Parents</span><span class="tv">{{ $soloParents }}</span></div>
         <div class="sc-tooltip-row"><span class="tl">Male / Female</span><span class="tv">{{ $male }} / {{ $female }}</span></div>
         <div class="sc-tooltip-row"><span class="tl" style="color:#94a3b8;font-style:italic">Click to expand</span></div>
       </div>
@@ -171,7 +172,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
     <div class="summary-card" id="householdCard">
       <div class="sc-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-home"></i></div>
       <div class="sc-label">Total Households</div>
-      <div class="sc-value">{{ $totalHouseholds }}</div>
+      <div class="sc-value" id="dash-total-households">{{ $totalHouseholds }}</div>
       <div class="sc-sub">Registered households</div>
       <div class="sc-tooltip">
         @foreach($householdsByType as $type => $count)
@@ -200,7 +201,7 @@ function svgDonut($segments, $size=160, $thickness=30) {
     <div class="summary-card" id="familyCard">
       <div class="sc-icon" style="background:#f3e8ff;color:#7c3aed"><i class="fas fa-people-roof"></i></div>
       <div class="sc-label">Total Families</div>
-      <div class="sc-value">{{ $totalFamilies }}</div>
+      <div class="sc-value" id="dash-total-families">{{ $totalFamilies }}</div>
       <div class="sc-sub">Registered families</div>
       <div class="sc-expand" id="familyExpand">
         <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Families by Purok</div>

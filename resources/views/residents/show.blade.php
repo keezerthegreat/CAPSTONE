@@ -150,6 +150,14 @@
         @if($resident->is_senior)<span class="badge badge-senior">Senior Citizen</span>@endif
         @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
         @if($resident->is_voter)<span class="badge badge-voter">Registered Voter</span>@endif
+        @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
+        @if($resident->is_labor_force)<span class="badge" style="background:#e0f2fe;color:#075985">Labor Force</span>@endif
+        @if($resident->is_unemployed)<span class="badge" style="background:#fee2e2;color:#991b1b">Unemployed</span>@endif
+        @if($resident->is_ofw)<span class="badge" style="background:#d1fae5;color:#065f46">OFW</span>@endif
+        @if($resident->is_indigenous)<span class="badge" style="background:#fdf4ff;color:#6b21a8">Indigenous</span>@endif
+        @if($resident->is_out_of_school_child)<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Child</span>@endif
+        @if($resident->is_out_of_school_youth)<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Youth</span>@endif
+        @if($resident->is_student)<span class="badge" style="background:#eff6ff;color:#1e40af">Student</span>@endif
       </div>
     </div>
     <div class="card-body">
@@ -157,6 +165,7 @@
         <div class="info-item"><div class="label">Last Name</div><div class="value">{{ $resident->last_name }}</div></div>
         <div class="info-item"><div class="label">First Name</div><div class="value">{{ $resident->first_name }}</div></div>
         <div class="info-item"><div class="label">Middle Name</div><div class="value">{{ $resident->middle_name ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">Suffix</div><div class="value">{{ $resident->suffix ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Sex</div><div class="value">{{ $resident->gender }}</div></div>
         <div class="info-item"><div class="label">Date of Birth</div><div class="value">{{ \Carbon\Carbon::parse($resident->birthdate)->format('F d, Y') }}</div></div>
         <div class="info-item"><div class="label">Age</div><div class="value">{{ $resident->age }} years old</div></div>
@@ -203,6 +212,38 @@
         <div class="info-item"><div class="label">Monthly Income</div><div class="value">{{ $resident->monthly_income ? '₱'.number_format($resident->monthly_income,2) : '—' }}</div></div>
         <div class="info-item"><div class="label">Education Level</div><div class="value">{{ $resident->education_level ?? '—' }}</div></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Sector Classifications -->
+  <div class="card">
+    <div class="card-header"><div class="card-title"><i class="fas fa-tags"></i> Sector Classifications</div></div>
+    <div class="card-body">
+      @php
+        $sectors = [
+          ['field' => 'is_senior',              'label' => 'Senior Citizen',       'color' => '#92400e', 'bg' => '#fef3c7'],
+          ['field' => 'is_pwd',                 'label' => 'PWD',                  'color' => '#991b1b', 'bg' => '#fee2e2'],
+          ['field' => 'is_voter',               'label' => 'Registered Voter',     'color' => '#6b21a8', 'bg' => '#f3e8ff'],
+          ['field' => 'is_solo_parent',         'label' => 'Solo Parent',          'color' => '#065f46', 'bg' => '#d1fae5'],
+          ['field' => 'is_labor_force',         'label' => 'Labor Force',          'color' => '#1e40af', 'bg' => '#dbeafe'],
+          ['field' => 'is_unemployed',          'label' => 'Unemployed',           'color' => '#9a3412', 'bg' => '#ffedd5'],
+          ['field' => 'is_ofw',                 'label' => 'OFW',                  'color' => '#164e63', 'bg' => '#cffafe'],
+          ['field' => 'is_indigenous',          'label' => 'Indigenous Person',    'color' => '#713f12', 'bg' => '#fef9c3'],
+          ['field' => 'is_out_of_school_child', 'label' => 'Out of School Child',  'color' => '#831843', 'bg' => '#fce7f3'],
+          ['field' => 'is_out_of_school_youth', 'label' => 'Out of School Youth',  'color' => '#4c1d95', 'bg' => '#ede9fe'],
+          ['field' => 'is_student',             'label' => 'Student',              'color' => '#134e4a', 'bg' => '#ccfbf1'],
+        ];
+        $active = array_filter($sectors, fn($s) => $resident->{$s['field']});
+      @endphp
+      @if(count($active))
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          @foreach($active as $sector)
+            <span class="badge" style="background:{{ $sector['bg'] }};color:{{ $sector['color'] }}">{{ $sector['label'] }}</span>
+          @endforeach
+        </div>
+      @else
+        <p style="color:var(--muted);font-size:13px;margin:0">No sector classifications assigned.</p>
+      @endif
     </div>
   </div>
 
@@ -257,7 +298,7 @@
           <div class="rbi-col-sub">Middle Name</div>
         </div>
         <div class="rbi-named-col">
-          <div class="rbi-underline"> </div>
+          <div class="rbi-underline">{{ $resident->suffix ?? '' }}</div>
           <div class="rbi-col-sub">Ext.</div>
         </div>
       </div>
@@ -402,6 +443,9 @@
       </span>
       <span class="rbi-check-item">
         <span class="rbi-checkbox {{ $resident->is_voter ? 'checked' : '' }}"></span> Registered Voter
+      </span>
+      <span class="rbi-check-item">
+        <span class="rbi-checkbox {{ $resident->is_solo_parent ? 'checked' : '' }}"></span> Solo Parent
       </span>
       <span class="rbi-check-item">
         <span class="rbi-checkbox {{ $resident->is_deceased ? 'checked' : '' }}"></span> Deceased

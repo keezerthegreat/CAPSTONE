@@ -20,6 +20,7 @@ class DashboardController extends Controller
         $seniors = (clone $living)->where('is_senior', true)->count();
         $pwd = (clone $living)->where('is_pwd', true)->count();
         $voters = (clone $living)->where('is_voter', true)->count();
+        $soloParents = (clone $living)->where('is_solo_parent', true)->count();
         $minors = (clone $living)->where('age', '<', 18)->count();
         $adults = (clone $living)->whereBetween('age', [18, 59])->count();
         $clearances = Clearance::count();
@@ -51,8 +52,11 @@ class DashboardController extends Controller
             })
             ->count();
 
+        $validSitios = ['Chrysanthemum', 'Dahlia', 'Dama de Noche', 'Ilang-Ilang', 'Ilang-Ilang 1', 'Ilang-Ilang 2', 'Jasmin', 'Rosal', 'Sampaguita'];
+
         // Households per sitio
         $householdsBySitio = Household::selectRaw('sitio, COUNT(*) as total')
+            ->whereIn('sitio', $validSitios)
             ->groupBy('sitio')
             ->orderByDesc('total')
             ->get();
@@ -60,6 +64,7 @@ class DashboardController extends Controller
         // Families per sitio (via household)
         $familiesBySitio = Family::join('households', 'families.household_id', '=', 'households.id')
             ->selectRaw('households.sitio, COUNT(*) as total')
+            ->whereIn('households.sitio', $validSitios)
             ->groupBy('households.sitio')
             ->orderByDesc('total')
             ->get();
@@ -72,7 +77,7 @@ class DashboardController extends Controller
         ];
 
         return view('dashboard', compact(
-            'totalResidents', 'male', 'female', 'seniors', 'pwd', 'voters',
+            'totalResidents', 'male', 'female', 'seniors', 'pwd', 'voters', 'soloParents',
             'minors', 'adults', 'clearances', 'totalFamilies', 'totalHouseholds',
             'civilStatus', 'recentLogs', 'bySitio', 'noSitio', 'householdsBySitio', 'householdsByType', 'familiesBySitio'
         ));

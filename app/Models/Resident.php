@@ -44,6 +44,7 @@ class Resident extends Model
         'last_name',
         'first_name',
         'middle_name',
+        'suffix',
         'gender',
         'birthdate',
         'age',
@@ -73,6 +74,14 @@ class Resident extends Model
         'is_senior',
         'is_pwd',
         'is_voter',
+        'is_solo_parent',
+        'is_labor_force',
+        'is_unemployed',
+        'is_ofw',
+        'is_indigenous',
+        'is_out_of_school_child',
+        'is_out_of_school_youth',
+        'is_student',
 
         // Location
         'latitude',

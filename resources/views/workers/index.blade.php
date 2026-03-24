@@ -14,13 +14,14 @@
 .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:8px; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; transition:all .15s; text-decoration:none; }
 .btn-primary { background:var(--primary); color:#fff; }
 .btn-primary:hover { background:var(--primary-light); }
-.btn-view   { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; padding:5px 10px; font-size:12px; }
-.btn-edit   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:5px 10px; font-size:12px; }
-.btn-delete { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; padding:5px 10px; font-size:12px; }
-.btn-view:hover { background:#dcfce7; }
-.btn-edit:hover { background:#dbeafe; }
+.btn-sm { padding:5px 10px; font-size:12px; }
+.btn-view   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+.btn-edit   { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+.btn-delete { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; }
+.btn-view:hover   { background:#dbeafe; }
+.btn-edit:hover   { background:#dcfce7; }
 .btn-delete:hover { background:#ffe4e6; }
-.action-btns { display:flex; gap:5px; }
+.action-btns { display:flex; gap:5px; justify-content:flex-end; }
 .search-input { padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; outline:none; width:240px; }
 .search-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(26,58,107,.08); }
 .table-wrap { overflow-x:auto; }
@@ -99,7 +100,7 @@ tbody tr:last-child td { border-bottom:none; }
             <th>Name</th>
             <th>Position</th>
             <th>Status</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -126,13 +127,13 @@ tbody tr:last-child td { border-bottom:none; }
             </td>
             <td>
               <div class="action-btns">
-                <button onclick='openModal(@json($worker))' class="btn btn-view"><i class="fas fa-eye"></i> View</button>
+                <button onclick='openModal(@json($worker))' class="btn btn-sm btn-view"><i class="fas fa-eye"></i> View</button>
                 @if(auth()->user()->role == 'admin')
-                <a href="{{ route('workers.edit', $worker->id) }}" class="btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
+                <a href="{{ route('workers.edit', $worker->id) }}" class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</a>
                 <form action="{{ route('workers.destroy', $worker->id) }}" method="POST" style="display:inline" onsubmit="return confirmDelete(this,'Delete {{ $worker->first_name }} {{ $worker->last_name }}? This action cannot be undone.')">
                   @csrf
                   @method('DELETE')
-                  <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                  <button type="submit" class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Delete</button>
                 </form>
                 @endif
               </div>

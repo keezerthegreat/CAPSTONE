@@ -29,7 +29,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
 .btn-print:hover  { background:#dbeafe; }
 .btn-edit:hover   { background:#dcfce7; }
 .btn-delete:hover { background:#ffe4e6; }
-.action-btns { display:flex; gap:5px; }
+.action-btns { display:flex; gap:5px; justify-content:flex-end; }
 .table-wrap { overflow-x:auto; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
 thead tr { background:#f8fafc; border-bottom:2px solid var(--border); }
@@ -277,7 +277,7 @@ tbody tr:last-child td { border-bottom:none; }
               <th>Resident Name</th>
               <th>Clearance Type</th>
               <th>Date Issued</th>
-              <th>Actions</th>
+              <th style="text-align:center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -377,16 +377,25 @@ function filterResidents(q) {
   list.innerHTML = filtered.map(r => {
     const name = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
     const meta = [r.address, r.barangay].filter(Boolean).join(', ') || 'Barangay Cogon';
-    return `<div class="rpicker-item" onclick="selectResident('${name.replace(/'/g,"\\'")}')">
+    return `<div class="rpicker-item" onclick="selectResident(${r.id})">
       <div class="ri-name">${name}</div>
       <div class="ri-meta">${meta}</div>
     </div>`;
   }).join('');
 }
-function selectResident(name) {
+function selectResident(id) {
+  const r = allResidents.find(res => res.id === id);
+  if (!r) return;
+  const name = r.last_name + ', ' + r.first_name + (r.middle_name ? ' ' + r.middle_name : '');
   document.getElementById('cl-resident-name').value = name;
   document.getElementById('cl-picker-label').textContent = name;
   document.getElementById('cl-picker-btn').classList.add('selected');
+  if (r.civil_status) {
+    const csEl = document.getElementById('cl-civil-status');
+    csEl.value = r.civil_status;
+    if (!csEl.value) csEl.add(new Option(r.civil_status, r.civil_status, true, true));
+  }
+  if (r.address) document.getElementById('cl-purok').value = r.address;
   closeResPicker();
   clUpdate();
 }

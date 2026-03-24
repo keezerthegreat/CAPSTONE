@@ -102,6 +102,10 @@ input::placeholder { color:#94a3b8; }
           <input type="text" name="middle_name" value="{{ old('middle_name') }}" placeholder="e.g. Santos">
         </div>
         <div class="form-group">
+          <label>Suffix</label>
+          <input type="text" name="suffix" value="{{ old('suffix') }}" placeholder="e.g. Jr., Sr., II">
+        </div>
+        <div class="form-group">
           <label>Sex <span class="req">*</span></label>
           <select name="gender" required>
             <option value="">Select...</option>
@@ -278,6 +282,47 @@ input::placeholder { color:#94a3b8; }
           <label class="check-item">
             <input type="checkbox" name="is_voter" value="1" {{ old('is_voter') ? 'checked':'' }}>
             <span>Registered Voter</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_solo_parent" value="1" {{ old('is_solo_parent') ? 'checked':'' }}>
+            <span>Solo Parent</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    {{-- Sector --}}
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-tags"></i> Sector</div></div>
+      <div class="card-body">
+        <div class="check-group">
+          <label class="check-item">
+            <input type="checkbox" name="is_labor_force" value="1" {{ old('is_labor_force') ? 'checked':'' }}>
+            <span>Labor Force</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_unemployed" value="1" {{ old('is_unemployed') ? 'checked':'' }}>
+            <span>Unemployed</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_ofw" value="1" {{ old('is_ofw') ? 'checked':'' }}>
+            <span>OFW</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_indigenous" value="1" {{ old('is_indigenous') ? 'checked':'' }}>
+            <span>Indigenous Person</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_out_of_school_child" value="1" {{ old('is_out_of_school_child') ? 'checked':'' }}>
+            <span>Out of School Child</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_out_of_school_youth" value="1" {{ old('is_out_of_school_youth') ? 'checked':'' }}>
+            <span>Out of School Youth</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="is_student" value="1" {{ old('is_student') ? 'checked':'' }}>
+            <span>Student</span>
           </label>
         </div>
       </div>
