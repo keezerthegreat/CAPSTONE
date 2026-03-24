@@ -121,9 +121,41 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             </select>
           </div>
 
+          @php
+            $religionOptions = [
+              'Roman Catholic',
+              'Islam',
+              'Iglesia ni Cristo',
+              "Jehovah's Witness",
+              'Seventh-Day Adventist Church',
+              'The Church of Jesus Christ of Latter-day Saints (Mormons)',
+              'Baptist Church',
+              'Born Again Christians',
+              'Philippine Independent Church (Aglipayan)',
+              'United Church of Christ in the Philippines (UCCP)',
+              'United Methodist Church',
+              'Episcopal Church in the Philippines',
+              'Ang Dating Daan',
+              'Bread of Life Ministries',
+              'Lutheran Church in the Philippines',
+            ];
+            $currentReligion = old('religion', $resident->religion);
+            $isOtherEdit     = $currentReligion && !in_array($currentReligion, $religionOptions);
+          @endphp
           <div class="form-group">
             <label>Religion</label>
-            <input type="text" name="religion" value="{{ old('religion', $resident->religion) }}">
+            <input type="hidden" name="religion" id="religion_value" value="{{ $currentReligion }}">
+            <select id="religion_select" onchange="handleReligionChange(this)">
+              <option value="">Select...</option>
+              @foreach($religionOptions as $rel)
+                <option value="{{ $rel }}" {{ (!$isOtherEdit && $currentReligion === $rel) ? 'selected' : '' }}>{{ $rel }}</option>
+              @endforeach
+              <option value="Others" {{ $isOtherEdit ? 'selected' : '' }}>Others</option>
+            </select>
+            <input type="text" id="religion_other" placeholder="Please specify religion"
+              value="{{ $isOtherEdit ? $currentReligion : '' }}"
+              style="{{ $isOtherEdit ? '' : 'display:none;' }} margin-top:6px;"
+              oninput="document.getElementById('religion_value').value = this.value">
           </div>
         </div>
       </div>
@@ -350,6 +382,19 @@ document.getElementById('isTransferred').addEventListener('change', function() {
 
   </form>
 </div>
+<script>
+function handleReligionChange(select) {
+  const otherInput = document.getElementById('religion_other');
+  const hiddenVal  = document.getElementById('religion_value');
+  if (select.value === 'Others') {
+    otherInput.style.display = '';
+    hiddenVal.value = otherInput.value;
+  } else {
+    otherInput.style.display = 'none';
+    hiddenVal.value = select.value;
+  }
+}
+</script>
 <script>
 function updateSeniorCheckbox(age) {
   const cb = document.getElementById('is_senior');
