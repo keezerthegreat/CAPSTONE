@@ -289,9 +289,9 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
   </div>
 </div>
 
-<!-- Deceased Status / Transferred -->
+<!-- Current Status -->
 <div class="card" style="border:1.5px solid #fecdd3">
-  <div class="card-header" style="background:#fff1f2"><div class="card-title" style="color:#be123c"><i class="fas fa-cross" style="margin-right:6px"></i>Deceased Status</div></div>
+  <div class="card-header" style="background:#fff1f2"><div class="card-title" style="color:#be123c"><i class="fas fa-info-circle" style="margin-right:6px"></i>Current Status</div></div>
   <div class="card-body">
     <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
 
