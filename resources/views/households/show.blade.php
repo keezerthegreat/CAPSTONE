@@ -142,11 +142,12 @@
         @php
           $headId = $household->head_resident_id;
           // Group by family_id; null family goes last
-          $grouped = $household->members->groupBy(fn($m) => $m->family_id ?? '__none__');
+          // Wrap as base Collection so ->except() uses array-key filtering, not Eloquent getKey()
+          $grouped = collect($household->members->groupBy(fn($m) => $m->family_id ?? '__none__')->all());
           // Put the head's family first
           $headMember = $household->members->firstWhere('id', $headId);
           $headFamilyKey = $headMember?->family_id ?? '__none__';
-          $ordered = collect([$headFamilyKey => $grouped[$headFamilyKey]])
+          $ordered = collect([$headFamilyKey => $grouped->get($headFamilyKey)])
             ->merge($grouped->except($headFamilyKey));
           $familyNum = 0;
           $counter = 0;

@@ -21,8 +21,8 @@ class DashboardController extends Controller
         $pwd = (clone $living)->where('is_pwd', true)->count();
         $voters = (clone $living)->where('is_voter', true)->count();
         $soloParents = (clone $living)->where('is_solo_parent', true)->count();
-        $minors = (clone $living)->where('age', '<', 18)->count();
-        $adults = (clone $living)->whereBetween('age', [18, 59])->count();
+        $minors = (clone $living)->whereRaw("CAST((julianday('now') - julianday(birthdate)) / 365.25 AS INTEGER) < 18")->count();
+        $adults = (clone $living)->whereRaw("CAST((julianday('now') - julianday(birthdate)) / 365.25 AS INTEGER) BETWEEN 18 AND 59")->count();
         $clearances = Clearance::count();
         $totalFamilies = Family::count();
         $totalHouseholds = Household::count();

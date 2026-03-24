@@ -502,6 +502,11 @@
         <i class="fas fa-tachometer-alt"></i> Dashboard
       </a>
 
+      <a href="{{ route('residents.index') }}"
+         class="nav-item {{ request()->routeIs('residents.*') && !request()->routeIs('residents.import*') ? 'active' : '' }}">
+        <i class="fas fa-users"></i> Residents
+      </a>
+
       <a href="{{ route('households.index') }}"
           class="nav-item {{ request()->is('households*') ? 'active' : '' }}">
           <i class="fas fa-home"></i> Households
@@ -510,11 +515,6 @@
       <a href="{{ route('families.index') }}"
          class="nav-item {{ request()->routeIs('families.*') ? 'active' : '' }}">
         <i class="fas fa-people-roof"></i> Families
-      </a>
-
-      <a href="{{ route('residents.index') }}"
-         class="nav-item {{ request()->routeIs('residents.*') && !request()->routeIs('residents.import*') ? 'active' : '' }}">
-        <i class="fas fa-users"></i> Residents
       </a>
 
       <div class="nav-section">Documents</div>

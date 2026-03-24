@@ -93,6 +93,29 @@ tbody tr:last-child td { border-bottom:none; }
 .pg-btn:hover:not([disabled]) { border-color:var(--primary); color:var(--primary); }
 .pg-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
 .pg-btn[disabled] { opacity:.35; cursor:default; }
+#hh-popcard {
+  display:none; position:fixed; z-index:9999;
+  background:#fff; border:1px solid #e2e8f0; border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.15); padding:12px 14px; min-width:200px; font-family:inherit;
+}
+#hh-popcard::after {
+  content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  border:6px solid transparent; border-top-color:#e2e8f0;
+}
+#hh-popcard::before {
+  content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  border:6px solid transparent; border-top-color:#fff; margin-top:-1px; z-index:1;
+}
+#hh-popcard .pc-number  { font-weight:700; font-size:14px; color:#1a3a6b; margin-bottom:3px; }
+#hh-popcard .pc-head    { font-weight:600; font-size:13px; color:#1e293b; margin-bottom:2px; }
+#hh-popcard .pc-sitio   { font-size:12px; color:#64748b; margin-bottom:6px; }
+#hh-popcard .pc-members { font-size:11px; font-weight:600; color:#1a3a6b; margin-bottom:10px; }
+#hh-popcard .pc-btn {
+  display:block; width:100%; padding:6px 0; background:#1a3a6b; color:#fff; border:none;
+  border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; text-align:center;
+  text-decoration:none; font-family:inherit;
+}
+#hh-popcard .pc-btn:hover { background:#1e4080; color:#fff; }
 </style>
 
 <div class="bidb-wrap">
@@ -201,8 +224,14 @@ tbody tr:last-child td { border-bottom:none; }
             <td>{{ $family->member_count }}</td>
             <td>
               @if($family->household)
-                <span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">
-                  HH #{{ $family->household->household_number }}
+                <span class="hh-badge"
+                  style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;cursor:default"
+                  data-number="{{ $family->household->household_number }}"
+                  data-head="{{ $family->household->head_last_name }}, {{ $family->household->head_first_name }}"
+                  data-sitio="{{ $family->household->sitio }}"
+                  data-members="{{ $family->household->member_count }}"
+                  data-url="{{ route('households.show', $family->household->id) }}">
+                  #{{ $family->household->household_number }}
                 </span>
               @else
                 <span style="color:var(--muted);font-size:12px">—</span>
@@ -364,7 +393,7 @@ function printFamilyForm() {
   t('fp-fname', f.family_name); t('fp-fname2', f.family_name);
   t('fp-fhead', (f.head_last_name||'') + ', ' + (f.head_first_name||'') + (f.head_middle_name ? ' '+f.head_middle_name : ''));
   t('fp-fcount', (f.member_count || 0) + ' member(s)');
-  t('fp-fhh', f.household ? 'HH #' + f.household.household_number + ' — ' + (f.household.sitio||'') : 'Not linked');
+  t('fp-fhh', f.household ? '#' + f.household.household_number + ' — ' + (f.household.sitio||'') : 'Not linked');
   t('fp-fnotes', f.notes); t('fp-hgender', hr.gender);
   t('fp-hage', hr.age ? hr.age + ' yrs old' : ''); t('fp-hcivil', hr.civil_status);
   t('fp-hocc', hr.occupation); t('fp-today', today);
@@ -387,7 +416,7 @@ function openFamilyModal(f) {
   document.getElementById('fm-name').textContent    = f.family_name || '—';
   document.getElementById('fm-head').textContent    = (f.head_last_name || '—') + ', ' + (f.head_first_name || '') + (f.head_middle_name ? ' ' + f.head_middle_name : '');
   document.getElementById('fm-members').textContent = (f.member_count || 0) + ' member(s)';
-  document.getElementById('fm-hh').textContent      = f.household ? 'HH #' + f.household.household_number + ' — ' + f.household.sitio : 'Not linked';
+  document.getElementById('fm-hh').textContent      = f.household ? '#' + f.household.household_number + ' — ' + f.household.sitio : 'Not linked';
   if (f.notes) { document.getElementById('fm-notes').textContent = f.notes; document.getElementById('fm-notes-wrap').style.display = ''; }
   else { document.getElementById('fm-notes-wrap').style.display = 'none'; }
   const body = document.getElementById('fm-members-body');
@@ -395,22 +424,25 @@ function openFamilyModal(f) {
   const headName = (f.head_last_name || '—') + ', ' + (f.head_first_name || '') + (f.head_middle_name ? ' ' + f.head_middle_name : '');
   const hr = f.head_resident || {};
   const headNameLink = f.head_resident_id ? `<a href="#" onclick="event.preventDefault();openResidentPreview(${f.head_resident_id})" style="color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer">${headName}</a>` : `<span style="font-weight:600">${headName}</span>`;
-  const headRow = `<tr><td style="color:var(--muted);font-size:11px">1</td><td>${headNameLink}</td><td>${hr.gender || '—'} / ${hr.age || '—'} yrs</td><td>${hr.civil_status || '—'}</td><td><span class="badge-head"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span></td><td>${f.head_role ? `<span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">${f.head_role}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}</td></tr>`;
+  const headNameWithBadge = `${headNameLink} <span class="badge-head" style="margin-left:6px"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span>`;
+  const rawRelVal = f.head_role || hr.family_role || '';
+  function inferHeadRelation(res) {
+    const a = res.age || 0, g = res.gender || '';
+    if (g === 'Male')   return a >= 60 ? 'Grandfather' : 'Father';
+    if (g === 'Female') return a >= 60 ? 'Grandmother' : 'Mother';
+    return '';
+  }
+  const headRelVal = (rawRelVal && rawRelVal !== 'Head') ? rawRelVal : inferHeadRelation(hr);
+  const headRelation = headRelVal ? `<span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">${headRelVal}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>';
+  const headRow = `<tr><td style="color:var(--muted);font-size:11px">1</td><td>${headNameWithBadge}</td><td>${hr.gender || '—'} / ${hr.age || '—'} yrs</td><td>${hr.civil_status || '—'}</td><td>${headRelation}</td></tr>`;
   const otherMembers = members.filter(m => m.id !== f.head_resident_id);
   let rows = headRow + otherMembers.map((m, i) => {
     const name = (m.last_name || '') + ', ' + (m.first_name || '') + (m.middle_name ? ' ' + m.middle_name : '');
     const nameLink = `<a href="#" onclick="event.preventDefault();openResidentPreview(${m.id})" style="color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer">${name}</a>`;
-    let hhRoleBadge;
-    if (m.family_role === 'head') {
-      hhRoleBadge = `<span style="background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">HH Head</span>`;
-    } else if (m.family_role === 'member') {
-      hhRoleBadge = `<span style="color:var(--muted);font-size:11px">member</span>`;
-    } else {
-      hhRoleBadge = '<span style="color:var(--muted);font-size:11px">—</span>';
-    }
-    return `<tr><td style="color:var(--muted);font-size:11px">${i+2}</td><td>${nameLink}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td><span style="color:var(--muted);font-size:11px">Member</span></td><td>${hhRoleBadge}</td></tr>`;
+    const relation = m.family_role ? `<span style="background:#f1f5f9;color:#475569;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">${m.family_role}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>';
+    return `<tr><td style="color:var(--muted);font-size:11px">${i+2}</td><td>${nameLink}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td>${relation}</td></tr>`;
   }).join('');
-  body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th><th>HH Role</th></tr></thead><tbody>${rows}</tbody></table>`;
+  body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Relation</th></tr></thead><tbody>${rows}</tbody></table>`;
   document.getElementById('fm-edit-link').innerHTML = `<a href="/families/${f.id}/edit" style="color:var(--primary);font-weight:600;text-decoration:none"><i class="fas fa-edit" style="margin-right:4px"></i>Edit this family</a>`;
 }
 function closeFamilyModal() { document.getElementById('familyModal').classList.remove('open'); }
@@ -503,6 +535,57 @@ function submitBulkDelete() {
     confirmDelete(form, 'Delete ' + checked.length + ' selected family/families? This cannot be undone.');
   }
 }
+</script>
+
+<div id="hh-popcard">
+  <div class="pc-number"></div>
+  <div class="pc-head"></div>
+  <div class="pc-sitio"></div>
+  <div class="pc-members"></div>
+  <a class="pc-btn" href="#"><i class="fas fa-eye" style="margin-right:5px"></i>View Household</a>
+</div>
+
+<script>
+(function () {
+  const card = document.getElementById('hh-popcard');
+  let hideTimer = null;
+
+  function showCard(badge) {
+    clearTimeout(hideTimer);
+    const rect = badge.getBoundingClientRect();
+    card.querySelector('.pc-number').textContent  = badge.dataset.number;
+    card.querySelector('.pc-head').textContent    = badge.dataset.head;
+    card.querySelector('.pc-sitio').textContent   = 'Sitio ' + badge.dataset.sitio;
+    card.querySelector('.pc-members').textContent = 'Members: ' + badge.dataset.members;
+    card.querySelector('.pc-btn').href            = badge.dataset.url;
+    card.style.display = 'block';
+    // Position above the badge, centred
+    const cardW = card.offsetWidth;
+    let left = rect.left + rect.width / 2 - cardW / 2;
+    // Keep within viewport horizontally
+    left = Math.max(8, Math.min(left, window.innerWidth - cardW - 8));
+    card.style.left = left + 'px';
+    card.style.top  = (rect.top + window.scrollY - card.offsetHeight - 10) + 'px';
+    // Recompute with scrollY for fixed positioning
+    card.style.top  = (rect.top - card.offsetHeight - 10) + 'px';
+  }
+
+  function scheduleHide() {
+    hideTimer = setTimeout(() => { card.style.display = 'none'; }, 200);
+  }
+
+  document.addEventListener('mouseover', function (e) {
+    const badge = e.target.closest('.hh-badge');
+    if (badge) { showCard(badge); return; }
+    if (e.target.closest('#hh-popcard')) { clearTimeout(hideTimer); }
+  });
+
+  document.addEventListener('mouseout', function (e) {
+    const fromBadge = e.target.closest('.hh-badge');
+    const fromCard  = e.target.closest('#hh-popcard');
+    if (fromBadge || fromCard) { scheduleHide(); }
+  });
+})();
 </script>
 
 @include('partials.resident-preview-modal')

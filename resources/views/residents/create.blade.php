@@ -213,7 +213,7 @@ input::placeholder { color:#94a3b8; }
           </div>
           <div class="form-group">
             <label>PhilSys Card Number</label>
-            <input type="text" name="philsys_number" value="{{ old('philsys_number') }}" placeholder="e.g. 1234-5678-9012">
+            <input type="text" name="philsys_number" id="philsysInput" value="{{ old('philsys_number') }}" placeholder="e.g. 1234-5678-9012-3456" maxlength="19" oninput="formatPhilSys(this)" onblur="formatPhilSys(this)">
           </div>
         </div>
       </div>
@@ -250,13 +250,9 @@ input::placeholder { color:#94a3b8; }
               @endforeach
             </select>
           </div>
-          <div class="form-group">
-            <label>Sitio</label>
-            <input type="text" name="purok" value="{{ old('purok') }}" placeholder="e.g. Sampaguita">
-          </div>
           <div class="form-group full">
-            <label>Street / House No.</label>
-            <input type="text" name="street_no" value="{{ old('street_no') }}" placeholder="e.g. 123 Rizal St.">
+            <label>Sitio / Street</label>
+            <input type="text" name="purok" value="{{ old('purok') }}" placeholder="e.g. Sitio Flan, 123 Rizal St.">
           </div>
         </div>
 
@@ -290,16 +286,41 @@ input::placeholder { color:#94a3b8; }
           </div>
           <div class="form-group">
             <label>Highest Educational Attainment</label>
-            <select name="education_level">
+            <select name="education_level" id="education_level" onchange="toggleEduSubLevel()">
               <option value="">Select...</option>
               @foreach(['No Formal Education','Elementary','High School','Senior High School','Vocational','College','Post-Graduate'] as $ed)
                 <option value="{{ $ed }}" {{ old('education_level')==$ed ? 'selected':'' }}>{{ $ed }}</option>
               @endforeach
             </select>
           </div>
+          <div class="form-group" id="edu-sub-level-group" style="{{ in_array(old('education_level'), ['Elementary','High School','Senior High School','College']) ? '' : 'display:none' }}">
+            <label>Status</label>
+            <div style="display:flex;gap:20px;margin-top:6px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer">
+                <input type="radio" name="education_sub_level" value="Undergraduate" {{ old('education_sub_level')=='Undergraduate' ? 'checked':'' }} style="width:15px;height:15px">
+                Undergraduate
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer">
+                <input type="radio" name="education_sub_level" value="Graduate" {{ old('education_sub_level')=='Graduate' ? 'checked':'' }} style="width:15px;height:15px">
+                Graduate
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    <script>
+    function toggleEduSubLevel() {
+      var lvl = document.getElementById('education_level').value;
+      var group = document.getElementById('edu-sub-level-group');
+      if (['Elementary','High School','Senior High School','College'].includes(lvl)) {
+        group.style.display = '';
+      } else {
+        group.style.display = 'none';
+        group.querySelectorAll('input[type=radio]').forEach(function(r) { r.checked = false; });
+      }
+    }
+    </script>
 
     <!-- Special Classifications -->
     <div class="card">
@@ -348,14 +369,6 @@ input::placeholder { color:#94a3b8; }
           <label class="check-item">
             <input type="checkbox" name="is_indigenous" value="1" {{ old('is_indigenous') ? 'checked':'' }}>
             <span>Indigenous Person</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="is_out_of_school_child" value="1" {{ old('is_out_of_school_child') ? 'checked':'' }}>
-            <span>Out of School Child <small style="color:var(--muted);font-weight:400">(ages 6–14 only)</small></span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="is_out_of_school_youth" value="1" {{ old('is_out_of_school_youth') ? 'checked':'' }}>
-            <span>Out of School Youth <small style="color:var(--muted);font-weight:400">(ages 15–24 only)</small></span>
           </label>
           <label class="check-item">
             <input type="checkbox" name="is_student" value="1" {{ old('is_student') ? 'checked':'' }}>
@@ -566,11 +579,10 @@ function handleReligionChange(select) {
   }
 
   const sitioSelect  = document.querySelector('select[name="sitio_name"]');
-  const streetInput  = document.querySelector('input[name="street_no"]');
+  const purokInput   = document.querySelector('input[name="purok"]');
 
   function autofillFromHousehold(h) {
-    if (h.sitio && !sitioSelect.value) {
-      // Try to match the sitio value exactly in the select options
+    if (h.sitio && sitioSelect) {
       for (const opt of sitioSelect.options) {
         if (opt.value.toLowerCase() === h.sitio.toLowerCase()) {
           sitioSelect.value = opt.value;
@@ -578,9 +590,7 @@ function handleReligionChange(select) {
         }
       }
     }
-    if (h.street && !streetInput.value) {
-      streetInput.value = h.street;
-    }
+    if (h.street && purokInput) { purokInput.value = h.street; }
   }
 
   function clearAutofill(h) {
@@ -593,8 +603,8 @@ function handleReligionChange(select) {
         }
       }
     }
-    if (h.street && streetInput.value === h.street) {
-      streetInput.value = '';
+    if (h.street && purokInput && purokInput.value === h.street) {
+      purokInput.value = '';
     }
   }
 
@@ -639,5 +649,10 @@ function handleReligionChange(select) {
 
 
 </script>
-
+<script>
+function formatPhilSys(el) {
+  const digits = el.value.replace(/\D/g, '').slice(0, 16);
+  el.value = digits.match(/.{1,4}/g)?.join('-') || digits;
+}
+</script>
 @endsection

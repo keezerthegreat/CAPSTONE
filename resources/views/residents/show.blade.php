@@ -235,7 +235,14 @@
     </div>
     <div class="card-body">
       <div class="info-grid">
-        <div class="info-item"><div class="label">Household No.</div><div class="value">HH #{{ $resident->household->household_number }}</div></div>
+        <div class="info-item">
+          <div class="label">Household No.</div>
+          <div class="value">
+            <button onclick="document.getElementById('hh-modal').classList.add('open')" style="background:none;border:none;padding:0;color:var(--primary);font-weight:700;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:inherit">
+              {{ $resident->household->household_number }}
+            </button>
+          </div>
+        </div>
         <div class="info-item"><div class="label">Head</div><div class="value">{{ $resident->household->head_last_name }}, {{ $resident->household->head_first_name }}{{ $resident->household->head_middle_name ? ' '.strtoupper(substr($resident->household->head_middle_name,0,1)).'.' : '' }}</div></div>
         <div class="info-item"><div class="label">Purok</div><div class="value">{{ $resident->household->sitio ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Residency Type</div><div class="value">{{ $resident->household->residency_type ?? '—' }}</div></div>
@@ -243,6 +250,64 @@
       </div>
     </div>
   </div>
+
+  <!-- Household Quick-View Modal -->
+  <div id="hh-modal" class="hh-modal-backdrop" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="hh-modal">
+      <div class="hh-modal-header">
+        <div style="font-size:16px;font-weight:700;color:var(--primary)"><i class="fas fa-home" style="margin-right:8px"></i>{{ $resident->household->household_number }}</div>
+        <button onclick="document.getElementById('hh-modal').classList.remove('open')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;padding:0">&times;</button>
+      </div>
+      <div class="hh-modal-body">
+        <div class="hh-modal-section">
+          <div class="hh-modal-section-title"><i class="fas fa-user-tie"></i> Household Head</div>
+          <div class="hh-modal-grid">
+            <div class="hh-mi"><span class="hh-ml">Last Name</span><span class="hh-mv">{{ $resident->household->head_last_name ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">First Name</span><span class="hh-mv">{{ $resident->household->head_first_name ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">Middle Name</span><span class="hh-mv">{{ $resident->household->head_middle_name ?? '—' }}</span></div>
+          </div>
+        </div>
+        <div class="hh-modal-section">
+          <div class="hh-modal-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
+          <div class="hh-modal-grid">
+            <div class="hh-mi"><span class="hh-ml">Purok</span><span class="hh-mv">{{ $resident->household->sitio ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">Street</span><span class="hh-mv">{{ $resident->household->street ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">Barangay</span><span class="hh-mv">{{ $resident->household->barangay ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">City</span><span class="hh-mv">{{ $resident->household->city ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">Province</span><span class="hh-mv">{{ $resident->household->province ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">GPS</span><span class="hh-mv">{{ $resident->household->latitude && $resident->household->longitude ? $resident->household->latitude.', '.$resident->household->longitude : 'Not pinned' }}</span></div>
+          </div>
+        </div>
+        <div class="hh-modal-section">
+          <div class="hh-modal-section-title"><i class="fas fa-info-circle"></i> Details</div>
+          <div class="hh-modal-grid">
+            <div class="hh-mi"><span class="hh-ml">Residency Type</span><span class="hh-mv">{{ $resident->household->residency_type ?? '—' }}</span></div>
+            <div class="hh-mi"><span class="hh-ml">Members</span><span class="hh-mv">{{ $resident->household->member_count }} member(s)</span></div>
+            <div class="hh-mi"><span class="hh-ml">Notes</span><span class="hh-mv">{{ $resident->household->notes ?? '—' }}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="hh-modal-footer">
+        <button onclick="document.getElementById('hh-modal').classList.remove('open')" class="btn btn-outline" style="font-size:13px">Close</button>
+        <a href="{{ route('households.show', $resident->household->id) }}" class="btn btn-primary" style="font-size:13px"><i class="fas fa-eye"></i> Full View</a>
+      </div>
+    </div>
+  </div>
+  <style>
+  .hh-modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:9999; align-items:center; justify-content:center; }
+  .hh-modal-backdrop.open { display:flex; }
+  .hh-modal { background:var(--card); border-radius:16px; width:560px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+  .hh-modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .hh-modal-body { padding:20px 24px; }
+  .hh-modal-section { margin-bottom:20px; }
+  .hh-modal-section:last-child { margin-bottom:0; }
+  .hh-modal-section-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; }
+  .hh-modal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .hh-mi { display:flex; flex-direction:column; gap:3px; }
+  .hh-ml { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .hh-mv { font-size:13px; color:var(--text); font-weight:500; background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:7px 10px; }
+  .hh-modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  </style>
   @endif
 
   @if($resident->family)

@@ -335,7 +335,7 @@ tbody tr:last-child td { border-bottom: none; }
       $fCitizenship = $filters['citizenship'] ?? '';
       $fResidentStatus = $filters['residentStatus'] ?? '';
       $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
-      $residentStatusLabel = match($fResidentStatus) { 'deceased'=>'Deceased','transferred'=>'Transferred',default=>'Status' };
+      $residentStatusLabel = match($fResidentStatus) { 'deceased'=>'Deceased','transferred'=>'Transferred','no_household'=>'No Household','no_family'=>'No Family',default=>'Status' };
       $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter','solo_parent'=>'Solo Parent',default=>'Classification' };
       $sectorLabel = match($fSector) { 'labor_force'=>'Labor Force','unemployed'=>'Unemployed','ofw'=>'OFW','indigenous'=>'Indigenous','out_of_school_child'=>'Out of School Child','out_of_school_youth'=>'Out of School Youth','student'=>'Student',default=>'Sector' };
     @endphp
@@ -463,6 +463,8 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="flt-dropdown" id="dd-resident_status">
             <div class="flt-option {{ $fResidentStatus==='deceased' ? 'selected' : '' }}" onclick="applyFilter('resident_status','deceased')">Deceased</div>
             <div class="flt-option {{ $fResidentStatus==='transferred' ? 'selected' : '' }}" onclick="applyFilter('resident_status','transferred')">Transferred</div>
+            <div class="flt-option {{ $fResidentStatus==='no_household' ? 'selected' : '' }}" onclick="applyFilter('resident_status','no_household')">No Household</div>
+            <div class="flt-option {{ $fResidentStatus==='no_family' ? 'selected' : '' }}" onclick="applyFilter('resident_status','no_family')">No Family</div>
           </div>
         </div>
 
@@ -565,7 +567,9 @@ tbody tr:last-child td { border-bottom: none; }
               @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
               @if($resident->is_voter)<span class="badge" style="background:#f3e8ff;color:#6b21a8">Voter</span>@endif
               @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
-              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter && !$resident->is_solo_parent)
+              @php $isMinor = $resident->age !== null && $resident->age < 18; @endphp
+              @if($isMinor)<span class="badge" style="background:#e0f2fe;color:#0369a1">Minor</span>@endif
+              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter && !$resident->is_solo_parent && !$isMinor)
               <span style="color:var(--muted);font-size:12px">—</span>
               @endif
             </td>
@@ -1094,7 +1098,7 @@ function openResidentModal(r, pendingStatus) {
   const hhSection = document.getElementById('rm-household-section');
   if (r.household) {
     const hhMiddle = r.household.head_middle_name ? ' ' + r.household.head_middle_name.charAt(0).toUpperCase() + '.' : '';
-    document.getElementById('rm-hh-number').textContent  = 'HH #' + r.household.household_number;
+    document.getElementById('rm-hh-number').textContent  = r.household.household_number;
     document.getElementById('rm-hh-head').textContent    = r.household.head_last_name + ', ' + r.household.head_first_name + hhMiddle;
     document.getElementById('rm-hh-sitio').textContent   = r.household.sitio || '—';
     document.getElementById('rm-hh-members').textContent = r.household.member_count + ' member(s)';

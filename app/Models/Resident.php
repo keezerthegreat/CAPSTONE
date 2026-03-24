@@ -70,6 +70,7 @@ class Resident extends Model
         'employer',
         'monthly_income',
         'education_level',
+        'education_sub_level',
 
         // Special classification
         'is_senior',

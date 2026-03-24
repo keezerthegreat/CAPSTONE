@@ -21,7 +21,7 @@
 .btn-view:hover   { background:#dbeafe; }
 .btn-edit:hover   { background:#dcfce7; }
 .btn-delete:hover { background:#ffe4e6; }
-.action-btns { display:flex; gap:5px; justify-content:flex-end; }
+.action-btns { display:flex; gap:5px; justify-content:center; }
 .search-input { padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; outline:none; width:240px; }
 .search-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(26,58,107,.08); }
 .table-wrap { overflow-x:auto; }
@@ -99,7 +99,7 @@ tbody tr:last-child td { border-bottom:none; }
             <th>Photo</th>
             <th>Name</th>
             <th>Position</th>
-            <th>Status</th>
+            <th>Contact</th>
             <th style="text-align:center">Actions</th>
           </tr>
         </thead>
@@ -114,17 +114,7 @@ tbody tr:last-child td { border-bottom:none; }
             </td>
             <td><div style="font-weight:600">{{ $worker->first_name }} {{ $worker->middle_name }} {{ $worker->last_name }}</div></td>
             <td>{{ $worker->position }}</td>
-            <td>
-              @if($worker->employment_status == 'Regular')
-                <span class="badge badge-regular">Regular</span>
-              @elseif($worker->employment_status == 'Job Order')
-                <span class="badge badge-joborder">Job Order</span>
-              @elseif($worker->employment_status == 'Volunteer')
-                <span class="badge badge-volunteer">Volunteer</span>
-              @else
-                <span class="badge badge-na">N/A</span>
-              @endif
-            </td>
+            <td>{{ $worker->contact_number ?? '—' }}</td>
             <td>
               <div class="action-btns">
                 <button onclick='openModal(@json($worker))' class="btn btn-sm btn-view"><i class="fas fa-eye"></i> View</button>
@@ -194,17 +184,23 @@ document.getElementById("workerSearch").addEventListener("keyup", function() {
     });
 });
 
+function fmtDate(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    if (isNaN(d)) return str;
+    return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+}
 function openModal(worker) {
     document.getElementById('viewModal').classList.add('open');
     document.getElementById('v_name').textContent = (worker.first_name ?? '') + ' ' + (worker.middle_name ?? '') + ' ' + (worker.last_name ?? '');
-    document.getElementById('v_birthdate').textContent = worker.birthdate ?? '—';
+    document.getElementById('v_birthdate').textContent = fmtDate(worker.birthdate);
     document.getElementById('v_gender').textContent = worker.gender ?? '—';
     document.getElementById('v_civil_status').textContent = worker.civil_status ?? '—';
     document.getElementById('v_contact').textContent = worker.contact_number ?? '—';
     document.getElementById('v_email').textContent = worker.email ?? '—';
     document.getElementById('v_address').textContent = worker.address ?? '—';
     document.getElementById('v_position').textContent = worker.position ?? '—';
-    document.getElementById('v_date_hired').textContent = worker.date_hired ?? '—';
+    document.getElementById('v_date_hired').textContent = fmtDate(worker.date_hired);
     document.getElementById('v_status').textContent = worker.employment_status ?? '—';
     const photo = worker.photo ? '/storage/' + worker.photo : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((worker.first_name ?? '') + ' ' + (worker.last_name ?? '')) + '&background=dbeafe&color=1d4ed8&size=160';
     document.getElementById('v_photo').src = photo;

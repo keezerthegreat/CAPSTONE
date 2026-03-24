@@ -7,12 +7,14 @@ use App\Models\ActivityLog;
 use App\Models\Household;
 use App\Models\Resident;
 use App\Models\ResidentPendingEdit;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResidentController extends Controller
 {
-    public function index(\Illuminate\Http\Request $request)
+    public function index(Request $request)
     {
         $gender = $request->get('gender', '');
         $civil = $request->get('civil', '');
@@ -47,9 +49,9 @@ class ResidentController extends Controller
         }
         if ($sector) {
             if ($sector === 'out_of_school_child') {
-                $query->whereBetween('age', [6, 14]);
+                $query->where('is_out_of_school_child', true);
             } elseif ($sector === 'out_of_school_youth') {
-                $query->whereBetween('age', [15, 24]);
+                $query->where('is_out_of_school_youth', true);
             } else {
                 $query->where("is_{$sector}", true);
             }
@@ -61,6 +63,10 @@ class ResidentController extends Controller
             $query->where('is_deceased', true);
         } elseif ($residentStatus === 'transferred') {
             $query->whereNotNull('transferred_to');
+        } elseif ($residentStatus === 'no_household') {
+            $query->whereNull('household_id');
+        } elseif ($residentStatus === 'no_family') {
+            $query->whereNull('family_id');
         }
         if ($ageMin !== null) {
             $query->where('age', '>=', $ageMin);
@@ -90,9 +96,9 @@ class ResidentController extends Controller
             : (clone $query)->where('is_deceased', false)->whereNull('transferred_to');
 
         $totalResidents = (clone $countQuery)->count();
-        $totalSeniors = (clone $countQuery)->where('age', '>=', 60)->count();
+        $totalSeniors = (clone $countQuery)->whereRaw("CAST((julianday('now') - julianday(birthdate)) / 365.25 AS INTEGER) >= 60")->count();
         $totalPwd = (clone $countQuery)->where('is_pwd', true)->count();
-        $residents = (clone $query)->with(['household', 'family'])->orderBy('last_name')->orderBy('first_name')->paginate(50)->withQueryString();
+        $residents = (clone $query)->with(['household', 'family'])->orderBy('last_name')->orderBy('first_name')->paginate(20)->withQueryString();
 
         $pendingResidents = Resident::where('status', 'pending')->latest()->get();
         $pendingEdits = ResidentPendingEdit::with('resident')->latest()->get();
@@ -135,12 +141,12 @@ class ResidentController extends Controller
             'city' => 'required|string|max:255',
             'barangay' => 'required|string|max:255',
             'sitio_name' => 'required|string|max:255',
-            'purok' => 'nullable|string|max:100',
-            'street_no' => 'nullable|string|max:255',
+            'purok' => 'nullable|string|max:255',
             'occupation' => 'nullable|string|max:255',
             'employer' => 'nullable|string|max:255',
             'monthly_income' => 'nullable|numeric|min:0|max:9999999',
             'education_level' => 'nullable|string|max:255',
+            'education_sub_level' => 'nullable|string|in:Undergraduate,Graduate',
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
@@ -149,8 +155,6 @@ class ResidentController extends Controller
             'is_unemployed' => 'nullable|boolean',
             'is_ofw' => 'nullable|boolean',
             'is_indigenous' => 'nullable|boolean',
-            'is_out_of_school_child' => 'nullable|boolean',
-            'is_out_of_school_youth' => 'nullable|boolean',
             'is_student' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -159,11 +163,10 @@ class ResidentController extends Controller
         // Build address from sub-fields then remove them from $validated
         $parts = array_filter([
             $validated['sitio_name'],
-            ! empty($validated['purok']) ? 'Purok '.$validated['purok'] : null,
-            $validated['street_no'] ?? null,
+            $validated['purok'] ?? null,
         ]);
         $validated['address'] = implode(', ', $parts);
-        unset($validated['sitio_name'], $validated['purok'], $validated['street_no']);
+        unset($validated['sitio_name'], $validated['purok']);
 
         $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
@@ -173,9 +176,9 @@ class ResidentController extends Controller
         $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
         $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
         $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
-        $validated['is_out_of_school_child'] = ($request->has('is_out_of_school_child') && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
-        $validated['is_out_of_school_youth'] = ($request->has('is_out_of_school_youth') && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['is_student'] = $request->has('is_student') ? 1 : 0;
+        $validated['is_out_of_school_child'] = (! $validated['is_student'] && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
+        $validated['is_out_of_school_youth'] = (! $validated['is_student'] && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['status'] = 'pending';
 
         // Duplicate check: same name + birthdate already in the system
@@ -205,7 +208,7 @@ class ResidentController extends Controller
         return view('residents.show', compact('resident'));
     }
 
-    public function json($id): \Illuminate\Http\JsonResponse
+    public function json($id): JsonResponse
     {
         $resident = Resident::with(['household', 'family'])->findOrFail($id);
 
@@ -244,12 +247,12 @@ class ResidentController extends Controller
             'city' => 'required|string|max:255',
             'barangay' => 'required|string|max:255',
             'sitio_name' => 'required|string|max:255',
-            'purok' => 'nullable|string|max:100',
-            'street_no' => 'nullable|string|max:255',
+            'purok' => 'nullable|string|max:255',
             'occupation' => 'nullable|string|max:255',
             'employer' => 'nullable|string|max:255',
             'monthly_income' => 'nullable|numeric|min:0|max:9999999',
             'education_level' => 'nullable|string|max:255',
+            'education_sub_level' => 'nullable|string|in:Undergraduate,Graduate',
             'is_senior' => 'nullable|boolean',
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
@@ -258,8 +261,6 @@ class ResidentController extends Controller
             'is_unemployed' => 'nullable|boolean',
             'is_ofw' => 'nullable|boolean',
             'is_indigenous' => 'nullable|boolean',
-            'is_out_of_school_child' => 'nullable|boolean',
-            'is_out_of_school_youth' => 'nullable|boolean',
             'is_student' => 'nullable|boolean',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -271,11 +272,10 @@ class ResidentController extends Controller
         // Build address from sub-fields
         $parts = array_filter([
             $validated['sitio_name'],
-            ! empty($validated['purok']) ? 'Purok '.$validated['purok'] : null,
-            $validated['street_no'] ?? null,
+            $validated['purok'] ?? null,
         ]);
         $validated['address'] = implode(', ', $parts);
-        unset($validated['sitio_name'], $validated['purok'], $validated['street_no']);
+        unset($validated['sitio_name'], $validated['purok']);
 
         $validated['is_senior'] = ($request->has('is_senior') && $validated['age'] >= 60) ? 1 : 0;
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
@@ -285,9 +285,9 @@ class ResidentController extends Controller
         $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
         $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
         $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
-        $validated['is_out_of_school_child'] = ($request->has('is_out_of_school_child') && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
-        $validated['is_out_of_school_youth'] = ($request->has('is_out_of_school_youth') && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['is_student'] = $request->has('is_student') ? 1 : 0;
+        $validated['is_out_of_school_child'] = (! $validated['is_student'] && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
+        $validated['is_out_of_school_youth'] = (! $validated['is_student'] && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
 
         if (! $validated['is_deceased']) {
@@ -325,7 +325,7 @@ class ResidentController extends Controller
         $pendingEdit = ResidentPendingEdit::findOrFail($id);
         $resident = $pendingEdit->resident;
 
-        $validator = \Illuminate\Support\Facades\Validator::make($pendingEdit->proposed_data, [
+        $validator = Validator::make($pendingEdit->proposed_data, [
             'last_name' => 'required|string|max:255',
             'first_name' => 'required|string|max:255',
             'gender' => 'required|in:Male,Female,Other',
@@ -436,7 +436,7 @@ class ResidentController extends Controller
         return redirect()->route('residents.index')->with('success', $msg);
     }
 
-    public function suggest(Request $request): \Illuminate\Http\JsonResponse
+    public function suggest(Request $request): JsonResponse
     {
         $q = strtolower(trim($request->get('q', '')));
 
@@ -466,7 +466,7 @@ class ResidentController extends Controller
 
     public function location()
     {
-        $households = \App\Models\Household::whereNotNull('latitude')
+        $households = Household::whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->with('members')
             ->get();

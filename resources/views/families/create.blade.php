@@ -29,6 +29,24 @@
 .btn-outline:hover { background:#f0f4f8; }
 .form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
 .alert-error { background:#fff1f2; border:1px solid #fecdd3; color:#be123c; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; }
+/* Household card selector */
+.hh-selector { margin-top:4px; }
+.hh-selector-search { width:100%; padding:7px 11px; border:1.5px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; color:var(--text); outline:none; transition:border .15s; margin-bottom:10px; }
+.hh-selector-search:focus { border-color:var(--primary); }
+.hh-list { display:flex; flex-direction:column; gap:8px; max-height:320px; overflow-y:auto; }
+.hh-card { border:1.5px solid var(--border); border-radius:10px; padding:11px 14px; cursor:pointer; transition:all .15s; background:#fff; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.hh-card:hover { border-color:var(--primary); background:#eff6ff; }
+.hh-card.selected { border-color:var(--primary); background:#eff6ff; box-shadow:0 0 0 3px rgba(26,58,107,.08); }
+.hh-card-info { display:flex; flex-direction:column; gap:2px; }
+.hh-card-title { font-size:13px; font-weight:700; color:var(--primary); }
+.hh-card-sub { font-size:12px; color:var(--muted); }
+.hh-card-badge { font-size:11px; font-weight:600; background:#e0e7ff; color:#3730a3; padding:3px 8px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
+.hh-card.selected .hh-card-badge { background:var(--primary); color:#fff; }
+.hh-none { font-size:13px; color:var(--muted); padding:8px 0; }
+.hh-deselect { display:none; align-items:center; gap:8px; margin-bottom:10px; padding:8px 12px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:8px; font-size:13px; color:#166534; }
+.hh-deselect.show { display:flex; }
+[data-theme="dark"] .hh-card { background:var(--card); }
+[data-theme="dark"] .hh-card:hover,.hh-card.selected { background:rgba(91,141,238,.12); border-color:var(--primary); }
 /* Resident search widget */
 .res-search-wrap { position:relative; }
 .res-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--primary); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:999; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
@@ -107,16 +125,18 @@
             </select>
           </div>
 
-          <div class="form-group half">
+          <div class="form-group full">
             <label>Linked Household</label>
-            <select name="household_id">
-              <option value="">— Not linked —</option>
-              @foreach($households as $household)
-                <option value="{{ $household->id }}" {{ old('household_id') == $household->id ? 'selected' : '' }}>
-                  HH #{{ $household->household_number }} — {{ $household->head_last_name }}, {{ $household->head_first_name }} ({{ $household->sitio }})
-                </option>
-              @endforeach
-            </select>
+            <input type="hidden" name="household_id" id="household_id" value="{{ old('household_id') }}">
+            <div class="hh-selector">
+              <div class="hh-deselect" id="hhDeselect">
+                <i class="fas fa-check-circle"></i>
+                <span id="hhSelectedLabel">—</span>
+                <button type="button" onclick="deselectHousehold()" style="background:none;border:none;cursor:pointer;color:#166534;font-size:18px;line-height:1;margin-left:auto;padding:0" title="Remove link">×</button>
+              </div>
+              <input type="text" class="hh-selector-search" id="hhSearch" placeholder="Search by household number or head name..." oninput="filterHouseholds(this.value)">
+              <div class="hh-list" id="hhList"></div>
+            </div>
           </div>
 
           <div class="form-group full">
@@ -275,6 +295,70 @@ function renderMembers() {
     memberInputs.appendChild(inp);
   });
 }
+
+// ── Household card selector ───────────────────────────────────
+const allHouseholds = @json($households->values());
+const hhHiddenInput  = document.getElementById('household_id');
+const hhList         = document.getElementById('hhList');
+const hhDeselect     = document.getElementById('hhDeselect');
+const hhSelectedLabel = document.getElementById('hhSelectedLabel');
+let selectedHhId     = hhHiddenInput.value || null;
+
+function renderHhCards(list) {
+  if (!list.length) {
+    hhList.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle" style="margin-right:6px"></i>No households found.</div>';
+    return;
+  }
+  hhList.innerHTML = list.map(h => {
+    const isSelected = String(h.id) === String(selectedHhId);
+    return `<div class="hh-card${isSelected ? ' selected' : ''}" onclick="selectHousehold(${h.id}, '${h.household_number}', '${h.head_last_name}, ${h.head_first_name}', '${h.sitio || '—'}')">
+      <div class="hh-card-info">
+        <div class="hh-card-title">Household #${h.household_number}</div>
+        <div class="hh-card-sub">Head: ${h.head_first_name} ${h.head_last_name} &nbsp;·&nbsp; Purok: ${h.sitio || '—'}</div>
+      </div>
+      <span class="hh-card-badge">${isSelected ? '<i class="fas fa-check"></i> Linked' : h.member_count + ' member(s)'}</span>
+    </div>`;
+  }).join('');
+}
+
+function filterHouseholds(q) {
+  const lower = q.toLowerCase();
+  const filtered = lower
+    ? allHouseholds.filter(h =>
+        h.household_number.toLowerCase().includes(lower) ||
+        (h.head_last_name + ' ' + h.head_first_name).toLowerCase().includes(lower) ||
+        (h.sitio || '').toLowerCase().includes(lower))
+    : allHouseholds;
+  renderHhCards(filtered);
+}
+
+function selectHousehold(id, num, head, sitio) {
+  if (String(selectedHhId) === String(id)) { deselectHousehold(); return; }
+  selectedHhId = id;
+  hhHiddenInput.value = id;
+  hhSelectedLabel.textContent = `Household #${num} — ${head} (${sitio})`;
+  hhDeselect.classList.add('show');
+  filterHouseholds(document.getElementById('hhSearch').value);
+}
+
+function deselectHousehold() {
+  selectedHhId = null;
+  hhHiddenInput.value = '';
+  hhDeselect.classList.remove('show');
+  filterHouseholds(document.getElementById('hhSearch').value);
+}
+
+// Init
+renderHhCards(allHouseholds);
+if (selectedHhId) {
+  const h = allHouseholds.find(x => String(x.id) === String(selectedHhId));
+  if (h) {
+    hhSelectedLabel.textContent = `Household #${h.household_number} — ${h.head_last_name}, ${h.head_first_name} (${h.sitio || '—'})`;
+    hhDeselect.classList.add('show');
+  }
+}
+window.selectHousehold = selectHousehold;
+window.deselectHousehold = deselectHousehold;
 
 // ── Shared dropdown builder ───────────────────────────────────
 function buildDropdown(query, dropdownEl, onSelect) {

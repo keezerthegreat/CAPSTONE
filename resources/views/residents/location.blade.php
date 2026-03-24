@@ -155,8 +155,9 @@ const hhData = @json($households->keyBy('id'));
 
 
 // Plot household pins
+const markers = {};
 @foreach($households as $hh)
-L.marker([{{ $hh->latitude }}, {{ $hh->longitude }}])
+markers[{{ $hh->id }}] = L.marker([{{ $hh->latitude }}, {{ $hh->longitude }}])
   .addTo(map)
   .bindPopup(`
     <div style="font-family:sans-serif;min-width:180px">
@@ -170,6 +171,17 @@ L.marker([{{ $hh->latitude }}, {{ $hh->longitude }}])
     </div>
   `);
 @endforeach
+
+// Auto-focus a specific household pin if ?focus= is in the URL
+(function () {
+  const focusId = new URLSearchParams(window.location.search).get('focus');
+  if (focusId && markers[focusId]) {
+    setTimeout(function () {
+      map.flyTo(markers[focusId].getLatLng(), 18, { animate: true, duration: 1 });
+      setTimeout(function () { markers[focusId].openPopup(); }, 1100);
+    }, 300);
+  }
+})();
 
 // Fullscreen toggle
 let isFullscreen = false;

@@ -74,7 +74,7 @@ tr:hover td { background:#f8fafc; }
       <div class="breadcrumb">Home › Audit Log</div>
     </div>
     <form method="POST" action="{{ route('audit.clear') }}" style="margin:0"
-          onsubmit="return confirm('Are you sure you want to permanently delete all audit logs? This action cannot be undone.')">
+          onsubmit="return confirmDelete(this, 'Permanently delete all audit logs? This action cannot be undone.')">
       @csrf @method('DELETE')
       <button type="submit" class="btn-danger"><i class="fas fa-trash"></i> Clear Log</button>
     </form>

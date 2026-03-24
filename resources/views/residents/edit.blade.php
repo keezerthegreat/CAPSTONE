@@ -22,6 +22,23 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
 .btn-primary { background:var(--primary); color:#fff; }
 .btn-outline { background:#fff; color:var(--primary); border:1.5px solid var(--primary); }
 .alert-error { background:#fee2e2; border:1px solid #fecaca; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; }
+.hh-suggestion { margin-top:16px; display:none; }
+.hh-suggestion-label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.hh-list { display:flex; flex-direction:column; gap:8px; }
+.hh-card { border:1.5px solid var(--border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all .15s; background:#fff; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.hh-card:hover { border-color:var(--primary); background:#eff6ff; }
+.hh-card.selected { border-color:var(--primary); background:#eff6ff; box-shadow:0 0 0 3px rgba(26,58,107,.08); }
+.hh-card-info { display:flex; flex-direction:column; gap:2px; }
+.hh-card-title { font-size:13px; font-weight:700; color:var(--primary); }
+.hh-card-sub { font-size:12px; color:var(--muted); }
+.hh-card-badge { font-size:11px; font-weight:600; background:#e0e7ff; color:#3730a3; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+.hh-card.selected .hh-card-badge { background:var(--primary); color:#fff; }
+.hh-none { font-size:13px; color:var(--muted); padding:10px 0; display:flex; align-items:center; gap:6px; }
+.hh-loading { font-size:13px; color:var(--muted); padding:8px 0; display:flex; align-items:center; gap:6px; }
+[data-theme="dark"] .hh-card { background:var(--card); border-color:var(--border); }
+[data-theme="dark"] .hh-card:hover { background:var(--hover-bg); border-color:var(--primary); }
+[data-theme="dark"] .hh-card.selected { background:rgba(91,141,238,.12); border-color:var(--primary); }
+[data-theme="dark"] .hh-card-badge { background:rgba(91,141,238,.15); color:#93bbf7; }
 </style>
 
 <div class="bidb-wrap">
@@ -180,7 +197,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
           </div>
           <div class="form-group">
             <label>PhilSys Card Number</label>
-            <input type="text" name="philsys_number" value="{{ old('philsys_number', $resident->philsys_number) }}" placeholder="e.g. 1234-5678-9012">
+            <input type="text" name="philsys_number" id="philsysInput" value="{{ old('philsys_number', $resident->philsys_number) }}" placeholder="e.g. 1234-5678-9012-3456" maxlength="19" oninput="formatPhilSys(this)" onblur="formatPhilSys(this)">
           </div>
         </div>
       </div>
@@ -197,7 +214,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
               if (stripos($storedAddress, $s) === 0) { $detectedSitio = $s; break; }
           }
           $oldSitio  = old('sitio_name', $detectedSitio);
-          $oldStreet = old('street_no', $detectedSitio ? trim(ltrim(substr($storedAddress, strlen($detectedSitio)), ', ')) : $storedAddress);
+          $oldPurok  = old('purok', $detectedSitio ? trim(ltrim(substr($storedAddress, strlen($detectedSitio)), ', ')) : $storedAddress);
         @endphp
         <div class="form-grid">
           <div class="form-group">
@@ -224,14 +241,17 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
               @endforeach
             </select>
           </div>
-          <div class="form-group">
-            <label>Sitio</label>
-            <input type="text" name="purok" value="{{ old('purok') }}" placeholder="e.g. Sampaguita">
-          </div>
           <div class="form-group full">
-            <label>Street / House No.</label>
-            <input type="text" name="street_no" value="{{ $oldStreet }}" placeholder="e.g. 123 Rizal St.">
+            <label>Sitio / Street</label>
+            <input type="text" name="purok" value="{{ $oldPurok }}" placeholder="e.g. Sitio Flan, 123 Rizal St.">
           </div>
+        </div>
+
+        {{-- Household suggestion panel --}}
+        <input type="hidden" name="household_id" id="household_id" value="{{ old('household_id', $resident->household_id) }}">
+        <div class="hh-suggestion" id="hhSuggestion">
+          <div class="hh-suggestion-label"><i class="fas fa-home"></i> Matching Households in this Barangay <span style="font-weight:400;color:#94a3b8">(optional — click to assign)</span></div>
+          <div class="hh-list" id="hhList"></div>
         </div>
       </div>
     </div>
@@ -254,16 +274,42 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
           </div>
           <div class="form-group">
             <label>Education Level</label>
-            <select name="education_level">
+            <select name="education_level" id="education_level" onchange="toggleEduSubLevel()">
               <option value="">Select...</option>
               @foreach(['No Formal Education','Elementary','High School','Senior High School','Vocational','College','Post-Graduate'] as $ed)
-                <option value="{{ $ed }}" {{ $resident->education_level == $ed ? 'selected' : '' }}>{{ $ed }}</option>
+                <option value="{{ $ed }}" {{ old('education_level', $resident->education_level) == $ed ? 'selected' : '' }}>{{ $ed }}</option>
               @endforeach
             </select>
+          </div>
+          @php $currentSubLevel = old('education_sub_level', $resident->education_sub_level); @endphp
+          <div class="form-group" id="edu-sub-level-group" style="{{ in_array(old('education_level', $resident->education_level), ['Elementary','High School','Senior High School','College']) ? '' : 'display:none' }}">
+            <label>Status</label>
+            <div style="display:flex;gap:20px;margin-top:6px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer">
+                <input type="radio" name="education_sub_level" value="Undergraduate" {{ $currentSubLevel == 'Undergraduate' ? 'checked' : '' }} style="width:15px;height:15px">
+                Undergraduate
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer">
+                <input type="radio" name="education_sub_level" value="Graduate" {{ $currentSubLevel == 'Graduate' ? 'checked' : '' }} style="width:15px;height:15px">
+                Graduate
+              </label>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <script>
+    function toggleEduSubLevel() {
+      var lvl = document.getElementById('education_level').value;
+      var group = document.getElementById('edu-sub-level-group');
+      if (['Elementary','High School','Senior High School','College'].includes(lvl)) {
+        group.style.display = '';
+      } else {
+        group.style.display = 'none';
+        group.querySelectorAll('input[type=radio]').forEach(function(r) { r.checked = false; });
+      }
+    }
+    </script>
 
 <div class="card">
   <div class="card-header"><div class="card-title"><i class="fas fa-tags" style="margin-right:6px"></i>Special Classifications</div></div>
@@ -309,14 +355,6 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
         <input type="checkbox" name="is_indigenous" value="1" {{ $resident->is_indigenous ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
         Indigenous Person
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_out_of_school_child" value="1" {{ $resident->is_out_of_school_child ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Out of School Child <small style="color:var(--muted);font-weight:400">(ages 6–14 only)</small>
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_out_of_school_youth" value="1" {{ $resident->is_out_of_school_youth ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Out of School Youth <small style="color:var(--muted);font-weight:400">(ages 15–24 only)</small>
       </label>
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
         <input type="checkbox" name="is_student" value="1" {{ $resident->is_student ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
@@ -430,5 +468,156 @@ document.getElementById('birthdate').addEventListener('change', function() {
 
 // Run on page load
 updateSeniorCheckbox({{ $resident->age ?? 0 }});
+</script>
+<script>
+function formatPhilSys(el) {
+  const digits = el.value.replace(/\D/g, '').slice(0, 16);
+  el.value = digits.match(/.{1,4}/g)?.join('-') || digits;
+}
+// Format existing value on load
+(function() {
+  const el = document.getElementById('philsysInput');
+  if (el && el.value) formatPhilSys(el);
+})();
+</script>
+<script>
+(function() {
+  const barangayInput = document.querySelector('input[name="barangay"][type="hidden"]');
+  const panel         = document.getElementById('hhSuggestion');
+  const list          = document.getElementById('hhList');
+  const hiddenId      = document.getElementById('household_id');
+  let selectedId      = '{{ old('household_id', $resident->household_id) }}';
+
+  const hhMap = {};
+  let rawHouseholds = [];
+  let allHouseholds = [];
+  let hhPage = 1;
+  const HH_PER_PAGE = 10;
+
+  function buildCards(page) {
+    const total = allHouseholds.length;
+    const totalPages = Math.ceil(total / HH_PER_PAGE);
+    const start = (page - 1) * HH_PER_PAGE;
+    const slice = allHouseholds.slice(start, start + HH_PER_PAGE);
+    const cards = slice.map(h => {
+      const isSelected = String(h.id) === String(selectedId);
+      const sitio = h.sitio ? h.sitio : (h.street || '—');
+      return `<div class="hh-card${isSelected ? ' selected' : ''}" data-id="${h.id}" onclick="selectHousehold(${h.id}, this)">
+        <div class="hh-card-info">
+          <div class="hh-card-title">Household #${h.household_number}</div>
+          <div class="hh-card-sub">Head: ${h.head_first_name} ${h.head_last_name} &nbsp;·&nbsp; Purok: ${sitio}</div>
+        </div>
+        <span class="hh-card-badge">${isSelected ? '<i class="fas fa-check"></i> Assigned' : h.member_count + ' member(s)'}</span>
+      </div>`;
+    }).join('');
+    const pagination = totalPages > 1 ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--muted);">
+        <span>Showing ${start + 1}–${Math.min(start + HH_PER_PAGE, total)} of ${total}</span>
+        <div style="display:flex;gap:4px;">
+          <button type="button" onclick="hhGoPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}
+            style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:12px;color:var(--muted);${page <= 1 ? 'opacity:.4;cursor:default;' : ''}">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span style="padding:4px 8px;font-weight:600;color:var(--text);">${page} / ${totalPages}</span>
+          <button type="button" onclick="hhGoPage(${page + 1})" ${page >= totalPages ? 'disabled' : ''}
+            style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:12px;color:var(--muted);${page >= totalPages ? 'opacity:.4;cursor:default;' : ''}">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>` : '';
+    list.innerHTML = cards + pagination;
+  }
+
+  function hhGoPage(page) {
+    const totalPages = Math.ceil(allHouseholds.length / HH_PER_PAGE);
+    if (page < 1 || page > totalPages) { return; }
+    hhPage = page;
+    buildCards(hhPage);
+  }
+
+  function applyPurokFilter() {
+    const selected = sitioSelect ? sitioSelect.value.toLowerCase() : '';
+    allHouseholds = selected
+      ? rawHouseholds.filter(h => h.sitio && h.sitio.toLowerCase() === selected)
+      : rawHouseholds;
+    hhPage = 1;
+    panel.style.display = 'block';
+    if (allHouseholds.length === 0) {
+      list.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle"></i> No households found in this purok yet.</div>';
+      return;
+    }
+    buildCards(hhPage);
+  }
+
+  function renderHouseholds(households) {
+    panel.style.display = 'block';
+    if (households.length === 0) {
+      list.innerHTML = '<div class="hh-none"><i class="fas fa-info-circle"></i> No households found in this barangay yet.</div>';
+      return;
+    }
+    rawHouseholds = households;
+    households.forEach(h => { hhMap[h.id] = h; });
+    applyPurokFilter();
+  }
+
+  function fetchHouseholds(barangay) {
+    if (!barangay || barangay.trim().length < 2) { panel.style.display = 'none'; return; }
+    list.innerHTML = '<div class="hh-loading"><i class="fas fa-spinner fa-spin"></i> Looking up households…</div>';
+    panel.style.display = 'block';
+    fetch(`{{ route('households.search') }}?barangay=${encodeURIComponent(barangay)}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(renderHouseholds)
+    .catch(() => { list.innerHTML = '<div class="hh-none"><i class="fas fa-exclamation-circle"></i> Could not load households.</div>'; });
+  }
+
+  const sitioSelect  = document.querySelector('select[name="sitio_name"]');
+  const purokInput   = document.querySelector('input[name="purok"]');
+
+  function autofillFromHousehold(h) {
+    if (h.sitio && sitioSelect) {
+      for (const opt of sitioSelect.options) {
+        if (opt.value.toLowerCase() === h.sitio.toLowerCase()) {
+          sitioSelect.value = opt.value;
+          break;
+        }
+      }
+    }
+    if (h.street && purokInput) { purokInput.value = h.street; }
+  }
+
+  window.selectHousehold = function(id, el) {
+    if (String(id) === String(selectedId)) {
+      selectedId = '';
+      hiddenId.value = '';
+      el.classList.remove('selected');
+      el.querySelector('.hh-card-badge').innerHTML = hhMap[id] ? hhMap[id].member_count + ' member(s)' : '—';
+    } else {
+      selectedId = id;
+      hiddenId.value = id;
+      document.querySelectorAll('.hh-card').forEach(c => {
+        c.classList.remove('selected');
+        const badge = c.querySelector('.hh-card-badge');
+        if (badge.innerHTML.includes('fa-check')) {
+          const hId = c.dataset.id;
+          badge.innerHTML = hhMap[hId] ? hhMap[hId].member_count + ' member(s)' : '—';
+        }
+      });
+      el.classList.add('selected');
+      el.querySelector('.hh-card-badge').innerHTML = '<i class="fas fa-check"></i> Assigned';
+      const h = hhMap[id];
+      if (h) autofillFromHousehold(h);
+    }
+  };
+
+  window.hhGoPage = hhGoPage;
+
+  if (sitioSelect) {
+    sitioSelect.addEventListener('change', applyPurokFilter);
+  }
+
+  fetchHouseholds(barangayInput.value);
+})();
 </script>
 @endsection

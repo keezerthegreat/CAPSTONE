@@ -320,7 +320,7 @@ tbody tr:last-child td { border-bottom:none; }
 </a>
 
 @if(auth()->user()->role === 'admin')
-<form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" style="display:inline">
+<form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" style="display:inline" onsubmit="return confirmDelete(this, 'Delete certificate for {{ $cert->resident_name }}? This cannot be undone.')">
 @csrf
 @method('DELETE')
 <button type="submit" class="btn btn-delete">

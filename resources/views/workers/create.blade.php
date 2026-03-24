@@ -187,13 +187,21 @@
                 <label>Position</label>
                 <select name="position" required>
                     <option value="">Select Position</option>
-                    <option>Barangay Captain</option>
-                    <option>Kagawad</option>
+                    <option>Punong Barangay</option>
+                    <option>Sangguniang Barangay Member</option>
                     <option>Secretary</option>
                     <option>Treasurer</option>
+                    <option>Clerk 1</option>
+                    <option>Clerk 2</option>
+                    <option>Clerk 3</option>
+                    <option>Lupon Member</option>
                     <option>Tanod</option>
-                    <option>Health Worker</option>
-                    <option>Utility Worker</option>
+                    <option>Child Development Worker</option>
+                    <option>Barangay Nutrition Scholar</option>
+                    <option>Driver</option>
+                    <option>SK Chairperson</option>
+                    <option>SK Member</option>
+                    <option>Utility</option>
                 </select>
             </div>
 
@@ -206,9 +214,8 @@
                 <label>Employment Status</label>
                 <select name="employment_status">
                     <option value="">Select Status</option>
-                    <option>Regular</option>
-                    <option>Job Order</option>
-                    <option>Volunteer</option>
+                    <option>Appointed Official</option>
+                    <option>Elected Official</option>
                 </select>
             </div>
         </div>

@@ -236,7 +236,12 @@ function openResidentPreview(id) {
       if (r.household) {
         const h = r.household;
         const headName = [h.head_last_name, h.head_first_name].filter(Boolean).join(', ') + (h.head_middle_name ? ' ' + h.head_middle_name.charAt(0) + '.' : '');
-        document.getElementById('rpp-hh-num').textContent     = 'HH #' + (h.household_number || '—');
+        const hhNumEl = document.getElementById('rpp-hh-num');
+        hhNumEl.textContent = h.household_number || '—';
+        hhNumEl.style.cursor = 'pointer';
+        hhNumEl.style.textDecoration = 'underline';
+        hhNumEl.title = 'View household';
+        hhNumEl.onclick = () => { window.location.href = `/households/${h.id}`; };
         document.getElementById('rpp-hh-head').textContent    = headName || '—';
         document.getElementById('rpp-hh-sitio').textContent   = v(h.sitio);
         document.getElementById('rpp-hh-members').textContent = h.member_count ? h.member_count + ' member(s)' : '—';

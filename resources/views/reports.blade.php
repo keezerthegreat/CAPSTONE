@@ -224,6 +224,7 @@
       <div class="tab" onclick="switchTab('voters')">Voters</div>
       <div class="tab" onclick="switchTab('solo-parents')">Solo Parents</div>
       <div class="tab" onclick="switchTab('minors')">Minors</div>
+      <div class="tab" onclick="switchTab('sectors')">Sectors</div>
     </div>
 
     <!-- Population Summary Tab -->
@@ -475,17 +476,121 @@
       </div>
     </div>
 
+    <!-- Sectors Tab -->
+    <div id="tab-sectors" class="tab-content">
+      <div class="print-section-title">VIII. Sector Summary</div>
+
+      {{-- Sector Overview Breakdown --}}
+      <div class="card-body" style="border-bottom:1px solid var(--border)">
+        <div style="font-weight:700;color:var(--primary);margin-bottom:14px;font-size:13px"><i class="fas fa-layer-group" style="margin-right:6px"></i>Sector Overview</div>
+        @php
+          $sectorOverview = [
+            ['label'=>'Labor Force',          'count'=>$laborForce, 'color'=>'#3b82f6'],
+            ['label'=>'Unemployed',            'count'=>$unemployed,  'color'=>'#ef4444'],
+            ['label'=>'OFW',                   'count'=>$ofw,         'color'=>'#06b6d4'],
+            ['label'=>'Indigenous',            'count'=>$indigenous,  'color'=>'#a16207'],
+            ['label'=>'Out of School Child',   'count'=>$osc,         'color'=>'#9333ea'],
+            ['label'=>'Out of School Youth',   'count'=>$osy,         'color'=>'#7c3aed'],
+            ['label'=>'Student',               'count'=>$student,     'color'=>'#0891b2'],
+          ];
+          $maxSector = max(array_column($sectorOverview, 'count')) ?: 1;
+        @endphp
+        <table class="breakdown-table">
+          @foreach($sectorOverview as $s)
+          <tr>
+            <td class="label-col">{{ $s['label'] }}</td>
+            <td class="bar-col"><div class="prog-bar"><div class="prog-fill" style="width:{{ round(($s['count']/$maxSector)*100) }}%;background:{{ $s['color'] }}"></div></div></td>
+            <td class="value-col">{{ $s['count'] }}</td>
+            <td class="pct-col">{{ $totalResidents > 0 ? round(($s['count']/$totalResidents)*100,1) : 0 }}%</td>
+          </tr>
+          @endforeach
+        </table>
+      </div>
+
+      {{-- Sector sub-navigation --}}
+      <div style="padding:14px 20px 0;background:#f8fafc;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border)" id="sector-subnav">
+        @foreach([
+          ['key'=>'labor-force',  'label'=>'Labor Force'],
+          ['key'=>'unemployed',   'label'=>'Unemployed'],
+          ['key'=>'ofw',          'label'=>'OFW'],
+          ['key'=>'indigenous',   'label'=>'Indigenous'],
+          ['key'=>'osc',          'label'=>'Out of School Child'],
+          ['key'=>'osy',          'label'=>'Out of School Youth'],
+          ['key'=>'student',      'label'=>'Student'],
+        ] as $s)
+        <button onclick="switchSector('{{ $s['key'] }}')" id="sbtn-{{ $s['key'] }}"
+          style="padding:6px 14px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;border-bottom:none;background:#e8eef5;color:var(--muted);font-family:inherit;margin-bottom:0;transition:all .15s">
+          {{ $s['label'] }}
+        </button>
+        @endforeach
+      </div>
+
+      {{-- Sector list panels --}}
+      @php
+        $sectorLists = [
+          'labor-force' => ['list' => $laborForceList, 'count' => $laborForce, 'label' => 'Labor Force'],
+          'unemployed'  => ['list' => $unemployedList,  'count' => $unemployed,  'label' => 'Unemployed'],
+          'ofw'         => ['list' => $ofwList,         'count' => $ofw,         'label' => 'OFW'],
+          'indigenous'  => ['list' => $indigenousList,  'count' => $indigenous,  'label' => 'Indigenous'],
+          'osc'         => ['list' => $oscList,         'count' => $osc,         'label' => 'Out of School Child'],
+          'osy'         => ['list' => $osyList,         'count' => $osy,         'label' => 'Out of School Youth'],
+          'student'     => ['list' => $studentList,     'count' => $student,     'label' => 'Student'],
+        ];
+      @endphp
+      @foreach($sectorLists as $key => $sector)
+      <div id="sector-panel-{{ $key }}" class="sector-panel" style="display:none">
+        <div style="padding:14px 20px;font-size:13px;color:var(--muted)">
+          Total: <strong style="color:var(--primary)">{{ $sector['count'] }}</strong> {{ $sector['label'] }} resident(s)
+        </div>
+        <table class="list-table">
+          <thead><tr><th>#</th><th>Full Name</th><th>Age</th><th>Sex</th><th>Address</th><th>Contact</th></tr></thead>
+          <tbody>
+            @forelse($sector['list'] as $i => $r)
+            <tr>
+              <td style="color:var(--muted)">{{ $i+1 }}</td>
+              <td><strong>{{ $r->last_name }}, {{ $r->first_name }}{{ $r->middle_name ? ' '.$r->middle_name : '' }}</strong></td>
+              <td>{{ $r->age }} yrs</td>
+              <td>{{ $r->gender }}</td>
+              <td>{{ $r->address ?? '—' }}</td>
+              <td>{{ $r->contact_number ?? '—' }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No {{ $sector['label'] }} residents found.</td></tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+      @endforeach
+    </div>
+
   </div>
 </div>
 
 <script>
-const LIST_TABS = ['tab-seniors', 'tab-pwd', 'tab-voters', 'tab-minors'];
+const LIST_TABS = ['tab-seniors', 'tab-pwd', 'tab-voters', 'tab-minors', 'tab-sectors'];
 
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
+  if (name === 'sectors' && !document.querySelector('.sector-panel[style*="block"]')) {
+    switchSector('labor-force');
+  }
+}
+
+const sectorKeys = ['labor-force','unemployed','ofw','indigenous','osc','osy','student'];
+function switchSector(key) {
+  sectorKeys.forEach(k => {
+    const panel = document.getElementById('sector-panel-' + k);
+    const btn   = document.getElementById('sbtn-' + k);
+    if (panel) panel.style.display = 'none';
+    if (btn) { btn.style.background = '#e8eef5'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'transparent'; }
+  });
+  const active = document.getElementById('sector-panel-' + key);
+  const activeBtn = document.getElementById('sbtn-' + key);
+  if (active) active.style.display = 'block';
+  if (activeBtn) { activeBtn.style.background = '#fff'; activeBtn.style.color = 'var(--primary)'; activeBtn.style.borderColor = 'var(--border)'; }
 }
 
 function doPrint() {

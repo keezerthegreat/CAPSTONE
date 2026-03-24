@@ -232,7 +232,7 @@ tbody tr:last-child td { border-bottom:none; }
             </td>
             <td>
               @if($hh->latitude && $hh->longitude)
-                <span style="color:#16a34a;font-size:12px"><i class="fas fa-map-marker-alt"></i> Pinned</span>
+                <a href="{{ route('households.map') }}?focus={{ $hh->id }}" style="color:#16a34a;font-size:12px;text-decoration:none;font-weight:600" title="View on map"><i class="fas fa-map-marker-alt"></i> Pinned</a>
               @else
                 <span style="color:var(--muted);font-size:12px">Not pinned</span>
               @endif

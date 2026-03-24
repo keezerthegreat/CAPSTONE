@@ -302,7 +302,7 @@ tbody tr:last-child td { border-bottom:none; }
 </a>
 
 @if(auth()->user()->role === 'admin')
-<form action="{{ route('clearance.destroy', $clearance->id) }}" method="POST" style="display:inline">
+<form action="{{ route('clearance.destroy', $clearance->id) }}" method="POST" style="display:inline" onsubmit="return confirmDelete(this, 'Delete clearance for {{ $clearance->resident_name }}? This cannot be undone.')">
 @csrf
 @method('DELETE')
 <button type="submit" class="btn btn-delete">

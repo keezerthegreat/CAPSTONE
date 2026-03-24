@@ -70,6 +70,8 @@ class FamilyController extends Controller
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);
+        // Capture the head's family_role before stripping from memberData
+        $headFamilyRole = $request->input('member_data.'.$request->head_resident_id) ?: null;
         // Strip the head from memberData to prevent double-counting
         $memberData = collect($request->input('member_data', []))
             ->reject(fn ($role, $residentId) => (int) $residentId === (int) $request->head_resident_id)
@@ -104,8 +106,8 @@ class FamilyController extends Controller
             'notes' => $request->notes,
         ]);
 
-        // Always set family_id on the head resident
-        Resident::where('id', $resident->id)->update(['family_id' => $family->id]);
+        // Always set family_id on the head resident, preserving their family_role
+        Resident::where('id', $resident->id)->update(['family_id' => $family->id, 'family_role' => $headFamilyRole]);
 
         foreach ($memberData as $residentId => $role) {
             Resident::where('id', $residentId)->update([
@@ -153,6 +155,8 @@ class FamilyController extends Controller
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);
+        // Capture the head's family_role before stripping from memberData
+        $headFamilyRole = $request->input('member_data.'.$request->head_resident_id) ?: null;
         // Strip the head from memberData to prevent double-counting
         $memberData = collect($request->input('member_data', []))
             ->reject(fn ($role, $residentId) => (int) $residentId === (int) $request->head_resident_id)
@@ -162,8 +166,8 @@ class FamilyController extends Controller
         // Clear old member links
         Resident::where('family_id', $family->id)->update(['family_id' => null, 'family_role' => null]);
 
-        // Always set family_id on the head resident
-        Resident::where('id', $resident->id)->update(['family_id' => $family->id]);
+        // Always set family_id on the head resident, preserving their family_role
+        Resident::where('id', $resident->id)->update(['family_id' => $family->id, 'family_role' => $headFamilyRole]);
 
         // Re-assign with roles
         foreach ($memberData as $residentId => $role) {

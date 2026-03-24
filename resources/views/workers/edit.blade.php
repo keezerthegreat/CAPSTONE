@@ -154,7 +154,7 @@
 
             <div class="form-group">
                 <label>Birthdate</label>
-                <input type="date" name="birthdate" value="{{ old('birthdate', $worker->birthdate) }}">
+                <input type="date" name="birthdate" value="{{ old('birthdate', $worker->birthdate?->format('Y-m-d')) }}">
             </div>
 
             <div class="form-group">
@@ -203,7 +203,7 @@
                 <label>Position</label>
                 <select name="position" required>
                     <option value="">Select Position</option>
-                    @foreach(['Barangay Captain','Kagawad','Secretary','Treasurer','Tanod','Health Worker','Utility Worker'] as $pos)
+                    @foreach(['Punong Barangay','Sangguniang Barangay Member','Secretary','Treasurer','Clerk 1','Clerk 2','Clerk 3','Lupon Member','Tanod','Child Development Worker','Barangay Nutrition Scholar','Driver','SK Chairperson','SK Member','Utility'] as $pos)
                         <option {{ old('position', $worker->position) == $pos ? 'selected' : '' }}>{{ $pos }}</option>
                     @endforeach
                 </select>
@@ -211,14 +211,14 @@
 
             <div class="form-group">
                 <label>Date Hired</label>
-                <input type="date" name="date_hired" value="{{ old('date_hired', $worker->date_hired) }}">
+                <input type="date" name="date_hired" value="{{ old('date_hired', $worker->date_hired?->format('Y-m-d')) }}">
             </div>
 
             <div class="form-group">
                 <label>Employment Status</label>
                 <select name="employment_status">
                     <option value="">Select Status</option>
-                    @foreach(['Regular','Job Order','Volunteer'] as $status)
+                    @foreach(['Appointed Official','Elected Official'] as $status)
                         <option {{ old('employment_status', $worker->employment_status) == $status ? 'selected' : '' }}>{{ $status }}</option>
                     @endforeach
                 </select>
