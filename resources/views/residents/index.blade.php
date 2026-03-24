@@ -333,7 +333,9 @@ tbody tr:last-child td { border-bottom: none; }
       $fSearch = $filters['search'] ?? '';
       $fSector = $filters['sector'] ?? '';
       $fCitizenship = $filters['citizenship'] ?? '';
+      $fResidentStatus = $filters['residentStatus'] ?? '';
       $ageLabel = ($fAgeMin || $fAgeMax) ? ($fAgeMin ?? '0').'–'.($fAgeMax ?? '∞').' yrs' : 'Age Range';
+      $residentStatusLabel = match($fResidentStatus) { 'active'=>'Active','deceased'=>'Deceased','transferred'=>'Transferred',default=>'Status' };
       $classLabel = match($fClass) { 'senior'=>'Senior Citizen','pwd'=>'PWD','voter'=>'Registered Voter','solo_parent'=>'Solo Parent',default=>'Classification' };
       $sectorLabel = match($fSector) { 'labor_force'=>'Labor Force','unemployed'=>'Unemployed','ofw'=>'OFW','indigenous'=>'Indigenous','out_of_school_child'=>'Out of School Child','out_of_school_youth'=>'Out of School Youth','student'=>'Student',default=>'Sector' };
     @endphp
@@ -450,6 +452,22 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
+        <!-- Status -->
+        <div class="flt-wrap" id="wrap-resident_status">
+          <button class="flt-btn {{ $fResidentStatus ? 'active' : '' }}" id="btn-resident_status" onclick="toggleFlt('resident_status')">
+            <i class="fas fa-circle-dot"></i>
+            <span id="lbl-resident_status">{{ $residentStatusLabel }}</span>
+            <i class="fas fa-chevron-down flt-caret" id="caret-resident_status" style="{{ $fResidentStatus ? 'display:none' : '' }}"></i>
+            <span class="flt-x" id="x-resident_status" style="{{ $fResidentStatus ? '' : 'display:none' }}" onclick="event.stopPropagation();applyFilter('resident_status','')">×</span>
+          </button>
+          <div class="flt-dropdown" id="dd-resident_status">
+            <div class="flt-option {{ !$fResidentStatus ? 'selected' : '' }}" onclick="applyFilter('resident_status','')">All</div>
+            <div class="flt-option {{ $fResidentStatus==='active' ? 'selected' : '' }}" onclick="applyFilter('resident_status','active')">Active</div>
+            <div class="flt-option {{ $fResidentStatus==='deceased' ? 'selected' : '' }}" onclick="applyFilter('resident_status','deceased')">Deceased</div>
+            <div class="flt-option {{ $fResidentStatus==='transferred' ? 'selected' : '' }}" onclick="applyFilter('resident_status','transferred')">Transferred</div>
+          </div>
+        </div>
+
         <!-- Age Range -->
         <div class="flt-wrap" id="wrap-age">
           <button class="flt-btn {{ ($fAgeMin || $fAgeMax) ? 'active' : '' }}" id="ageFilterBtn" onclick="toggleAgePopup()">
@@ -473,7 +491,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
-        @if($fGender || $fCivil || $fPurok || $fClass || $fSector || $fCitizenship || $fAgeMin || $fAgeMax || $fSearch)
+        @if($fGender || $fCivil || $fPurok || $fClass || $fSector || $fCitizenship || $fResidentStatus || $fAgeMin || $fAgeMax || $fSearch)
         <a href="{{ route('residents.index') }}" class="flt-btn" style="margin-left:auto;text-decoration:none;color:var(--muted);border-color:var(--border);white-space:nowrap;">
           <i class="fas fa-times"></i> Clear Filters
         </a>
@@ -1137,7 +1155,7 @@ document.getElementById('residentModal').addEventListener('click', function(e) {
 });
 
 // Filter state
-const fltKeys = ['gender', 'civil', 'sitio', 'class', 'citizenship', 'sector'];
+const fltKeys = ['gender', 'civil', 'sitio', 'class', 'citizenship', 'sector', 'resident_status'];
 
 function positionDropdown(el, btn) {
   const r = btn.getBoundingClientRect();
