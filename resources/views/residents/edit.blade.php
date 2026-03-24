@@ -85,11 +85,16 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
               <option value="Other" {{ $resident->gender == 'Other' ? 'selected' : '' }}>Other</option>
             </select>
           </div>
+
           <div class="form-group">
             <label>Date of Birth *</label>
             <input type="date" name="birthdate" id="birthdate" value="{{ old('birthdate', $resident->birthdate) }}" required>
           </div>
           <input type="hidden" name="age" id="age" value="{{ old('age', $resident->age) }}">
+          <div class="form-group">
+            <label>Place of Birth</label>
+            <input type="text" name="place_of_birth" value="{{ old('place_of_birth', $resident->place_of_birth) }}" placeholder="e.g. Ormoc City, Leyte">
+          </div>
           <div class="form-group">
             <label>Civil Status</label>
             <select name="civil_status">

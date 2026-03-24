@@ -47,6 +47,7 @@ class Resident extends Model
         'suffix',
         'gender',
         'birthdate',
+        'place_of_birth',
         'age',
         'civil_status',
         'nationality',

@@ -532,7 +532,7 @@ tbody tr:last-child td { border-bottom: none; }
                 }
             }
           @endphp
-          <tr ondblclick='openResidentModal(@json($resident))' data-age="{{ $resident->age ?? '' }}" data-civil="{{ strtolower($resident->civil_status ?? '') }}" data-sitio="{{ $trSitio }}">
+          <tr ondblclick='openResidentPreview({{ $resident->id }})' data-age="{{ $resident->age ?? '' }}" data-civil="{{ strtolower($resident->civil_status ?? '') }}" data-sitio="{{ $trSitio }}">
 
             @if(auth()->user()->role == 'admin')
             <td onclick="event.stopPropagation()">
@@ -573,7 +573,7 @@ tbody tr:last-child td { border-bottom: none; }
             <td>
               <div class="action-btns">
 
-                <button onclick='event.stopPropagation();openResidentModal(@json($resident))' class="btn btn-sm btn-view">
+                <button onclick='event.stopPropagation();openResidentPreview({{ $resident->id }})' class="btn btn-sm btn-view">
                   <i class="fas fa-eye"></i> View
                 </button>
 
@@ -1330,5 +1330,7 @@ function submitBulkDelete() {
     }
 }
 </script>
+
+@include('partials.resident-preview-modal')
 
 @endsection

@@ -32,6 +32,8 @@ tbody tr:last-child td { border-bottom:none; }
 tbody tr:hover td { background:#f8fafc; }
 .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
 .badge-head { background:#fef3c7; color:#92400e; }
+.btn-view { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; text-decoration:none; transition:background .15s; }
+.btn-view:hover { background:#dbeafe; }
 </style>
 
 <div class="bidb-wrap">
@@ -105,6 +107,7 @@ tbody tr:hover td { background:#f8fafc; }
           <th>Sex / Age</th>
           <th>Civil Status</th>
           <th>Role</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -112,10 +115,10 @@ tbody tr:hover td { background:#f8fafc; }
         <tr>
           <td style="color:var(--muted);font-size:12px">{{ $i + 1 }}</td>
           <td>
-            <div style="font-weight:600">{{ $member->last_name }}, {{ $member->first_name }} {{ $member->middle_name }}</div>
+            <div style="font-weight:600">{{ $member->last_name }}, {{ $member->first_name }}{{ $member->middle_name ? ' '.$member->middle_name : '' }}</div>
             <div style="font-size:11px;color:var(--muted)">ID #{{ $member->id }}</div>
           </td>
-          <td>{{ $member->gender }} / {{ $member->age }} yrs</td>
+          <td>{{ $member->gender ?? '—' }} / {{ $member->age ?? '—' }} yrs</td>
           <td>{{ $member->civil_status ?? '—' }}</td>
           <td>
             @if($member->id === $family->head_resident_id)
@@ -123,6 +126,11 @@ tbody tr:hover td { background:#f8fafc; }
             @else
               <span style="color:var(--muted);font-size:12px">Member</span>
             @endif
+          </td>
+          <td>
+            <a href="{{ route('residents.show', $member->id) }}" class="btn-view">
+              <i class="fas fa-eye"></i> View
+            </a>
           </td>
         </tr>
         @endforeach

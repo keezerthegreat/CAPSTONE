@@ -168,6 +168,7 @@
         <div class="info-item"><div class="label">Suffix</div><div class="value">{{ $resident->suffix ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Sex</div><div class="value">{{ $resident->gender }}</div></div>
         <div class="info-item"><div class="label">Date of Birth</div><div class="value">{{ \Carbon\Carbon::parse($resident->birthdate)->format('F d, Y') }}</div></div>
+        <div class="info-item"><div class="label">Place of Birth</div><div class="value">{{ $resident->place_of_birth ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Age</div><div class="value">{{ $resident->age }} years old</div></div>
         <div class="info-item"><div class="label">Civil Status</div><div class="value">{{ $resident->civil_status ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Citizenship</div><div class="value">{{ $resident->nationality ?? '—' }}</div></div>

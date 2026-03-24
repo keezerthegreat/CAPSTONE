@@ -119,6 +119,11 @@ input::placeholder { color:#94a3b8; }
           <input type="date" name="birthdate" id="birthdate" value="{{ old('birthdate') }}" required>
         </div>
         <input type="hidden" name="age" id="age" value="{{ old('age') }}">
+        
+        <div class="form-group">
+          <label>Place of Birth</label>
+          <input type="text" name="place_of_birth" value="{{ old('place_of_birth') }}" placeholder="e.g. Ormoc City, Leyte">
+        </div>
 
         <div class="form-group">
           <label>Civil Status</label>

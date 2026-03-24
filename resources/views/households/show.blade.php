@@ -28,6 +28,8 @@
 .btn-edit { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
 .btn-outline { background:#fff; color:var(--primary); border:1.5px solid var(--primary); }
 #map { height:300px; border-radius:10px; border:1.5px solid var(--border); }
+.btn-view { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; text-decoration:none; transition:background .15s; }
+.btn-view:hover { background:#dbeafe; }
 </style>
 
 <div class="bidb-wrap">
@@ -157,6 +159,7 @@
               <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Sex / Age</th>
               <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Civil Status</th>
               <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Role</th>
+              <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -184,6 +187,11 @@
                     @else
                       <span style="color:var(--muted);font-size:12px">Member</span>
                     @endif
+                  </td>
+                  <td style="padding:10px 12px">
+                    <a href="{{ route('residents.show', $member->id) }}" class="btn-view">
+                      <i class="fas fa-eye"></i> View
+                    </a>
                   </td>
                 </tr>
               @endforeach
