@@ -171,7 +171,7 @@
         <div class="info-item"><div class="label">Age</div><div class="value">{{ $resident->age }} years old</div></div>
         <div class="info-item"><div class="label">Civil Status</div><div class="value">{{ $resident->civil_status ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Citizenship</div><div class="value">{{ $resident->nationality ?? '—' }}</div></div>
-        <div class="info-item"><div class="label">Type of Resident</div><div class="value">{{ $resident->resident_type ?? '—' }}</div></div>
+        <div class="info-item"><div class="label">Inhabitant</div><div class="value">{{ $resident->resident_type ?? '—' }}</div></div>
         <div class="info-item"><div class="label">Religion</div><div class="value">{{ $resident->religion ?? '—' }}</div></div>
       </div>
     </div>
@@ -248,6 +248,38 @@
     </div>
   </div>
   @endif
+
+  <!-- Sector Classifications -->
+  <div class="card">
+    <div class="card-header"><div class="card-title"><i class="fas fa-tags"></i> Sector Classifications</div></div>
+    <div class="card-body">
+      @php
+        $sectors = [
+          ['field' => 'is_senior',              'label' => 'Senior Citizen',       'color' => '#92400e', 'bg' => '#fef3c7'],
+          ['field' => 'is_pwd',                 'label' => 'PWD',                  'color' => '#991b1b', 'bg' => '#fee2e2'],
+          ['field' => 'is_voter',               'label' => 'Registered Voter',     'color' => '#6b21a8', 'bg' => '#f3e8ff'],
+          ['field' => 'is_solo_parent',         'label' => 'Solo Parent',          'color' => '#065f46', 'bg' => '#d1fae5'],
+          ['field' => 'is_labor_force',         'label' => 'Labor Force',          'color' => '#1e40af', 'bg' => '#dbeafe'],
+          ['field' => 'is_unemployed',          'label' => 'Unemployed',           'color' => '#9a3412', 'bg' => '#ffedd5'],
+          ['field' => 'is_ofw',                 'label' => 'OFW',                  'color' => '#164e63', 'bg' => '#cffafe'],
+          ['field' => 'is_indigenous',          'label' => 'Indigenous Person',    'color' => '#713f12', 'bg' => '#fef9c3'],
+          ['field' => 'is_out_of_school_child', 'label' => 'Out of School Child',  'color' => '#831843', 'bg' => '#fce7f3'],
+          ['field' => 'is_out_of_school_youth', 'label' => 'Out of School Youth',  'color' => '#4c1d95', 'bg' => '#ede9fe'],
+          ['field' => 'is_student',             'label' => 'Student',              'color' => '#134e4a', 'bg' => '#ccfbf1'],
+        ];
+        $active = array_filter($sectors, fn($s) => $resident->{$s['field']});
+      @endphp
+      @if(count($active))
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          @foreach($active as $sector)
+            <span class="badge" style="background:{{ $sector['bg'] }};color:{{ $sector['color'] }}">{{ $sector['label'] }}</span>
+          @endforeach
+        </div>
+      @else
+        <p style="color:var(--muted);font-size:13px;margin:0">No sector classifications assigned.</p>
+      @endif
+    </div>
+  </div>
 
 </div>
 

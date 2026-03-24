@@ -411,6 +411,34 @@ class ResidentController extends Controller
         return redirect()->route('residents.index')->with('success', $msg);
     }
 
+    public function suggest(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $q = strtolower(trim($request->get('q', '')));
+
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $residents = Resident::where('status', 'approved')
+            ->where(function ($query) use ($q) {
+                $query->whereRaw('LOWER(first_name) like ?', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(last_name) like ?', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(address) like ?', ["%{$q}%"]);
+            })
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->limit(8)
+            ->get(['first_name', 'last_name', 'address']);
+
+        $suggestions = $residents->map(fn ($r) => [
+            'label' => $r->last_name.', '.$r->first_name,
+            'value' => $r->last_name.', '.$r->first_name,
+            'meta' => $r->address,
+        ]);
+
+        return response()->json($suggestions);
+    }
+
     public function location()
     {
         $households = \App\Models\Household::whereNotNull('latitude')
@@ -424,22 +452,27 @@ class ResidentController extends Controller
     public function bulkDestroy(Request $request)
     {
         if ($request->input('select_all')) {
-            $residents = Resident::all();
+            $query = Resident::query();
         } else {
             $ids = $request->input('ids', []);
             if (empty($ids)) {
                 return redirect()->back()->with('error', 'No residents selected.');
             }
-            $residents = Resident::whereIn('id', $ids)->get();
+            $query = Resident::whereIn('id', $ids);
         }
 
+        $residents = $query->get(['id', 'household_id', 'first_name', 'last_name']);
         $householdIds = $residents->pluck('household_id')->filter()->unique();
         $count = $residents->count();
 
-        foreach ($residents as $resident) {
-            ActivityLog::log('deleted', 'Resident', "Bulk deleted resident: {$resident->first_name} {$resident->last_name}");
-            $resident->delete();
+        if ($count === 0) {
+            return redirect()->back()->with('error', 'No residents found.');
         }
+
+        $residentIds = $residents->pluck('id')->all();
+        Resident::whereIn('id', $residentIds)->delete();
+
+        ActivityLog::log('deleted', 'Resident', "Bulk deleted {$count} resident(s).");
 
         foreach ($householdIds as $householdId) {
             $remaining = Resident::where('household_id', $householdId)->where('status', 'approved')->count();

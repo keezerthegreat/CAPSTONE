@@ -28,7 +28,7 @@ class ClearanceController extends Controller
     {
         $request->validate([
             'resident_name' => 'required|string|max:255',
-            'certificate_ty     pe' => 'required|string|max:255',
+            'certificate_type' => 'required|string|max:255',
             'civil_status' => 'nullable|string|max:50',
             'purok' => 'nullable|string|max:255',
             'requestor' => 'nullable|string|max:255',

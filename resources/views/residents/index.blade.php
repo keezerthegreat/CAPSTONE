@@ -26,7 +26,7 @@
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead tr { background: #f8fafc; border-bottom: 2px solid var(--border); }
 th { padding: 12px 16px; text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
-td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
 tbody tr { cursor:pointer; }
 tbody tr:hover { background: #f0f7ff; }
 tbody tr:last-child td { border-bottom: none; }
@@ -53,25 +53,26 @@ tbody tr:last-child td { border-bottom: none; }
 .btn-view   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 .btn-edit   { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 .btn-delete { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
-.action-btns { display: flex; gap: 5px; }
+.action-btns { display: flex; gap: 5px; justify-content: flex-end; }
 .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
 .alert-success { background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; }
 .modal-backdrop.open { display:flex; }
-.modal { background:#fff; border-radius:16px; width:600px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
-.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal { background:var(--bg,#f1f5f9); border-radius:16px; width:680px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); background:var(--card,#fff); border-radius:16px 16px 0 0; display:flex; align-items:center; justify-content:space-between; }
 .modal-header h2 { font-size:16px; font-weight:700; color:var(--primary); margin:0; }
 .modal-close { background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1; padding:0; }
-.modal-body { padding:24px; }
-.modal-section { margin-bottom:20px; }
-.modal-section-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; }
+.modal-body { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.modal-section { background:var(--card,#fff); border-radius:12px; border:1px solid var(--border); overflow:hidden; }
+.modal-section-title { font-size:13px; font-weight:700; color:var(--primary); padding:12px 16px; border-bottom:1px solid var(--border); background:#f8fafc; display:flex; align-items:center; gap:8px; }
+.modal-section-body { padding:16px; }
 .mgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-.mi { display:flex; flex-direction:column; gap:3px; }
-.mi .ml { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
-.mi .mv { font-size:13px; color:var(--text); font-weight:500; background:#f8fafc; border:1px solid var(--border); border-radius:7px; padding:7px 10px; }
+.mi { display:flex; flex-direction:column; gap:5px; }
+.mi .ml { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.mi .mv { font-size:14px; color:var(--text); font-weight:400; background:#fff; border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; min-height:38px; }
 .mi.span2 { grid-column:span 2; }
 .mi.span3 { grid-column:span 3; }
-.modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.modal-footer { padding:16px 24px; border-top:1px solid var(--border); background:var(--card,#fff); border-radius:0 0 16px 16px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
 /* ── RBI Print Frame ── */
 #rbi-print-frame { display:none; }
 @media print {
@@ -209,7 +210,7 @@ tbody tr:last-child td { border-bottom: none; }
             <th>Civil Status</th>
             <th>Address</th>
             <th>Submitted</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -375,7 +376,7 @@ tbody tr:last-child td { border-bottom: none; }
           </button>
           <div class="flt-dropdown" id="dd-civil">
             <div class="flt-option {{ !$fCivil ? 'selected' : '' }}" onclick="applyFilter('civil','')">All</div>
-           @foreach(['single','married','widowed','separated','annulled','common law','divorced','live-in'] as $cv)
+           @foreach(['single','married','widowed','separated','annulled','common law (live-in)','divorced'] as $cv)
 <div class="flt-option {{ strtolower($fCivil)===$cv ? 'selected' : '' }}" onclick="applyFilter('civil','{{ $cv }}')">{{ ucwords($cv) }}</div>
 @endforeach
           </div>
@@ -501,8 +502,7 @@ tbody tr:last-child td { border-bottom: none; }
             <th>Civil Status</th>
             <th>Address</th>
             <th>Classifications</th>
-            <th>Sector</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
           </tr>
         </thead>
 
@@ -550,19 +550,6 @@ tbody tr:last-child td { border-bottom: none; }
               @if($resident->is_voter)<span class="badge" style="background:#f3e8ff;color:#6b21a8">Voter</span>@endif
               @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
               @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter && !$resident->is_solo_parent)
-              <span style="color:var(--muted);font-size:12px">—</span>
-              @endif
-            </td>
-
-            <td>
-              @if($resident->is_labor_force)<span class="badge" style="background:#e0f2fe;color:#075985">Labor Force</span>@endif
-              @if($resident->is_unemployed)<span class="badge" style="background:#fee2e2;color:#991b1b">Unemployed</span>@endif
-              @if($resident->is_ofw)<span class="badge" style="background:#d1fae5;color:#065f46">OFW</span>@endif
-              @if($resident->is_indigenous)<span class="badge" style="background:#fdf4ff;color:#6b21a8">Indigenous</span>@endif
-              @if($resident->is_out_of_school_child)<span class="badge" style="background:#fff7ed;color:#9a3412">OSC</span>@endif
-              @if($resident->is_out_of_school_youth)<span class="badge" style="background:#fff7ed;color:#9a3412">OSY</span>@endif
-              @if($resident->is_student)<span class="badge" style="background:#eff6ff;color:#1e40af">Student</span>@endif
-              @if(!$resident->is_labor_force && !$resident->is_unemployed && !$resident->is_ofw && !$resident->is_indigenous && !$resident->is_out_of_school_child && !$resident->is_out_of_school_youth && !$resident->is_student)
               <span style="color:var(--muted);font-size:12px">—</span>
               @endif
             </td>
@@ -832,50 +819,65 @@ tbody tr:last-child td { border-bottom: none; }
     <div class="modal-body">
 
       <div class="modal-section">
-        <div class="modal-section-title"><i class="fas fa-user"></i> Personal Information</div>
-        <div id="rm-badges" style="margin-bottom:12px"></div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Last Name</span><span class="mv" id="rm-last"></span></div>
-          <div class="mi"><span class="ml">First Name</span><span class="mv" id="rm-first"></span></div>
-          <div class="mi"><span class="ml">Middle Name</span><span class="mv" id="rm-middle"></span></div>
-          <div class="mi"><span class="ml">Sex</span><span class="mv" id="rm-gender"></span></div>
-          <div class="mi"><span class="ml">Date of Birth</span><span class="mv" id="rm-birth"></span></div>
-          <div class="mi"><span class="ml">Age</span><span class="mv" id="rm-age"></span></div>
-          <div class="mi"><span class="ml">Civil Status</span><span class="mv" id="rm-civil"></span></div>
-          <div class="mi"><span class="ml">Citizenship</span><span class="mv" id="rm-nat"></span></div>
-          <div class="mi"><span class="ml">Type of Resident</span><span class="mv" id="rm-restype"></span></div>
-          <div class="mi"><span class="ml">Religion</span><span class="mv" id="rm-rel"></span></div>
+        <div class="modal-section-title"><i class="fas fa-id-card"></i> Personal Information</div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Last Name</span><span class="mv" id="rm-last"></span></div>
+            <div class="mi"><span class="ml">First Name</span><span class="mv" id="rm-first"></span></div>
+            <div class="mi"><span class="ml">Middle Name</span><span class="mv" id="rm-middle"></span></div>
+            <div class="mi"><span class="ml">Suffix</span><span class="mv" id="rm-suffix"></span></div>
+            <div class="mi"><span class="ml">Sex</span><span class="mv" id="rm-gender"></span></div>
+            <div class="mi"><span class="ml">Date of Birth</span><span class="mv" id="rm-birth"></span></div>
+            <div class="mi"><span class="ml">Age</span><span class="mv" id="rm-age"></span></div>
+            <div class="mi"><span class="ml">Civil Status</span><span class="mv" id="rm-civil"></span></div>
+            <div class="mi"><span class="ml">Citizenship</span><span class="mv" id="rm-nat"></span></div>
+            <div class="mi"><span class="ml">Inhabitant</span><span class="mv" id="rm-restype"></span></div>
+            <div class="mi"><span class="ml">Religion</span><span class="mv" id="rm-rel"></span></div>
+          </div>
         </div>
       </div>
 
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-phone"></i> Contact Information</div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Contact Number</span><span class="mv" id="rm-contact"></span></div>
-          <div class="mi"><span class="ml">Email</span><span class="mv" id="rm-email"></span></div>
-          <div class="mi"><span class="ml">PhilSys Card No.</span><span class="mv" id="rm-philsys"></span></div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Contact Number</span><span class="mv" id="rm-contact"></span></div>
+            <div class="mi"><span class="ml">Email</span><span class="mv" id="rm-email"></span></div>
+            <div class="mi"><span class="ml">PhilSys Card No.</span><span class="mv" id="rm-philsys"></span></div>
+          </div>
         </div>
       </div>
 
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Province</span><span class="mv" id="rm-prov"></span></div>
-          <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="rm-city"></span></div>
-          <div class="mi"><span class="ml">Barangay</span><span class="mv" id="rm-brgy"></span></div>
-          <div class="mi"><span class="ml">Purok</span><span class="mv" id="rm-purok"></span></div>
-          <div class="mi"><span class="ml">Street / House No.</span><span class="mv" id="rm-street"></span></div>
-          <div class="mi span3"><span class="ml">Complete Address</span><span class="mv" id="rm-addr"></span></div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Province</span><span class="mv" id="rm-prov"></span></div>
+            <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="rm-city"></span></div>
+            <div class="mi"><span class="ml">Barangay</span><span class="mv" id="rm-brgy"></span></div>
+            <div class="mi"><span class="ml">Purok</span><span class="mv" id="rm-purok"></span></div>
+            <div class="mi"><span class="ml">Street / House No.</span><span class="mv" id="rm-street"></span></div>
+            <div class="mi span3"><span class="ml">Complete Address</span><span class="mv" id="rm-addr"></span></div>
+          </div>
         </div>
       </div>
 
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-briefcase"></i> Socio-Economic</div>
-        <div class="mgrid">
-          <div class="mi"><span class="ml">Occupation</span><span class="mv" id="rm-occ"></span></div>
-          <div class="mi"><span class="ml">Employer</span><span class="mv" id="rm-emp"></span></div>
-          <div class="mi"><span class="ml">Monthly Income</span><span class="mv" id="rm-inc"></span></div>
-          <div class="mi span3"><span class="ml">Education Level</span><span class="mv" id="rm-edu"></span></div>
+        <div class="modal-section-body">
+          <div class="mgrid">
+            <div class="mi"><span class="ml">Occupation</span><span class="mv" id="rm-occ"></span></div>
+            <div class="mi"><span class="ml">Employer</span><span class="mv" id="rm-emp"></span></div>
+            <div class="mi"><span class="ml">Monthly Income</span><span class="mv" id="rm-inc"></span></div>
+            <div class="mi span3"><span class="ml">Education Level</span><span class="mv" id="rm-edu"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title"><i class="fas fa-tags"></i> Sector Classifications</div>
+        <div class="modal-section-body">
+          <div id="rm-sectors"></div>
         </div>
       </div>
 
@@ -1043,6 +1045,7 @@ function openResidentModal(r, pendingStatus) {
   document.getElementById('rm-last').textContent    = r.last_name   || '—';
   document.getElementById('rm-first').textContent   = r.first_name  || '—';
   document.getElementById('rm-middle').textContent  = r.middle_name || '—';
+  document.getElementById('rm-suffix').textContent  = r.suffix      || '—';
   document.getElementById('rm-gender').textContent  = r.gender      || '—';
   document.getElementById('rm-birth').textContent   = r.birthdate   || '—';
   document.getElementById('rm-age').textContent     = r.age ? r.age + ' yrs' : '—';
@@ -1088,19 +1091,26 @@ function openResidentModal(r, pendingStatus) {
   } else {
     famSection.style.display = 'none';
   }
-  let badges = '';
-  if (r.is_deceased) badges += '<span class="badge" style="background:#fee2e2;color:#be123c">Deceased</span> ';
-  if (r.is_senior)   badges += '<span class="badge badge-senior">Senior Citizen</span> ';
-  if (r.is_pwd)      badges += '<span class="badge badge-pwd">PWD</span> ';
-  if (r.is_voter)       badges += '<span class="badge" style="background:#f3e8ff;color:#6b21a8">Registered Voter</span> ';
-  if (r.is_solo_parent)         badges += '<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span> ';
-  if (r.is_labor_force)         badges += '<span class="badge" style="background:#e0f2fe;color:#075985">Labor Force</span> ';
-  if (r.is_unemployed)          badges += '<span class="badge" style="background:#fee2e2;color:#991b1b">Unemployed</span> ';
-  if (r.is_ofw)                 badges += '<span class="badge" style="background:#d1fae5;color:#065f46">OFW</span> ';
-  if (r.is_indigenous)          badges += '<span class="badge" style="background:#fdf4ff;color:#6b21a8">Indigenous</span> ';
-  if (r.is_out_of_school_child) badges += '<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Child</span> ';
-  if (r.is_out_of_school_youth) badges += '<span class="badge" style="background:#fff7ed;color:#9a3412">Out of School Youth</span> ';
-  if (r.is_student)             badges += '<span class="badge" style="background:#eff6ff;color:#1e40af">Student</span> ';
+
+  // Badges
+  const sectorDefs = [
+    { field: 'is_deceased',            label: 'Deceased',            color: '#be123c', bg: '#fee2e2' },
+    { field: 'is_senior',              label: 'Senior Citizen',      color: '#92400e', bg: '#fef3c7' },
+    { field: 'is_pwd',                 label: 'PWD',                 color: '#991b1b', bg: '#fee2e2' },
+    { field: 'is_voter',               label: 'Registered Voter',    color: '#6b21a8', bg: '#f3e8ff' },
+    { field: 'is_solo_parent',         label: 'Solo Parent',         color: '#065f46', bg: '#d1fae5' },
+    { field: 'is_labor_force',         label: 'Labor Force',         color: '#1e40af', bg: '#dbeafe' },
+    { field: 'is_unemployed',          label: 'Unemployed',          color: '#9a3412', bg: '#ffedd5' },
+    { field: 'is_ofw',                 label: 'OFW',                 color: '#164e63', bg: '#cffafe' },
+    { field: 'is_indigenous',          label: 'Indigenous Person',   color: '#713f12', bg: '#fef9c3' },
+    { field: 'is_out_of_school_child', label: 'Out of School Child', color: '#831843', bg: '#fce7f3' },
+    { field: 'is_out_of_school_youth', label: 'Out of School Youth', color: '#4c1d95', bg: '#ede9fe' },
+    { field: 'is_student',             label: 'Student',             color: '#134e4a', bg: '#ccfbf1' },
+  ];
+  const badges = sectorDefs
+    .filter(s => r[s.field])
+    .map(s => `<span class="badge" style="background:${s.bg};color:${s.color}">${s.label}</span>`)
+    .join(' ');
   document.getElementById('rm-badges').innerHTML = badges;
 }
 function closeResidentModal() {
@@ -1186,7 +1196,9 @@ document.addEventListener('click', function(e) {
 });
 
 // Search submits on Enter
-document.getElementById('searchInput').addEventListener('keydown', function(e) {
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
     const url = new URL(window.location);
     const val = this.value.trim();

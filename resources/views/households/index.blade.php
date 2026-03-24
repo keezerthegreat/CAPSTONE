@@ -22,7 +22,7 @@
 table { width:100%; border-collapse:collapse; font-size:13px; }
 thead tr { background:#f8fafc; border-bottom:2px solid var(--border); }
 th { padding:12px 16px; text-align:left; font-weight:700; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
-td { padding:13px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+td { padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
 tbody tr { cursor:pointer; }
 tbody tr:hover { background:#f0f7ff; }
 tbody tr:last-child td { border-bottom:none; }
@@ -40,7 +40,7 @@ tbody tr:last-child td { border-bottom:none; }
 .btn-view:hover   { background:#dbeafe; }
 .btn-edit:hover   { background:#dcfce7; }
 .btn-delete:hover { background:#ffe4e6; }
-.action-btns { display:flex; gap:5px; }
+.action-btns { display:flex; gap:5px; justify-content:flex-end; }
 .empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
 .alert-success { background:#dcfce7; border:1px solid #bbf7d0; color:#166534; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; display:flex; align-items:center; gap:8px; }
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; align-items:center; justify-content:center; }
@@ -199,7 +199,7 @@ tbody tr:last-child td { border-bottom:none; }
             <th>Members</th>
             <th>Classification</th>
             <th>Location</th>
-            <th>Actions</th>
+            <th style="text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody>

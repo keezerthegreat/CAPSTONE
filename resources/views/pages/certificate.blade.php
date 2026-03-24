@@ -29,7 +29,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
 .btn-print:hover  { background:#dbeafe; }
 .btn-edit:hover   { background:#dcfce7; }
 .btn-delete:hover { background:#ffe4e6; }
-.action-btns { display:flex; gap:5px; }
+.action-btns { display:flex; gap:5px; justify-content:flex-end; }
 .table-wrap { overflow-x:auto; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
 thead tr { background:#f8fafc; border-bottom:2px solid var(--border); }
@@ -141,9 +141,8 @@ tbody tr:last-child td { border-bottom:none; }
 <option value="Widowed">Widowed</option>
 <option value="Separated">Separated</option>
 <option value="Annulled">Annulled</option>
-<option value="Common Law">Common Law</option>
+<option value="Common Law (Live-in)">Common Law (Live-in)</option>
 <option value="Divorced">Divorced</option>
-<option value="Live-in">Live-in</option>
 </select>
 </div>
 
@@ -282,7 +281,7 @@ tbody tr:last-child td { border-bottom:none; }
 <th>Resident Name</th>
 <th>Certificate Type</th>
 <th>Date Issued</th>
-<th>Actions</th>
+<th style="text-align:center">Actions</th>
 </tr>
 </thead>
 
@@ -427,7 +426,7 @@ document.getElementById('resPickerModal').addEventListener('click', function(e) 
 const ctBodies = {
   'Barangay Certification':
     `<p>TO WHOM IT MAY CONCERN:</p>
-     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Barangay Cogon, Ormoc City.</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <b><strong>[NAME]</strong></b>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Barangay Cogon, Ormoc City.</p>
      <p style="text-indent:2em">[Type custom content here...]</p>
      <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
   'Good Moral Character Clearance':
@@ -495,7 +494,7 @@ function ctUpdate() {
   // Update editable body from template
   const bodyTpl  = ctBodies[type] || '';
   const bodyHtml = bodyTpl
-    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil)
+    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil.toLowerCase())
     .replace(/\[PUROK\]/g, purok).replace(/\[REQUESTOR\]/g, requestor);
   document.getElementById('ct-doc-body').innerHTML = bodyHtml
     || '<p style="color:#aaa;text-align:center;font-family:sans-serif;font-size:13px">Select a document type to generate the body.</p>';

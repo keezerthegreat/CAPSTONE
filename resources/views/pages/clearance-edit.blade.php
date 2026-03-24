@@ -88,7 +88,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
         <div class="form-group">
           <label>Civil Status</label>
           <select name="civil_status" id="cl-civil-status" onchange="clUpdateMeta()">
-            @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law','Divorced','Live-in'] as $cs)
+            @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law (Live-in)','Divorced'] as $cs)
             <option value="{{ $cs }}" {{ ($clearance->civil_status ?? 'Single') == $cs ? 'selected' : '' }}>{{ $cs }}</option>
             @endforeach
           </select>
@@ -257,7 +257,7 @@ function clOnTypeChange() {
 
   const bodyTpl  = clBodies[type] || '';
   const bodyHtml = bodyTpl
-    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil)
+    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil.toLowerCase())
     .replace(/\[PUROK\]/g, purok).replace(/\[REQUESTOR\]/g, requestor);
   document.getElementById('cl-doc-body').innerHTML = bodyHtml
     || '<p style="color:#aaa;text-align:center;font-family:sans-serif;font-size:13px">No template for this type.</p>';
