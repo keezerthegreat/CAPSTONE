@@ -77,9 +77,15 @@ class ResidentController extends Controller
             });
         }
 
-        $totalResidents = (clone $query)->where('is_deceased', false)->whereNull('transferred_to')->count();
-        $totalSeniors = (clone $query)->where('is_deceased', false)->whereNull('transferred_to')->where('age', '>=', 60)->count();
-        $totalPwd = (clone $query)->where('is_deceased', false)->whereNull('transferred_to')->where('is_pwd', true)->count();
+        // When no status filter is active, exclude deceased/transferred from counts.
+        // When a status filter is active, the query is already scoped — count as-is.
+        $countQuery = $residentStatus
+            ? clone $query
+            : (clone $query)->where('is_deceased', false)->whereNull('transferred_to');
+
+        $totalResidents = (clone $countQuery)->count();
+        $totalSeniors = (clone $countQuery)->where('age', '>=', 60)->count();
+        $totalPwd = (clone $countQuery)->where('is_pwd', true)->count();
         $residents = (clone $query)->with(['household', 'family'])->orderBy('last_name')->orderBy('first_name')->paginate(50)->withQueryString();
 
         $pendingResidents = Resident::where('status', 'pending')->latest()->get();
