@@ -279,7 +279,7 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
             return null;
         }
 
-        return ucwords(strtolower(trim($value)));
+        return mb_convert_case(mb_strtolower(trim($value), 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
     }
 
     private function val(array $row, int $index): ?string
