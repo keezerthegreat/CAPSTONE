@@ -65,7 +65,13 @@ class HouseholdController extends Controller
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);
-        $memberCount = count($request->members ?? []) + 1;
+
+        // Strip the head from the members array to prevent double-counting
+        $memberIds = collect($request->members ?? [])
+            ->filter(fn ($id) => (int) $id !== (int) $request->head_resident_id)
+            ->values()
+            ->all();
+        $memberCount = count($memberIds) + 1; // +1 for the head
 
         // Duplicate check: same head resident already heads a household
         $headDuplicate = Household::where('head_resident_id', $resident->id)->first();
@@ -86,8 +92,10 @@ class HouseholdController extends Controller
 
         $household = Household::create($data);
 
-        if ($request->filled('members')) {
-            Resident::whereIn('id', $request->members)->update(['household_id' => $household->id]);
+        // Always link household_id to the head and all members
+        Resident::where('id', $request->head_resident_id)->update(['household_id' => $household->id]);
+        if (! empty($memberIds)) {
+            Resident::whereIn('id', $memberIds)->update(['household_id' => $household->id]);
         }
 
         ActivityLog::log('created', 'Household', "Added household: #{$household->household_number}");
@@ -98,7 +106,7 @@ class HouseholdController extends Controller
 
     public function show($id)
     {
-        $household = Household::with('members')->findOrFail($id);
+        $household = Household::with(['members', 'members.family'])->findOrFail($id);
 
         return view('households.show', compact('household'));
     }
@@ -124,12 +132,19 @@ class HouseholdController extends Controller
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);
-        $memberCount = count($request->members ?? []) + 1;
 
-        // Clear old member links then reassign
+        // Strip the head from the members array to prevent double-counting
+        $memberIds = collect($request->members ?? [])
+            ->filter(fn ($id) => (int) $id !== (int) $request->head_resident_id)
+            ->values()
+            ->all();
+        $memberCount = count($memberIds) + 1; // +1 for the head
+
+        // Clear old member links, then reassign head + members
         Resident::where('household_id', $household->id)->update(['household_id' => null]);
-        if ($request->filled('members')) {
-            Resident::whereIn('id', $request->members)->update(['household_id' => $household->id]);
+        Resident::where('id', $request->head_resident_id)->update(['household_id' => $household->id]);
+        if (! empty($memberIds)) {
+            Resident::whereIn('id', $memberIds)->update(['household_id' => $household->id]);
         }
 
         $data = $request->only([

@@ -535,16 +535,44 @@ function openHouseholdModal(h) {
   const members = h.members || [];
   if (!members.length) { body.innerHTML = '<p style="color:var(--muted);font-size:13px;font-style:italic;margin:0">No members linked yet.</p>'; }
   else {
-    const sorted = members.slice().sort((a, b) => (a.last_name || '').localeCompare(b.last_name || ''));
-    let currentLn = null; let counter = 0;
-    const rows = sorted.map(m => {
-      const isHead = m.id === h.head_resident_id;
-      const role = isHead ? '<span class="badge-head"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span>' : '<span style="color:var(--muted);font-size:11px">Member</span>';
-      const name = (m.last_name || '') + ', ' + (m.first_name || '') + (m.middle_name ? ' ' + m.middle_name : '');
-      const nameLink = `<a href="#" onclick="event.preventDefault();openResidentPreview(${m.id})" style="color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer">${name}</a>`;
-      const sep = m.last_name !== currentLn ? `<tr><td colspan="5" style="padding:3px 6px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--header-bg)">${m.last_name || ''}</td></tr>` : '';
-      currentLn = m.last_name; counter++;
-      return `${sep}<tr><td style="color:var(--muted);font-size:11px">${counter}</td><td>${nameLink}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td>${role}</td></tr>`;
+    // Group by family_id; head's family comes first, then others in order of first appearance
+    const headMember = members.find(m => m.id === h.head_resident_id);
+    const headFamilyId = headMember ? headMember.family_id : null;
+
+    const groups = {};
+    const groupOrder = [];
+    members.forEach(m => {
+      const key = m.family_id ? String(m.family_id) : '__none__';
+      if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+      groups[key].push(m);
+    });
+
+    // Put head's family first
+    const headFamilyKey = headFamilyId ? String(headFamilyId) : null;
+    if (headFamilyKey && groupOrder[0] !== headFamilyKey) {
+      const idx = groupOrder.indexOf(headFamilyKey);
+      if (idx > 0) { groupOrder.splice(idx, 1); groupOrder.unshift(headFamilyKey); }
+    }
+
+    let counter = 0; let familyNum = 0;
+    const rows = groupOrder.map(key => {
+      familyNum++;
+      const groupMembers = groups[key].slice().sort((a, b) => {
+        if (a.id === h.head_resident_id) return -1;
+        if (b.id === h.head_resident_id) return 1;
+        return (a.last_name || '').localeCompare(b.last_name || '');
+      });
+      const headerLabel = key === '__none__' ? 'Ungrouped' : `Family ${familyNum}`;
+      const headerRow = `<tr><td colspan="5" style="padding:3px 6px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--header-bg)">${headerLabel}</td></tr>`;
+      const memberRows = groupMembers.map(m => {
+        counter++;
+        const isHead = m.id === h.head_resident_id;
+        const role = isHead ? '<span class="badge-head"><i class="fas fa-crown" style="margin-right:3px;font-size:9px"></i>Head</span>' : '<span style="color:var(--muted);font-size:11px">Member</span>';
+        const name = (m.last_name || '') + ', ' + (m.first_name || '') + (m.middle_name ? ' ' + m.middle_name : '');
+        const nameLink = `<a href="#" onclick="event.preventDefault();openResidentPreview(${m.id})" style="color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer">${name}</a>`;
+        return `<tr><td style="color:var(--muted);font-size:11px">${counter}</td><td>${nameLink}</td><td>${m.gender || '—'} / ${m.age || '—'} yrs</td><td>${m.civil_status || '—'}</td><td>${role}</td></tr>`;
+      }).join('');
+      return headerRow + memberRows;
     }).join('');
     body.innerHTML = `<table class="mem-table"><thead><tr><th>#</th><th>Full Name</th><th>Sex / Age</th><th>Civil Status</th><th>Role</th></tr></thead><tbody>${rows}</tbody></table>`;
   }

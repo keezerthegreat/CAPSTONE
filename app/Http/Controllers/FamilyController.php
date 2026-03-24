@@ -70,8 +70,11 @@ class FamilyController extends Controller
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);
-        $memberData = $request->input('member_data', []); // [id => role]
-        $memberCount = count($memberData) + 1;
+        // Strip the head from memberData to prevent double-counting
+        $memberData = collect($request->input('member_data', []))
+            ->reject(fn ($role, $residentId) => (int) $residentId === (int) $request->head_resident_id)
+            ->all();
+        $memberCount = count($memberData) + 1; // +1 for the head
 
         // Duplicate check: same head resident already heads a family
         $headDuplicate = Family::where('head_resident_id', $resident->id)->first();
@@ -150,8 +153,11 @@ class FamilyController extends Controller
         ]);
 
         $resident = Resident::findOrFail($request->head_resident_id);
-        $memberData = $request->input('member_data', []);
-        $memberCount = count($memberData) + 1;
+        // Strip the head from memberData to prevent double-counting
+        $memberData = collect($request->input('member_data', []))
+            ->reject(fn ($role, $residentId) => (int) $residentId === (int) $request->head_resident_id)
+            ->all();
+        $memberCount = count($memberData) + 1; // +1 for the head
 
         // Clear old member links
         Resident::where('family_id', $family->id)->update(['family_id' => null, 'family_role' => null]);

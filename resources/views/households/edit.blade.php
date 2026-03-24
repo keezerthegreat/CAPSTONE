@@ -122,7 +122,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
               </div>
             </div>
             <div class="member-list" id="memberList">
-              <div class="member-empty" id="memberEmpty" style="{{ $household->members->count() ? 'display:none' : '' }}">No members added yet.</div>
+              <div class="member-empty" id="memberEmpty" style="{{ $household->members->where('id', '!=', $household->head_resident_id)->count() ? 'display:none' : '' }}">No members added yet.</div>
             </div>
             <div id="memberInputs"></div>
           </div>
@@ -246,7 +246,7 @@ const residents = @json($residents);
 
 // ── Pre-load existing members ──────────────────────────────────
 const addedMembers = {};
-@foreach($household->members as $m)
+@foreach($household->members->where('id', '!=', $household->head_resident_id) as $m)
   addedMembers[{{ $m->id }}] = "{{ $m->last_name }}, {{ $m->first_name }}{{ $m->middle_name ? ' '.$m->middle_name : '' }}";
 @endforeach
 

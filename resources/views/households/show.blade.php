@@ -130,6 +130,70 @@
     </div>
   </div>
 
+  <!-- Household Members -->
+  <div class="card">
+    <div class="card-header"><div class="card-title"><i class="fas fa-users"></i> Household Members</div></div>
+    <div class="card-body" style="padding:0">
+      @if($household->members->isEmpty())
+        <p style="padding:24px;color:var(--muted);font-size:13px;font-style:italic;margin:0">No members linked yet.</p>
+      @else
+        @php
+          $headId = $household->head_resident_id;
+          // Group by family_id; null family goes last
+          $grouped = $household->members->groupBy(fn($m) => $m->family_id ?? '__none__');
+          // Put the head's family first
+          $headMember = $household->members->firstWhere('id', $headId);
+          $headFamilyKey = $headMember?->family_id ?? '__none__';
+          $ordered = collect([$headFamilyKey => $grouped[$headFamilyKey]])
+            ->merge($grouped->except($headFamilyKey));
+          $familyNum = 0;
+          $counter = 0;
+        @endphp
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="background:var(--header-bg,#f8fafc)">
+              <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;width:36px">#</th>
+              <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Full Name</th>
+              <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Sex / Age</th>
+              <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Civil Status</th>
+              <th style="padding:10px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left">Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($ordered as $familyKey => $familyMembers)
+              @php $familyNum++; @endphp
+              <tr style="background:var(--header-bg,#f8fafc)">
+                <td colspan="5" style="padding:4px 12px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+                  Family {{ $familyNum }}
+                </td>
+              </tr>
+              @foreach($familyMembers->sortBy(fn($m) => $m->id === $headId ? 0 : 1) as $member)
+                @php $counter++; @endphp
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:10px 12px;font-size:12px;color:var(--muted)">{{ $counter }}</td>
+                  <td style="padding:10px 12px;font-size:13px;font-weight:600">
+                    <a href="{{ route('residents.show', $member->id) }}" style="color:var(--primary);text-decoration:none">
+                      {{ $member->last_name }}, {{ $member->first_name }}{{ $member->middle_name ? ' '.$member->middle_name : '' }}
+                    </a>
+                  </td>
+                  <td style="padding:10px 12px;font-size:13px;color:var(--muted)">{{ $member->gender ?? '—' }} / {{ $member->age ?? '—' }} yrs</td>
+                  <td style="padding:10px 12px;font-size:13px">{{ $member->civil_status ?? '—' }}</td>
+                  <td style="padding:10px 12px">
+                    @if($member->id === $headId)
+                      <span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700"><i class="fas fa-crown" style="font-size:9px;margin-right:3px"></i>Head</span>
+                    @else
+                      <span style="color:var(--muted);font-size:12px">Member</span>
+                    @endif
+                  </td>
+                </tr>
+              @endforeach
+            @endforeach
+          </tbody>
+        </table>
+      @endif
+    </div>
+  </div>
+
   <!-- Map -->
   <div class="card">
     <div class="card-header">

@@ -220,8 +220,29 @@ function removeMember(id) {
   renderMembers();
 }
 
+function isCustomRole(role) {
+  return role && !roleOptions.includes(role);
+}
+
 function updateRole(id, val) {
-  if (addedMembers[id]) addedMembers[id].role = val;
+  if (!addedMembers[id]) return;
+  const customInp = document.getElementById(`mcustom_${id}`);
+  const hiddenInp = document.getElementById(`mdinp_${id}`);
+  if (val === 'Other') {
+    addedMembers[id].role = customInp ? customInp.value : '';
+    if (customInp) customInp.style.display = '';
+  } else {
+    addedMembers[id].role = val;
+    if (customInp) { customInp.style.display = 'none'; customInp.value = ''; }
+    if (hiddenInp) hiddenInp.value = val;
+  }
+}
+
+function updateCustomRole(id, val) {
+  if (!addedMembers[id]) return;
+  addedMembers[id].role = val;
+  const inp = document.getElementById(`mdinp_${id}`);
+  if (inp) inp.value = val;
 }
 
 function renderMembers() {
@@ -231,29 +252,27 @@ function renderMembers() {
   memberInputs.innerHTML = '';
   ids.forEach(id => {
     const { name, role } = addedMembers[id];
-    const opts = roleOptions.map(o => `<option value="${o}" ${role===o?'selected':''}>${o}</option>`).join('');
+    const custom = isCustomRole(role);
+    const selectedOpt = custom ? 'Other' : role;
+    const customVal = custom ? role : '';
+    const opts = roleOptions.map(o => `<option value="${o}" ${selectedOpt===o?'selected':''}>${o}</option>`).join('');
     const item = document.createElement('div');
     item.className = 'member-item';
     item.innerHTML = `<i class="fas fa-user" style="color:var(--muted)"></i>
       <span class="m-name">${name}</span>
-      <select class="m-role" onchange="updateRole(${id}, this.value)">
+      <select class="m-role" id="msel_${id}" onchange="updateRole(${id}, this.value)">
         <option value="">— Relationship —</option>${opts}
       </select>
+      <input type="text" id="mcustom_${id}" placeholder="e.g. Housemaid"
+        style="display:${custom?'':'none'};padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;color:var(--text);outline:none;min-width:110px;"
+        value="${customVal}" oninput="updateCustomRole(${id}, this.value)">
       <button type="button" class="m-remove" onclick="removeMember(${id})" title="Remove">×</button>`;
     memberList.appendChild(item);
-    // submit as member_data[id] = role
     const inp = document.createElement('input');
-    inp.type = 'hidden'; inp.name = `member_data[${id}]`; inp.value = role;
+    inp.type = 'hidden'; inp.name = `member_data[${id}]`;
+    inp.value = custom ? customVal : role;
     inp.id = `mdinp_${id}`;
     memberInputs.appendChild(inp);
-  });
-  // Keep hidden inputs in sync when role select changes
-  ids.forEach(id => {
-    const sel = memberList.querySelector(`select[onchange="updateRole(${id}, this.value)"]`);
-    if (sel) sel.addEventListener('change', () => {
-      const inp = document.getElementById(`mdinp_${id}`);
-      if (inp) inp.value = sel.value;
-    });
   });
 }
 
