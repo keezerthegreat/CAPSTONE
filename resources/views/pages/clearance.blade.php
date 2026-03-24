@@ -29,7 +29,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
 .btn-print:hover  { background:#dbeafe; }
 .btn-edit:hover   { background:#dcfce7; }
 .btn-delete:hover { background:#ffe4e6; }
-.action-btns { display:flex; gap:5px; justify-content:flex-end; }
+.action-btns { display:flex; gap:5px; }
 .table-wrap { overflow-x:auto; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
 thead tr { background:#f8fafc; border-bottom:2px solid var(--border); }
@@ -408,10 +408,10 @@ const clBodies = {
   'Barangay Clearance':
     `<p>TO WHOM IT MAY CONCERN:</p>
      <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Purok [PUROK], Barangay Cogon, Ormoc City.</p>
-     <p style="text-indent:2em">THIS IS TO CERTIFY FURTHER, that based on the records of this office, the above-named person has no derogatory record on file and is hereby <strong>CLEARED</strong> for whatever purpose this may serve.</p>
+     <p style="text-indent:2em">THIS IS TO FURTHER CERTIFY, that based on the records of this office, the above-named person has no derogatory record on file and is hereby <strong>CLEARED</strong> for whatever purpose this may serve.</p>
      <p style="text-indent:2em">This clearance is hereby issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
   'Residency Clearance':
-    `<p>TO WHOM IT MAY CONCERN:</p>
+    `<p>TO WHOM IT MAY CONCERN:</p> 
      <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide permanent resident of Purok [PUROK], Barangay Cogon, Ormoc City, and is hereby cleared for the purpose stated herein.</p>
      <p style="text-indent:2em">This clearance is hereby issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
   'Good Moral Clearance':
@@ -446,7 +446,7 @@ function clFmt(cmd) {
 function clUpdate() {
   const type      = clGetVal('cl-type-select');
   const name      = clGetVal('cl-resident-name') || '___________________';
-  const civil     = clGetVal('cl-civil-status')  || 'Single';
+  const civil     = clGetVal('cl-civil-status')  || 'single';
   const purok     = clGetVal('cl-purok')          || '___________';
   const requestor = clGetVal('cl-requestor')      || 'the above-named person';
   const orNum     = clGetVal('cl-or-number');
@@ -463,7 +463,7 @@ function clUpdate() {
   // Update editable body from template
   const bodyTpl  = clBodies[type] || '';
   const bodyHtml = bodyTpl
-    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil)
+    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil.toLowerCase())
     .replace(/\[PUROK\]/g, purok).replace(/\[REQUESTOR\]/g, requestor);
   document.getElementById('cl-doc-body').innerHTML = bodyHtml
     || '<p style="color:#aaa;text-align:center;font-family:sans-serif;font-size:13px">Select a document type to generate the body.</p>';

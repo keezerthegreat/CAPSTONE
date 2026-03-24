@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>{{ $clearance->certificate_type }} — {{ $clearance->clearance_no }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background: #d1d5db;
-      font-family: "Times New Roman", Times, serif;
+      font-family: "Tahoma", "Geneva", sans-serif;
       font-size: 13pt;
       color: #000;
     }
@@ -75,7 +77,7 @@
     /* ── Letterhead ── */
     .lh { text-align: center; margin-bottom: 20px; }
     .lh img { width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 8px; }
-    .lh .republic  { font-size: 11pt; font-style: italic; }
+    .lh .republic  { font-size: 13pt; font-family: "UnifrakturMaguntia", "Old English Text MT", cursive; font-style: normal; }
     .lh .office    { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
     .lh .location  { font-size: 11pt; margin-top: 2px; }
     .lh hr         { display: none; }
@@ -96,16 +98,20 @@
     .doc-body p {
       margin: 0 0 14px;
       text-align: justify;
+      text-align-last: left;
       font-size: 13pt;
       line-height: 1.9;
     }
     .doc-body p:last-child { margin-bottom: 0; }
+    .doc-body strong { font-weight: bold; text-transform: uppercase; }
 
     /* ── Issued line ── */
     .issued-line {
       margin-top: 18px;
       font-size: 12pt;
       line-height: 1.7;
+      text-align: justify;
+      text-align-last: left;
     }
 
     /* ── Signature ── */
@@ -156,9 +162,12 @@
         min-height: unset;
         padding: 15mm 20mm 20mm;
       }
+      .lh .republic {
+        font-family: "UnifrakturMaguntia", "Old English Text MT", cursive !important;
+      }
       @page {
         size: A4 portrait;
-        margin: 10mm;
+        margin: 0;
       }
     }
   </style>
@@ -230,15 +239,15 @@
   </div>
   @endif
 
-  {{-- Doc number --}}
-  <div class="doc-no">{{ $clearance->clearance_no }}</div>
 
 </div>
 </div>
 
 <script>
   window.addEventListener('load', function () {
-    setTimeout(window.print, 600);
+    document.fonts.ready.then(function () {
+      setTimeout(window.print, 300);
+    });
   });
 </script>
 </body>

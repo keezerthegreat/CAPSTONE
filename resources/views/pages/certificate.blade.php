@@ -426,7 +426,7 @@ document.getElementById('resPickerModal').addEventListener('click', function(e) 
 const ctBodies = {
   'Barangay Certification':
     `<p>TO WHOM IT MAY CONCERN:</p>
-     <p style="text-indent:2em">THIS IS TO CERTIFY that <strong>[NAME]</strong>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Barangay Cogon, Ormoc City.</p>
+     <p style="text-indent:2em">THIS IS TO CERTIFY that <b><strong>[NAME]</strong></b>, of legal age, [CIVIL_STATUS], Filipino Citizen, is a bona fide resident of Barangay Cogon, Ormoc City.</p>
      <p style="text-indent:2em">[Type custom content here...]</p>
      <p style="text-indent:2em">This certification is issued upon the request of <strong>[REQUESTOR]</strong>.</p>`,
   'Good Moral Character Clearance':
@@ -494,7 +494,7 @@ function ctUpdate() {
   // Update editable body from template
   const bodyTpl  = ctBodies[type] || '';
   const bodyHtml = bodyTpl
-    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil)
+    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil.toLowerCase())
     .replace(/\[PUROK\]/g, purok).replace(/\[REQUESTOR\]/g, requestor);
   document.getElementById('ct-doc-body').innerHTML = bodyHtml
     || '<p style="color:#aaa;text-align:center;font-family:sans-serif;font-size:13px">Select a document type to generate the body.</p>';

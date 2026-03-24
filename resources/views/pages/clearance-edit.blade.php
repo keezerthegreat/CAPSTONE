@@ -257,7 +257,7 @@ function clOnTypeChange() {
 
   const bodyTpl  = clBodies[type] || '';
   const bodyHtml = bodyTpl
-    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil)
+    .replace(/\[NAME\]/g, name).replace(/\[CIVIL_STATUS\]/g, civil.toLowerCase())
     .replace(/\[PUROK\]/g, purok).replace(/\[REQUESTOR\]/g, requestor);
   document.getElementById('cl-doc-body').innerHTML = bodyHtml
     || '<p style="color:#aaa;text-align:center;font-family:sans-serif;font-size:13px">No template for this type.</p>';
