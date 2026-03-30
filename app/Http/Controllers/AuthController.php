@@ -26,7 +26,7 @@ class AuthController extends Controller
 
         $throttleKey = 'login:'.strtolower($request->input('email')).'|'.$request->ip();
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+        if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
             $seconds = RateLimiter::availableIn($throttleKey);
             $minutes = ceil($seconds / 60);
 
@@ -56,8 +56,8 @@ class AuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        RateLimiter::hit($throttleKey, 900); // Lock for 15 minutes after 5 failures
-        $remaining = 5 - RateLimiter::attempts($throttleKey);
+        RateLimiter::hit($throttleKey, 900); // Lock for 15 minutes after 3 failures
+        $remaining = 3 - RateLimiter::attempts($throttleKey);
 
         return back()
             ->withInput($request->only('email'))
