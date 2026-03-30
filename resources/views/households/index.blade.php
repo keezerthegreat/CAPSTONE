@@ -195,7 +195,7 @@ tbody tr:last-child td { border-bottom:none; }
             <th>#</th>
             <th>Household No.</th>
             <th>Household Head</th>
-            <th>Purok</th>
+            <th>Households</th>
             <th>Members</th>
             <th>Classification</th>
             <th>Location</th>
@@ -415,7 +415,7 @@ function submitBulkDelete() {
   <div class="hp-section">
     <div class="hp-section-title">III. Complete Address</div>
     <div class="hp-grid3">
-      <div class="hp-field"><span class="hp-lbl">Purok</span><span id="hp-sitio" class="hp-val"></span></div>
+      <div class="hp-field"><span class="hp-lbl">Households</span><span id="hp-sitio" class="hp-val"></span></div>
       <div class="hp-field"><span class="hp-lbl">Street / Sitio</span><span id="hp-street" class="hp-val"></span></div>
       <div class="hp-field"><span class="hp-lbl">Barangay</span><span id="hp-brgy" class="hp-val"></span></div>
       <div class="hp-field"><span class="hp-lbl">City / Municipality</span><span id="hp-city" class="hp-val"></span></div>
@@ -465,7 +465,7 @@ function submitBulkDelete() {
       <div class="modal-section">
         <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
         <div class="mgrid">
-          <div class="mi"><span class="ml">Purok</span><span class="mv" id="hm-sitio"></span></div>
+          <div class="mi"><span class="ml">Households</span><span class="mv" id="hm-sitio"></span></div>
           <div class="mi"><span class="ml">Street / Sitio</span><span class="mv" id="hm-street"></span></div>
           <div class="mi"><span class="ml">Barangay</span><span class="mv" id="hm-brgy"></span></div>
           <div class="mi"><span class="ml">City / Municipality</span><span class="mv" id="hm-city"></span></div>

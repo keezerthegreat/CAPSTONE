@@ -503,7 +503,7 @@
       </a>
 
       <a href="{{ route('residents.index') }}"
-         class="nav-item {{ request()->routeIs('residents.*') && !request()->routeIs('residents.import*') ? 'active' : '' }}">
+         class="nav-item {{ request()->routeIs('residents.*') && !request()->routeIs('residents.import*') && !request()->routeIs('residents.pending') ? 'active' : '' }}">
         <i class="fas fa-users"></i> Residents
       </a>
 
@@ -549,6 +549,14 @@
         <i class="fas fa-history"></i> Audit Log
       </a>
 
+      @php $pendingVerificationCount = \App\Models\Resident::where('status','pending')->count() + \App\Models\ResidentPendingEdit::count(); @endphp
+      <a href="{{ route('residents.pending') }}"
+         class="nav-item {{ request()->routeIs('residents.pending') ? 'active' : '' }}"
+         style="position:relative">
+        <i class="fas fa-clock"></i> Pending Verification
+        <span style="display:{{ $pendingVerificationCount > 0 ? 'inline-block' : 'none' }};position:absolute;right:12px;top:50%;transform:translateY(-50%);background:#f59e0b;color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:1px 6px;line-height:1.6">{{ $pendingVerificationCount }}</span>
+      </a>
+
       <a href="{{ route('residents.import.form') }}"
          class="nav-item {{ request()->routeIs('residents.import*') ? 'active' : '' }}">
         <i class="fas fa-file-import"></i> Import Data
@@ -565,6 +573,12 @@
       <a href="{{ route('settings.index') }}"
          class="nav-item {{ request()->is('settings*') ? 'active' : '' }}">
         <i class="fas fa-cog"></i> Settings
+      </a>
+@else
+      <div class="nav-section">My Account</div>
+      <a href="{{ route('audit.index') }}"
+         class="nav-item {{ request()->is('audit-log*') ? 'active' : '' }}">
+        <i class="fas fa-history"></i> My Activity Log
       </a>
 @endif
 

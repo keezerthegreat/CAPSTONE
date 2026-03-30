@@ -70,14 +70,16 @@ tr:hover td { background:#f8fafc; }
 <div class="wrap">
   <div class="page-hdr">
     <div>
-      <h1><i class="fas fa-history" style="margin-right:8px"></i>Audit Log</h1>
-      <div class="breadcrumb">Home › Audit Log</div>
+      <h1><i class="fas fa-history" style="margin-right:8px"></i>{{ $isAdmin ? 'Audit Log' : 'My Activity Log' }}</h1>
+      <div class="breadcrumb">Home › {{ $isAdmin ? 'Audit Log' : 'My Activity' }}</div>
     </div>
+    @if($isAdmin)
     <form method="POST" action="{{ route('audit.clear') }}" style="margin:0"
           onsubmit="return confirmDelete(this, 'Permanently delete all audit logs? This action cannot be undone.')">
       @csrf @method('DELETE')
       <button type="submit" class="btn-danger"><i class="fas fa-trash"></i> Clear Log</button>
     </form>
+    @endif
   </div>
 
   @if(session('success'))
@@ -98,6 +100,17 @@ tr:hover td { background:#f8fafc; }
             <label>Search</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Name or description…">
           </div>
+          @if($isAdmin)
+          <div>
+            <label>User</label>
+            <select name="user_id">
+              <option value="">All Users</option>
+              @foreach($users as $u)
+                <option value="{{ $u->id }}" {{ request('user_id') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          @endif
           <div>
             <label>Module</label>
             <select name="module">

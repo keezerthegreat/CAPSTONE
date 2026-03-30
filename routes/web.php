@@ -91,6 +91,9 @@ Route::middleware('auth')->group(function () {
     // Theme toggle — available to all authenticated users
     Route::post('/settings/theme', [SettingsController::class, 'setTheme'])->name('settings.theme');
 
+    // Audit Log — viewable by all users (employees see only their own logs)
+    Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');
+
     /*
     |--------------------------------------------------------------------------
     | ADMIN ONLY
@@ -111,10 +114,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/households-bulk', [HouseholdController::class, 'bulkDestroy'])->name('households.bulkDestroy');
 
         // Residents — admin-only actions + bulk delete
+        Route::get('/residents/pending', [ResidentController::class, 'pending'])->name('residents.pending');
         Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])->name('residents.destroy');
         Route::delete('/residents-bulk', [ResidentController::class, 'bulkDestroy'])->name('residents.bulkDestroy');
         Route::get('/residents-import', [ResidentController::class, 'importForm'])->name('residents.import.form');
         Route::post('/residents-import', [ResidentController::class, 'import'])->name('residents.import');
+        Route::get('/residents-export', [ResidentController::class, 'export'])->name('residents.export');
         Route::post('/residents/{id}/approve', [ResidentController::class, 'approve'])->name('residents.approve');
         Route::post('/residents/{id}/reject', [ResidentController::class, 'reject'])->name('residents.reject');
         Route::post('/residents/edits/{id}/approve', [ResidentController::class, 'approveEdit'])->name('residents.approveEdit');
@@ -141,8 +146,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/password-requests/{passwordRequest}/resolve', [PasswordRequestController::class, 'resolve'])->name('password.requests.resolve');
         Route::post('/admin/password-requests/{passwordRequest}/dismiss', [PasswordRequestController::class, 'dismiss'])->name('password.requests.dismiss');
 
-        // Audit Log
-        Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');
+        // Audit Log — clear is admin-only (GET is outside this group)
         Route::delete('/audit-log/clear', [AuditLogController::class, 'clear'])->name('audit.clear');
 
         // Database Backup

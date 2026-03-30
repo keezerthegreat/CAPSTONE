@@ -96,15 +96,23 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
         {{-- LEFT COLUMN --}}
         <div>
 
-            {{-- Create Employee Account --}}
+            {{-- Create Account --}}
             <div class="s-card" style="margin-bottom:24px">
                 <div class="s-card-header">
                     <i class="fas fa-user-plus"></i>
-                    <span class="s-card-title">Create Employee Account</span>
+                    <span class="s-card-title">Create Account</span>
                 </div>
                 <div class="s-card-body">
                     <form method="POST" action="{{ route('settings.employee.store') }}">
                         @csrf
+                        <div class="form-group">
+                            <label class="form-label">Role <span class="req">*</span></label>
+                            <select name="role" class="form-input" required>
+                                <option value="employee" {{ old('role', 'employee') === 'employee' ? 'selected' : '' }}>Employee</option>
+                                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                            </select>
+                            @error('role')<div style="color:#dc2626;font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Full Name <span class="req">*</span></label>
                             <input type="text" name="name" class="form-input" placeholder="e.g. Juan Dela Cruz" value="{{ old('name') }}" required>
@@ -117,7 +125,7 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
                         </div>
                         <div class="form-group">
                             <label class="form-label">Password <span class="req">*</span></label>
-                            <input type="password" name="password" class="form-input" placeholder="Min. 6 characters" required>
+                            <input type="password" name="password" class="form-input" placeholder="Min. 8 characters" required>
                             @error('password')<div style="color:#dc2626;font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
@@ -125,7 +133,7 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
                             <input type="password" name="password_confirmation" class="form-input" placeholder="Re-enter password" required>
                         </div>
                         <button type="submit" class="btn btn-green">
-                            <i class="fas fa-user-plus"></i> Create Employee Account
+                            <i class="fas fa-user-plus"></i> Create Account
                         </button>
                     </form>
                 </div>
@@ -133,52 +141,133 @@ tbody tr:hover { background: var(--hover-bg, #f8fafc); }
 
         </div>
 
-        {{-- RIGHT COLUMN - Employee Accounts List --}}
-        <div class="s-card">
-            <div class="s-card-header">
-                <i class="fas fa-users"></i>
-                <span class="s-card-title">Employee Accounts ({{ $employees->count() }})</span>
+        {{-- RIGHT COLUMN - All Accounts --}}
+        <div>
+            {{-- Super Admin (read-only) --}}
+            @if($superAdmin)
+            <div class="s-card" style="margin-bottom:24px;border:1.5px solid #bfdbfe">
+                <div class="s-card-header" style="background:#eff6ff">
+                    <i class="fas fa-shield-alt" style="color:#1d4ed8"></i>
+                    <span class="s-card-title" style="color:#1e40af">Super Admin</span>
+                    <span style="margin-left:auto;font-size:11px;color:#3b82f6;font-weight:600">PROTECTED — CANNOT BE MODIFIED</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="avatar" style="background:#1d4ed8">{{ strtoupper(substr($superAdmin->name, 0, 1)) }}</span> {{ $superAdmin->name }}</td>
+                                <td style="color:var(--muted-color,#64748b)">{{ $superAdmin->email }}</td>
+                                <td><span class="badge" style="background:#dbeafe;color:#1e40af">Super Admin</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($employees as $emp)
-                        <tr>
-                            <td>
-                                <span class="avatar">{{ strtoupper(substr($emp->name, 0, 1)) }}</span>
-                                {{ $emp->name }}
-                            </td>
-                            <td style="color:var(--muted-color,#64748b)">{{ $emp->email }}</td>
-                            <td><span class="badge badge-{{ $emp->role }}">{{ ucfirst($emp->role) }}</span></td>
-                            <td>
-                                <form method="POST" action="{{ route('settings.employee.destroy', $emp->id) }}"
-                                    onsubmit="return confirmDelete(this, 'Delete employee account for {{ addslashes($emp->name) }}? This cannot be undone.')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" style="text-align:center;padding:32px;color:var(--muted-color,#64748b)">
-                                <i class="fas fa-users" style="font-size:32px;opacity:.3;display:block;margin-bottom:8px"></i>
-                                No employee accounts yet.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            @endif
+
+            {{-- Admin Accounts --}}
+            <div class="s-card" style="margin-bottom:24px">
+                <div class="s-card-header">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="s-card-title">Admin Accounts ({{ $admins->count() }})</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody>
+                            @forelse($admins as $emp)
+                            <tr>
+                                <td><span class="avatar">{{ strtoupper(substr($emp->name, 0, 1)) }}</span> {{ $emp->name }}</td>
+                                <td style="color:var(--muted-color,#64748b)">{{ $emp->email }}</td>
+                                <td>
+                                    @if($emp->is_archived)
+                                        <span class="badge" style="background:#fef2f2;color:#991b1b">Archived</span>
+                                    @else
+                                        <span class="badge badge-admin">Active</span>
+                                    @endif
+                                </td>
+                                <td style="display:flex;gap:6px;flex-wrap:wrap">
+                                    @if($emp->is_archived)
+                                        <form method="POST" action="{{ route('settings.employee.unarchive', $emp->id) }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn" style="background:#dcfce7;color:#166534;padding:6px 12px;font-size:12px">
+                                                <i class="fas fa-undo"></i> Restore
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('settings.employee.archive', $emp->id) }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn" style="background:#fef9c3;color:#854d0e;padding:6px 12px;font-size:12px">
+                                                <i class="fas fa-archive"></i> Archive
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <form method="POST" action="{{ route('settings.employee.destroy', $emp->id) }}"
+                                        onsubmit="return confirmDelete(this, 'Delete admin account for {{ addslashes($emp->name) }}? This cannot be undone.')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted-color,#64748b)">No admin accounts yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Employee Accounts --}}
+            <div class="s-card">
+                <div class="s-card-header">
+                    <i class="fas fa-users"></i>
+                    <span class="s-card-title">Employee Accounts ({{ $employees->count() }})</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody>
+                            @forelse($employees as $emp)
+                            <tr>
+                                <td><span class="avatar" style="background:#16a34a">{{ strtoupper(substr($emp->name, 0, 1)) }}</span> {{ $emp->name }}</td>
+                                <td style="color:var(--muted-color,#64748b)">{{ $emp->email }}</td>
+                                <td>
+                                    @if($emp->is_archived)
+                                        <span class="badge" style="background:#fef2f2;color:#991b1b">Archived</span>
+                                    @else
+                                        <span class="badge badge-employee">Active</span>
+                                    @endif
+                                </td>
+                                <td style="display:flex;gap:6px;flex-wrap:wrap">
+                                    @if($emp->is_archived)
+                                        <form method="POST" action="{{ route('settings.employee.unarchive', $emp->id) }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn" style="background:#dcfce7;color:#166534;padding:6px 12px;font-size:12px">
+                                                <i class="fas fa-undo"></i> Restore
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('settings.employee.archive', $emp->id) }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn" style="background:#fef9c3;color:#854d0e;padding:6px 12px;font-size:12px">
+                                                <i class="fas fa-archive"></i> Archive
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <form method="POST" action="{{ route('settings.employee.destroy', $emp->id) }}"
+                                        onsubmit="return confirmDelete(this, 'Delete employee account for {{ addslashes($emp->name) }}? This cannot be undone.')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted-color,#64748b)">No employee accounts yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

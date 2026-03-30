@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ResidentsExport;
 use App\Imports\ResidentsImport;
 use App\Models\ActivityLog;
 use App\Models\Household;
@@ -52,6 +53,9 @@ class ResidentController extends Controller
                 $query->where('is_out_of_school_child', true);
             } elseif ($sector === 'out_of_school_youth') {
                 $query->where('is_out_of_school_youth', true);
+            } elseif ($sector === 'labor_force') {
+                // Labor Force filter shows unemployed labor force members only
+                $query->where('is_labor_force', true)->where('is_unemployed', true);
             } else {
                 $query->where("is_{$sector}", true);
             }
@@ -134,7 +138,7 @@ class ResidentController extends Controller
             'resident_type' => 'nullable|string|max:255',
             'religion' => 'nullable|string|max:255',
             'place_of_birth' => 'nullable|string|max:255',
-            'contact_number' => 'nullable|string|max:20',
+            'contact_number' => ['nullable', 'digits:11', 'regex:/^09\d{9}$/'],
             'email' => 'nullable|email|max:255',
             'philsys_number' => 'nullable|string|max:50',
             'province' => 'required|string|max:255',
@@ -151,11 +155,8 @@ class ResidentController extends Controller
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
             'is_solo_parent' => 'nullable|boolean',
-            'is_labor_force' => 'nullable|boolean',
-            'is_unemployed' => 'nullable|boolean',
-            'is_ofw' => 'nullable|boolean',
-            'is_indigenous' => 'nullable|boolean',
-            'is_student' => 'nullable|boolean',
+            'solo_parent_id_number' => 'nullable|string|max:100',
+            'sector' => 'nullable|in:labor_force,unemployed,ofw,indigenous,student',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
@@ -172,11 +173,14 @@ class ResidentController extends Controller
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
         $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
-        $validated['is_labor_force'] = $request->has('is_labor_force') ? 1 : 0;
-        $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
-        $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
-        $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
-        $validated['is_student'] = $request->has('is_student') ? 1 : 0;
+
+        $sector = $validated['sector'] ?? null;
+        unset($validated['sector']);
+        $validated['is_labor_force'] = $sector === 'labor_force' ? 1 : 0;
+        $validated['is_unemployed'] = ($sector === 'unemployed' || $sector === 'labor_force') ? 1 : 0;
+        $validated['is_ofw'] = $sector === 'ofw' ? 1 : 0;
+        $validated['is_indigenous'] = $sector === 'indigenous' ? 1 : 0;
+        $validated['is_student'] = $sector === 'student' ? 1 : 0;
         $validated['is_out_of_school_child'] = (! $validated['is_student'] && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
         $validated['is_out_of_school_youth'] = (! $validated['is_student'] && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['status'] = 'pending';
@@ -240,7 +244,7 @@ class ResidentController extends Controller
             'resident_type' => 'nullable|string|max:255',
             'religion' => 'nullable|string|max:255',
             'place_of_birth' => 'nullable|string|max:255',
-            'contact_number' => 'nullable|string|max:20',
+            'contact_number' => ['nullable', 'digits:11', 'regex:/^09\d{9}$/'],
             'email' => 'nullable|email|max:255',
             'philsys_number' => 'nullable|string|max:50',
             'province' => 'required|string|max:255',
@@ -257,11 +261,8 @@ class ResidentController extends Controller
             'is_pwd' => 'nullable|boolean',
             'is_voter' => 'nullable|boolean',
             'is_solo_parent' => 'nullable|boolean',
-            'is_labor_force' => 'nullable|boolean',
-            'is_unemployed' => 'nullable|boolean',
-            'is_ofw' => 'nullable|boolean',
-            'is_indigenous' => 'nullable|boolean',
-            'is_student' => 'nullable|boolean',
+            'solo_parent_id_number' => 'nullable|string|max:100',
+            'sector' => 'nullable|in:labor_force,unemployed,ofw,indigenous,student',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'is_deceased' => 'nullable|boolean',
@@ -281,11 +282,14 @@ class ResidentController extends Controller
         $validated['is_pwd'] = $request->has('is_pwd') ? 1 : 0;
         $validated['is_voter'] = $request->has('is_voter') ? 1 : 0;
         $validated['is_solo_parent'] = $request->has('is_solo_parent') ? 1 : 0;
-        $validated['is_labor_force'] = $request->has('is_labor_force') ? 1 : 0;
-        $validated['is_unemployed'] = $request->has('is_unemployed') ? 1 : 0;
-        $validated['is_ofw'] = $request->has('is_ofw') ? 1 : 0;
-        $validated['is_indigenous'] = $request->has('is_indigenous') ? 1 : 0;
-        $validated['is_student'] = $request->has('is_student') ? 1 : 0;
+
+        $sector = $validated['sector'] ?? null;
+        unset($validated['sector']);
+        $validated['is_labor_force'] = $sector === 'labor_force' ? 1 : 0;
+        $validated['is_unemployed'] = ($sector === 'unemployed' || $sector === 'labor_force') ? 1 : 0;
+        $validated['is_ofw'] = $sector === 'ofw' ? 1 : 0;
+        $validated['is_indigenous'] = $sector === 'indigenous' ? 1 : 0;
+        $validated['is_student'] = $sector === 'student' ? 1 : 0;
         $validated['is_out_of_school_child'] = (! $validated['is_student'] && $validated['age'] >= 6 && $validated['age'] <= 14) ? 1 : 0;
         $validated['is_out_of_school_youth'] = (! $validated['is_student'] && $validated['age'] >= 15 && $validated['age'] <= 24) ? 1 : 0;
         $validated['is_deceased'] = $request->has('is_deceased') ? 1 : 0;
@@ -296,6 +300,19 @@ class ResidentController extends Controller
 
         if (empty($validated['transferred_to'])) {
             $validated['transferred_to'] = null;
+        }
+
+        // Duplicate check: same name + birthdate as another resident
+        $duplicate = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($validated['first_name'])])
+            ->whereRaw('LOWER(last_name) = ?', [strtolower($validated['last_name'])])
+            ->where('birthdate', $validated['birthdate'])
+            ->where('id', '!=', $resident->id)
+            ->first();
+
+        if ($duplicate) {
+            return back()->withInput()->withErrors([
+                'first_name' => "A resident named {$duplicate->first_name} {$duplicate->last_name} with the same birthdate already exists in the system (ID #{$duplicate->id}).",
+            ]);
         }
 
         // Admin applies changes directly; employee sends for verification
@@ -335,7 +352,7 @@ class ResidentController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('residents.index')
+            return redirect()->back()
                 ->with('error', "Cannot apply edit for {$resident->first_name} {$resident->last_name}: the proposed data contains invalid values. Ask the employee to resubmit.");
         }
 
@@ -343,7 +360,7 @@ class ResidentController extends Controller
         ActivityLog::log('approved_edit', 'Resident', "Approved proposed edit for: {$resident->first_name} {$resident->last_name} (submitted by {$pendingEdit->submitted_by_name})");
         $pendingEdit->delete();
 
-        return redirect()->route('residents.index')
+        return redirect()->back()
             ->with('success', "Edit for {$resident->first_name} {$resident->last_name} has been approved and applied.");
     }
 
@@ -355,7 +372,7 @@ class ResidentController extends Controller
         ActivityLog::log('rejected_edit', 'Resident', "Rejected proposed edit for: {$name} (submitted by {$pendingEdit->submitted_by_name})");
         $pendingEdit->delete();
 
-        return redirect()->route('residents.index')
+        return redirect()->back()
             ->with('success', "Proposed edit for {$name} has been rejected.");
     }
 
@@ -375,6 +392,14 @@ class ResidentController extends Controller
             ->with('success', 'Resident deleted successfully!');
     }
 
+    public function pending()
+    {
+        $pendingResidents = Resident::where('status', 'pending')->latest()->get();
+        $pendingEdits = ResidentPendingEdit::with('resident')->latest()->get();
+
+        return view('residents.pending', compact('pendingResidents', 'pendingEdits'));
+    }
+
     public function approve($id)
     {
         $resident = Resident::where('status', 'pending')->findOrFail($id);
@@ -387,7 +412,7 @@ class ResidentController extends Controller
 
         ActivityLog::log('approved', 'Resident', "Approved resident record: {$resident->first_name} {$resident->last_name} (ID #{$resident->id})");
 
-        return redirect()->route('residents.index')
+        return redirect()->back()
             ->with('success', "Resident {$resident->first_name} {$resident->last_name} has been approved and added to records.");
     }
 
@@ -398,7 +423,7 @@ class ResidentController extends Controller
         ActivityLog::log('rejected', 'Resident', "Rejected and removed pending resident record: {$name} (ID #{$resident->id})");
         $resident->delete();
 
-        return redirect()->route('residents.index')
+        return redirect()->back()
             ->with('success', "Pending record for {$name} has been rejected and removed.");
     }
 
@@ -434,6 +459,94 @@ class ResidentController extends Controller
         }
 
         return redirect()->route('residents.index')->with('success', $msg);
+    }
+
+    public function export(Request $request)
+    {
+        $gender = $request->get('gender', '');
+        $civil = $request->get('civil', '');
+        $purok = $request->get('purok', '');
+        $classification = $request->get('classification', '');
+        $sector = $request->get('sector', '');
+        $citizenship = $request->get('citizenship', '');
+        $residentStatus = $request->get('resident_status', '');
+        $ageMin = $request->filled('age_min') ? (int) $request->age_min : null;
+        $ageMax = $request->filled('age_max') ? (int) $request->age_max : null;
+        $search = $request->get('search', '');
+
+        $query = Resident::where('status', 'approved')->with('household');
+
+        if ($gender) {
+            $query->where('gender', $gender);
+        }
+        if ($civil) {
+            $query->whereRaw('LOWER(civil_status) = ?', [strtolower($civil)]);
+        }
+        if ($purok) {
+            $query->where('address', 'like', ucfirst(strtolower($purok)).'%');
+        }
+        if ($classification === 'senior') {
+            $query->where('age', '>=', 60);
+        } elseif ($classification === 'pwd') {
+            $query->where('is_pwd', true);
+        } elseif ($classification === 'voter') {
+            $query->where('is_voter', true);
+        } elseif ($classification === 'solo_parent') {
+            $query->where('is_solo_parent', true);
+        }
+        if ($sector) {
+            if ($sector === 'out_of_school_child') {
+                $query->where('is_out_of_school_child', true);
+            } elseif ($sector === 'out_of_school_youth') {
+                $query->where('is_out_of_school_youth', true);
+            } elseif ($sector === 'labor_force') {
+                $query->where('is_labor_force', true)->where('is_unemployed', true);
+            } else {
+                $query->where("is_{$sector}", true);
+            }
+        }
+        if ($citizenship) {
+            $query->whereRaw('LOWER(nationality) = ?', [strtolower($citizenship)]);
+        }
+        if ($residentStatus === 'deceased') {
+            $query->where('is_deceased', true);
+        } elseif ($residentStatus === 'transferred') {
+            $query->whereNotNull('transferred_to');
+        } elseif ($residentStatus === 'no_household') {
+            $query->whereNull('household_id');
+        } elseif ($residentStatus === 'no_family') {
+            $query->whereNull('family_id');
+        }
+        if ($ageMin !== null) {
+            $query->where('age', '>=', $ageMin);
+        }
+        if ($ageMax !== null) {
+            $query->where('age', '<=', $ageMax);
+        }
+        if ($search) {
+            $s = strtolower($search);
+            $query->where(function ($q) use ($s) {
+                $q->whereRaw('LOWER(first_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(last_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(middle_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(address) like ?', ["%{$s}%"]);
+            });
+        }
+
+        $query->orderBy('last_name')->orderBy('first_name');
+
+        $format = $request->get('format', 'xlsx');
+        if ($format === 'csv') {
+            $filename = 'residents_'.now()->format('Y-m-d_His').'.csv';
+            ActivityLog::log('exported', 'Resident', 'Exported residents list to CSV.');
+
+            return Excel::download(new ResidentsExport($query), $filename, \Maatwebsite\Excel\Excel::CSV);
+        }
+
+        $filename = 'residents_'.now()->format('Y-m-d_His').'.xlsx';
+        ActivityLog::log('exported', 'Resident', 'Exported residents list to Excel.');
+
+        return Excel::download(new ResidentsExport($query), $filename);
     }
 
     public function suggest(Request $request): JsonResponse

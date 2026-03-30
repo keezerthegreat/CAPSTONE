@@ -7,6 +7,7 @@ use App\Models\PasswordResetRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
@@ -23,6 +24,19 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        $throttleKey = 'login:'.strtolower($request->input('email')).'|'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $minutes = ceil($seconds / 60);
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => "Too many failed login attempts. Please try again in {$minutes} minute(s).",
+                ]);
+        }
+
         if (Auth::attempt($request->only('email', 'password'))) {
             // Block archived accounts
             if (Auth::user()->is_archived) {
@@ -34,16 +48,23 @@ class AuthController extends Controller
                         'email' => 'This account has been archived. Please contact your administrator.',
                     ]);
             }
+
+            RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
             ActivityLog::log('logged_in', 'Auth', 'User logged in');
 
             return redirect()->route('dashboard');
         }
 
+        RateLimiter::hit($throttleKey, 900); // Lock for 15 minutes after 5 failures
+        $remaining = 5 - RateLimiter::attempts($throttleKey);
+
         return back()
             ->withInput($request->only('email'))
             ->withErrors([
-                'email' => 'Invalid email or password.',
+                'email' => $remaining > 0
+                    ? "Invalid email or password. {$remaining} attempt(s) remaining before lockout."
+                    : 'Invalid email or password.',
             ]);
     }
 

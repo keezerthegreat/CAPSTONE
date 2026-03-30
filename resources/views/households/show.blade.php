@@ -103,7 +103,7 @@
     <div class="card-body">
       <div class="info-grid">
         <div class="info-item">
-          <div class="label">Purok</div>
+          <div class="label">Households</div>
           <div class="value">{{ $household->sitio }}</div>
         </div>
         <div class="info-item">

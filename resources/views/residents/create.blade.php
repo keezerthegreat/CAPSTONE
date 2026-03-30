@@ -19,6 +19,7 @@
 .form-group.half { grid-column:span 2; }
 label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
 label .req { color:#dc2626; margin-left:2px; }
+label .opt { font-weight:400; color:var(--muted); font-size:11px; margin-left:2px; }
 input, select, textarea { padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:inherit; color:var(--text); outline:none; transition:border-color .15s; background:#fff; width:100%; box-sizing:border-box; }
 input:focus, select:focus, textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(26,58,107,.08); }
 input::placeholder { color:#94a3b8; }
@@ -98,12 +99,17 @@ input::placeholder { color:#94a3b8; }
           <input type="text" name="first_name" value="{{ old('first_name') }}" placeholder="e.g. Juan" required>
         </div>
         <div class="form-group">
-          <label>Middle Name</label>
+          <label>Middle Name <span class="opt">(optional)</span></label>
           <input type="text" name="middle_name" value="{{ old('middle_name') }}" placeholder="e.g. Santos">
         </div>
         <div class="form-group">
-          <label>Suffix</label>
-          <input type="text" name="suffix" value="{{ old('suffix') }}" placeholder="e.g. Jr., Sr., II">
+          <label>Suffix <span class="opt">(optional)</span></label>
+          <select name="suffix">
+            <option value="">— None —</option>
+            @foreach(['Jr.','Sr.','II','III','IV','V'] as $sfx)
+              <option value="{{ $sfx }}" {{ old('suffix') === $sfx ? 'selected' : '' }}>{{ $sfx }}</option>
+            @endforeach
+          </select>
         </div>
         <div class="form-group">
           <label>Sex <span class="req">*</span></label>
@@ -121,12 +127,12 @@ input::placeholder { color:#94a3b8; }
         <input type="hidden" name="age" id="age" value="{{ old('age') }}">
         
         <div class="form-group">
-          <label>Place of Birth</label>
+          <label>Place of Birth <span class="opt">(optional)</span></label>
           <input type="text" name="place_of_birth" value="{{ old('place_of_birth') }}" placeholder="e.g. Ormoc City, Leyte">
         </div>
 
         <div class="form-group">
-          <label>Civil Status</label>
+          <label>Civil Status <span class="opt">(optional)</span></label>
           <select name="civil_status">
             <option value="">Select...</option>
             @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law (Live-in)','Divorced'] as $cs)
@@ -137,7 +143,7 @@ input::placeholder { color:#94a3b8; }
 
         
         <div class="form-group">
-          <label>Citizenship</label>
+          <label>Citizenship <span class="opt">(optional)</span></label>
           <select name="nationality">
             <option value="">Select...</option>
             @foreach(['Filipino', 'Foreigner'] as $cs)
@@ -147,7 +153,7 @@ input::placeholder { color:#94a3b8; }
         </div>
 
         <div class="form-group">
-          <label>Inhabitant</label>
+          <label>Inhabitant <span class="opt">(optional)</span></label>
           <select name="resident_type">
             <option value="">Select...</option>
             @foreach(['Migrant','Non-Migrant','Transient'] as $rt)
@@ -178,7 +184,7 @@ input::placeholder { color:#94a3b8; }
           $isOtherCreate = $oldReligion && !in_array($oldReligion, $religionOptions);
         @endphp
         <div class="form-group">
-          <label>Religion</label>
+          <label>Religion <span class="opt">(optional)</span></label>
           <input type="hidden" name="religion" id="religion_value" value="{{ $oldReligion }}">
           <select id="religion_select" onchange="handleReligionChange(this)">
             <option value="">Select...</option>
@@ -204,15 +210,16 @@ input::placeholder { color:#94a3b8; }
       <div class="card-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Contact Number</label>
-            <input type="text" name="contact_number" value="{{ old('contact_number') }}" placeholder="e.g. 09xx-xxx-xxxx">
+            <label>Contact Number <span class="opt">(optional)</span></label>
+            <input type="text" name="contact_number" id="contact_number_create" value="{{ old('contact_number') }}" placeholder="e.g. 09xxxxxxxxx" maxlength="11" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,11);validateContact(this,'contact_hint_create')" onblur="validateContact(this,'contact_hint_create')">
+            <span id="contact_hint_create" style="font-size:11px;margin-top:3px;display:none"></span>
           </div>
           <div class="form-group">
-            <label>Email Address</label>
+            <label>Email Address <span class="opt">(optional)</span></label>
             <input type="email" name="email" value="{{ old('email') }}" placeholder="e.g. juan@email.com">
           </div>
           <div class="form-group">
-            <label>PhilSys Card Number</label>
+            <label>PhilSys Card Number <span class="opt">(optional)</span></label>
             <input type="text" name="philsys_number" id="philsysInput" value="{{ old('philsys_number') }}" placeholder="e.g. 1234-5678-9012-3456" maxlength="19" oninput="formatPhilSys(this)" onblur="formatPhilSys(this)">
           </div>
         </div>
@@ -251,7 +258,7 @@ input::placeholder { color:#94a3b8; }
             </select>
           </div>
           <div class="form-group full">
-            <label>Sitio / Street</label>
+            <label>Sitio / Street <span class="opt">(optional)</span></label>
             <input type="text" name="purok" value="{{ old('purok') }}" placeholder="e.g. Sitio Flan, 123 Rizal St.">
           </div>
         </div>
@@ -273,19 +280,19 @@ input::placeholder { color:#94a3b8; }
       <div class="card-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Occupation</label>
+            <label>Occupation <span class="opt">(optional)</span></label>
             <input type="text" name="occupation" value="{{ old('occupation') }}" placeholder="e.g. Farmer, Student, N/A">
           </div>
           <div class="form-group">
-            <label>Employer / Workplace</label>
+            <label>Employer / Workplace <span class="opt">(optional)</span></label>
             <input type="text" name="employer" value="{{ old('employer') }}" placeholder="e.g. DepEd">
           </div>
           <div class="form-group">
-            <label>Estimated Monthly Income</label>
+            <label>Estimated Monthly Income <span class="opt">(optional)</span></label>
             <input type="number" name="monthly_income" value="{{ old('monthly_income') }}" placeholder="e.g. 15000" min="0">
           </div>
           <div class="form-group">
-            <label>Highest Educational Attainment</label>
+            <label>Highest Educational Attainment <span class="opt">(optional)</span></label>
             <select name="education_level" id="education_level" onchange="toggleEduSubLevel()">
               <option value="">Select...</option>
               @foreach(['No Formal Education','Elementary','High School','Senior High School','Vocational','College','Post-Graduate'] as $ed)
@@ -342,9 +349,14 @@ input::placeholder { color:#94a3b8; }
             <span>Registered Voter</span>
           </label>
           <label class="check-item">
-            <input type="checkbox" name="is_solo_parent" value="1" {{ old('is_solo_parent') ? 'checked':'' }}>
+            <input type="checkbox" name="is_solo_parent" id="is_solo_parent" value="1" {{ old('is_solo_parent') ? 'checked':'' }} onchange="toggleSoloParentId()">
             <span>Solo Parent</span>
           </label>
+        </div>
+        <div id="solo-parent-id-group" style="{{ old('is_solo_parent') ? '' : 'display:none' }};margin-top:12px;max-width:360px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:6px">Solo Parent ID Number <span style="color:#dc2626">*</span></label>
+          <input type="text" name="solo_parent_id_number" value="{{ old('solo_parent_id_number') }}" placeholder="e.g. SP-2024-00123" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Enter the Solo Parent ID number for verification.</div>
         </div>
       </div>
     </div>
@@ -353,27 +365,16 @@ input::placeholder { color:#94a3b8; }
     <div class="card">
       <div class="card-header"><div class="card-title"><i class="fas fa-tags"></i> Sector</div></div>
       <div class="card-body">
-        <div class="check-group">
-          <label class="check-item">
-            <input type="checkbox" name="is_labor_force" value="1" {{ old('is_labor_force') ? 'checked':'' }}>
-            <span>Labor Force</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="is_unemployed" value="1" {{ old('is_unemployed') ? 'checked':'' }}>
-            <span>Unemployed</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="is_ofw" value="1" {{ old('is_ofw') ? 'checked':'' }}>
-            <span>OFW</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="is_indigenous" value="1" {{ old('is_indigenous') ? 'checked':'' }}>
-            <span>Indigenous Person</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="is_student" value="1" {{ old('is_student') ? 'checked':'' }}>
-            <span>Student</span>
-          </label>
+        <div class="form-group" style="max-width:360px">
+          <label>Primary Sector <span style="font-weight:400;color:var(--muted);font-size:12px">(optional)</span></label>
+          <select name="sector">
+            <option value="">— None —</option>
+            <option value="labor_force" {{ old('sector') === 'labor_force' ? 'selected' : '' }}>Labor Force (Unemployed)</option>
+            <option value="unemployed" {{ old('sector') === 'unemployed' ? 'selected' : '' }}>Unemployed</option>
+            <option value="ofw" {{ old('sector') === 'ofw' ? 'selected' : '' }}>OFW (Overseas Filipino Worker)</option>
+            <option value="indigenous" {{ old('sector') === 'indigenous' ? 'selected' : '' }}>Indigenous Person</option>
+            <option value="student" {{ old('sector') === 'student' ? 'selected' : '' }}>Student</option>
+          </select>
         </div>
       </div>
     </div>
@@ -382,7 +383,7 @@ input::placeholder { color:#94a3b8; }
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
       @if(true)
-      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Resident Record</button>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
       @else
       <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit for Verification</button>
       @endif
@@ -650,9 +651,29 @@ function handleReligionChange(select) {
 
 </script>
 <script>
+function toggleSoloParentId() {
+  const checked = document.getElementById('is_solo_parent').checked;
+  document.getElementById('solo-parent-id-group').style.display = checked ? '' : 'none';
+}
 function formatPhilSys(el) {
   const digits = el.value.replace(/\D/g, '').slice(0, 16);
   el.value = digits.match(/.{1,4}/g)?.join('-') || digits;
+}
+function validateContact(el, hintId) {
+  const hint = document.getElementById(hintId);
+  if (!hint) return;
+  const v = el.value;
+  if (!v) { hint.style.display = 'none'; return; }
+  if (!/^09/.test(v)) {
+    hint.textContent = '⚠ Must start with 09';
+    hint.style.cssText = 'font-size:11px;margin-top:3px;display:block;color:#b45309';
+  } else if (v.length < 11) {
+    hint.textContent = '⚠ Must be exactly 11 digits (' + v.length + '/11)';
+    hint.style.cssText = 'font-size:11px;margin-top:3px;display:block;color:#b45309';
+  } else {
+    hint.textContent = '✓ Valid contact number';
+    hint.style.cssText = 'font-size:11px;margin-top:3px;display:block;color:#16a34a';
+  }
 }
 </script>
 @endsection

@@ -16,6 +16,7 @@
 .form-group { display:flex; flex-direction:column; gap:5px; }
 .form-group.full { grid-column:span 3; }
 label { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+label .opt { font-weight:400; color:var(--muted); font-size:11px; margin-left:2px; }
 input, select, textarea { padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:inherit; color:var(--text); outline:none; background:#fff; width:100%; box-sizing:border-box; }
 input:focus, select:focus, textarea:focus { border-color:var(--primary); }
 .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; text-decoration:none; }
@@ -86,12 +87,17 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             <input type="text" name="first_name" value="{{ old('first_name', $resident->first_name) }}" required>
           </div>
           <div class="form-group">
-            <label>Middle Name</label>
+            <label>Middle Name <span class="opt">(optional)</span></label>
             <input type="text" name="middle_name" value="{{ old('middle_name', $resident->middle_name) }}">
           </div>
           <div class="form-group">
-            <label>Suffix</label>
-            <input type="text" name="suffix" value="{{ old('suffix', $resident->suffix) }}" placeholder="e.g. Jr., Sr., II">
+            <label>Suffix <span class="opt">(optional)</span></label>
+            <select name="suffix">
+              <option value="">— None —</option>
+              @foreach(['Jr.','Sr.','II','III','IV','V'] as $sfx)
+                <option value="{{ $sfx }}" {{ old('suffix', $resident->suffix) === $sfx ? 'selected' : '' }}>{{ $sfx }}</option>
+              @endforeach
+            </select>
           </div>
           <div class="form-group">
             <label>Sex *</label>
@@ -109,11 +115,11 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
           </div>
           <input type="hidden" name="age" id="age" value="{{ old('age', $resident->age) }}">
           <div class="form-group">
-            <label>Place of Birth</label>
+            <label>Place of Birth <span class="opt">(optional)</span></label>
             <input type="text" name="place_of_birth" value="{{ old('place_of_birth', $resident->place_of_birth) }}" placeholder="e.g. Ormoc City, Leyte">
           </div>
           <div class="form-group">
-            <label>Civil Status</label>
+            <label>Civil Status <span class="opt">(optional)</span></label>
             <select name="civil_status">
               <option value="">Select...</option>
               @foreach(['Single','Married','Widowed','Separated','Annulled','Common Law (Live-in)','Divorced'] as $cs)
@@ -124,7 +130,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
 
           
            <div class="form-group">
-          <label>Citizenship</label>
+          <label>Citizenship <span class="opt">(optional)</span></label>
           <select name="nationality">
             <option value="">Select...</option>
             @foreach(['Filipino', 'Foreigner'] as $cs)
@@ -134,7 +140,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
         </div>
 
           <div class="form-group">
-            <label>Inhabitant</label>
+            <label>Inhabitant <span class="opt">(optional)</span></label>
             <select name="resident_type">
               <option value="">Select...</option>
               @foreach(['Migrant','Non-Migrant','Transient'] as $rt)
@@ -165,7 +171,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             $isOtherEdit     = $currentReligion && !in_array($currentReligion, $religionOptions);
           @endphp
           <div class="form-group">
-            <label>Religion</label>
+            <label>Religion <span class="opt">(optional)</span></label>
             <input type="hidden" name="religion" id="religion_value" value="{{ $currentReligion }}">
             <select id="religion_select" onchange="handleReligionChange(this)">
               <option value="">Select...</option>
@@ -188,15 +194,16 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
       <div class="card-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Contact Number</label>
-            <input type="text" name="contact_number" value="{{ old('contact_number', $resident->contact_number) }}" placeholder="09xxxxxxxxx">
+            <label>Contact Number <span class="opt">(optional)</span></label>
+            <input type="text" name="contact_number" id="contact_number_edit" value="{{ old('contact_number', $resident->contact_number) }}" placeholder="09xxxxxxxxx" maxlength="11" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,11);validateContact(this,'contact_hint_edit')" onblur="validateContact(this,'contact_hint_edit')">
+            <span id="contact_hint_edit" style="font-size:11px;margin-top:3px;display:none"></span>
           </div>
           <div class="form-group">
-            <label>Email Address</label>
+            <label>Email Address <span class="opt">(optional)</span></label>
             <input type="email" name="email" value="{{ old('email', $resident->email) }}">
           </div>
           <div class="form-group">
-            <label>PhilSys Card Number</label>
+            <label>PhilSys Card Number <span class="opt">(optional)</span></label>
             <input type="text" name="philsys_number" id="philsysInput" value="{{ old('philsys_number', $resident->philsys_number) }}" placeholder="e.g. 1234-5678-9012-3456" maxlength="19" oninput="formatPhilSys(this)" onblur="formatPhilSys(this)">
           </div>
         </div>
@@ -242,7 +249,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
             </select>
           </div>
           <div class="form-group full">
-            <label>Sitio / Street</label>
+            <label>Sitio / Street <span class="opt">(optional)</span></label>
             <input type="text" name="purok" value="{{ $oldPurok }}" placeholder="e.g. Sitio Flan, 123 Rizal St.">
           </div>
         </div>
@@ -261,19 +268,19 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
       <div class="card-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Occupation</label>
+            <label>Occupation <span class="opt">(optional)</span></label>
             <input type="text" name="occupation" value="{{ old('occupation', $resident->occupation) }}">
           </div>
           <div class="form-group">
-            <label>Employer / Workplace</label>
+            <label>Employer / Workplace <span class="opt">(optional)</span></label>
             <input type="text" name="employer" value="{{ old('employer', $resident->employer) }}">
           </div>
           <div class="form-group">
-            <label>Monthly Income</label>
+            <label>Monthly Income <span class="opt">(optional)</span></label>
             <input type="number" name="monthly_income" value="{{ old('monthly_income', $resident->monthly_income) }}" min="0" step="0.01">
           </div>
           <div class="form-group">
-            <label>Education Level</label>
+            <label>Education Level <span class="opt">(optional)</span></label>
             <select name="education_level" id="education_level" onchange="toggleEduSubLevel()">
               <option value="">Select...</option>
               @foreach(['No Formal Education','Elementary','High School','Senior High School','Vocational','College','Post-Graduate'] as $ed)
@@ -328,9 +335,14 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
         Registered Voter
       </label>
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_solo_parent" value="1" {{ $resident->is_solo_parent ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
+        <input type="checkbox" name="is_solo_parent" id="is_solo_parent" value="1" {{ $resident->is_solo_parent ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0" onchange="toggleSoloParentId()">
         Solo Parent
       </label>
+      <div id="solo-parent-id-group" style="{{ $resident->is_solo_parent ? '' : 'display:none' }};margin-top:12px;max-width:360px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:6px">Solo Parent ID Number <span style="color:#dc2626">*</span></label>
+        <input type="text" name="solo_parent_id_number" value="{{ old('solo_parent_id_number', $resident->solo_parent_id_number) }}" placeholder="e.g. SP-2024-00123" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Enter the Solo Parent ID number for verification.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -339,27 +351,24 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); }
 <div class="card">
   <div class="card-header"><div class="card-title"><i class="fas fa-tags"></i> Sector</div></div>
   <div class="card-body">
-    <div style="display:flex;gap:32px;flex-wrap:wrap">
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_labor_force" value="1" {{ $resident->is_labor_force ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Labor Force
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_unemployed" value="1" {{ $resident->is_unemployed ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Unemployed
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_ofw" value="1" {{ $resident->is_ofw ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        OFW
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_indigenous" value="1" {{ $resident->is_indigenous ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Indigenous Person
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px;text-transform:none;letter-spacing:0;cursor:pointer;font-weight:500">
-        <input type="checkbox" name="is_student" value="1" {{ $resident->is_student ? 'checked' : '' }} style="width:16px;height:16px;padding:0;margin:0">
-        Student
-      </label>
+    @php
+      $currentSector = old('sector',
+        $resident->is_labor_force ? 'labor_force' :
+        ($resident->is_unemployed ? 'unemployed' :
+        ($resident->is_ofw ? 'ofw' :
+        ($resident->is_indigenous ? 'indigenous' :
+        ($resident->is_student ? 'student' : '')))));
+    @endphp
+    <div style="max-width:360px">
+      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:6px">Primary Sector <span style="font-weight:400;font-size:12px">(optional)</span></label>
+      <select name="sector" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit">
+        <option value="">— None —</option>
+        <option value="labor_force" {{ $currentSector === 'labor_force' ? 'selected' : '' }}>Labor Force (Unemployed)</option>
+        <option value="unemployed" {{ $currentSector === 'unemployed' ? 'selected' : '' }}>Unemployed</option>
+        <option value="ofw" {{ $currentSector === 'ofw' ? 'selected' : '' }}>OFW (Overseas Filipino Worker)</option>
+        <option value="indigenous" {{ $currentSector === 'indigenous' ? 'selected' : '' }}>Indigenous Person</option>
+        <option value="student" {{ $currentSector === 'student' ? 'selected' : '' }}>Student</option>
+      </select>
     </div>
   </div>
 </div>
@@ -417,7 +426,7 @@ document.getElementById('isTransferred').addEventListener('change', function() {
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <a href="{{ route('residents.index') }}" class="btn btn-outline">Cancel</a>
       @if(true)
-        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
       @else
         <button type="submit" class="btn btn-primary" style="background:#2563eb"><i class="fas fa-paper-plane"></i> Submit for Verification</button>
       @endif
@@ -470,9 +479,29 @@ document.getElementById('birthdate').addEventListener('change', function() {
 updateSeniorCheckbox({{ $resident->age ?? 0 }});
 </script>
 <script>
+function toggleSoloParentId() {
+  const checked = document.getElementById('is_solo_parent').checked;
+  document.getElementById('solo-parent-id-group').style.display = checked ? '' : 'none';
+}
 function formatPhilSys(el) {
   const digits = el.value.replace(/\D/g, '').slice(0, 16);
   el.value = digits.match(/.{1,4}/g)?.join('-') || digits;
+}
+function validateContact(el, hintId) {
+  const hint = document.getElementById(hintId);
+  if (!hint) return;
+  const v = el.value;
+  if (!v) { hint.style.display = 'none'; return; }
+  if (!/^09/.test(v)) {
+    hint.textContent = '⚠ Must start with 09';
+    hint.style.cssText = 'font-size:11px;margin-top:3px;display:block;color:#b45309';
+  } else if (v.length < 11) {
+    hint.textContent = '⚠ Must be exactly 11 digits (' + v.length + '/11)';
+    hint.style.cssText = 'font-size:11px;margin-top:3px;display:block;color:#b45309';
+  } else {
+    hint.textContent = '✓ Valid contact number';
+    hint.style.cssText = 'font-size:11px;margin-top:3px;display:block;color:#16a34a';
+  }
 }
 // Format existing value on load
 (function() {

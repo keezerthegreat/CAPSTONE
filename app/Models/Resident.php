@@ -77,6 +77,7 @@ class Resident extends Model
         'is_pwd',
         'is_voter',
         'is_solo_parent',
+        'solo_parent_id_number',
         'is_labor_force',
         'is_unemployed',
         'is_ofw',

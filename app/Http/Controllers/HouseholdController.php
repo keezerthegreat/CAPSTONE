@@ -140,11 +140,26 @@ class HouseholdController extends Controller
             ->all();
         $memberCount = count($memberIds) + 1; // +1 for the head
 
-        // Clear old member links, then reassign head + members
+        // Find residents being transferred in from other households, so we can fix those households' counts
+        $newResidentIds = array_merge([$request->head_resident_id], $memberIds);
+        $affectedHouseholdIds = Resident::whereIn('id', $newResidentIds)
+            ->whereNotNull('household_id')
+            ->where('household_id', '!=', $household->id)
+            ->pluck('household_id')
+            ->unique()
+            ->all();
+
+        // Clear old member links for this household, then reassign head + members
         Resident::where('household_id', $household->id)->update(['household_id' => null]);
         Resident::where('id', $request->head_resident_id)->update(['household_id' => $household->id]);
         if (! empty($memberIds)) {
             Resident::whereIn('id', $memberIds)->update(['household_id' => $household->id]);
+        }
+
+        // Recalculate member counts for any other households that lost residents
+        foreach ($affectedHouseholdIds as $affectedId) {
+            $count = Resident::where('household_id', $affectedId)->count();
+            Household::where('id', $affectedId)->update(['member_count' => $count]);
         }
 
         $data = $request->only([
