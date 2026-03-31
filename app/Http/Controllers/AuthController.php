@@ -56,15 +56,25 @@ class AuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        RateLimiter::hit($throttleKey, 900); // Lock for 15 minutes after 3 failures
+        RateLimiter::hit($throttleKey, 900);
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $minutes = ceil($seconds / 60);
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => "Too many failed login attempts. Please try again in {$minutes} minute(s).",
+                ]);
+        }
+
         $remaining = 3 - RateLimiter::attempts($throttleKey);
 
         return back()
             ->withInput($request->only('email'))
             ->withErrors([
-                'email' => $remaining > 0
-                    ? "Invalid email or password. {$remaining} attempt(s) remaining before lockout."
-                    : 'Invalid email or password.',
+                'email' => "Invalid email or password. {$remaining} attempt(s) remaining before lockout.",
             ]);
     }
 
