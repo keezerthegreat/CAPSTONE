@@ -237,6 +237,15 @@
         transform: translateY(0);
     }
 
+    .btn-submit:disabled {
+        background: linear-gradient(135deg, #555 0%, #444 100%);
+        color: #999;
+        cursor: not-allowed;
+        opacity: 0.6;
+        box-shadow: none;
+        transform: none;
+    }
+
     /* Forgot password link */
     .forgot-link {
         display: block;
@@ -407,8 +416,9 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">
-                Sign In
+            @php $isLockedOut = str_contains($errors->first('email') ?? '', 'Too many failed login attempts'); @endphp
+            <button type="submit" class="btn-submit" {{ $isLockedOut ? 'disabled' : '' }}>
+                {{ $isLockedOut ? 'Account Locked' : 'Sign In' }}
             </button>
 
         </form>
