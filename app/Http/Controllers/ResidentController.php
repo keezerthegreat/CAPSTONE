@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ResidentsExport;
+use App\Exports\ResidentsRbiExport;
 use App\Imports\ResidentsImport;
 use App\Models\ActivityLog;
 use App\Models\Household;
@@ -547,6 +548,85 @@ class ResidentController extends Controller
         ActivityLog::log('exported', 'Resident', 'Exported residents list to Excel.');
 
         return Excel::download(new ResidentsExport($query), $filename);
+    }
+
+    public function exportRbi(Request $request)
+    {
+        $gender = $request->get('gender', '');
+        $civil = $request->get('civil', '');
+        $purok = $request->get('purok', '');
+        $classification = $request->get('classification', '');
+        $sector = $request->get('sector', '');
+        $citizenship = $request->get('citizenship', '');
+        $residentStatus = $request->get('resident_status', '');
+        $ageMin = $request->filled('age_min') ? (int) $request->age_min : null;
+        $ageMax = $request->filled('age_max') ? (int) $request->age_max : null;
+        $search = $request->get('search', '');
+
+        $query = Resident::where('status', 'approved');
+
+        if ($gender) {
+            $query->where('gender', $gender);
+        }
+        if ($civil) {
+            $query->whereRaw('LOWER(civil_status) = ?', [strtolower($civil)]);
+        }
+        if ($purok) {
+            $query->where('address', 'like', ucfirst(strtolower($purok)).'%');
+        }
+        if ($classification === 'senior') {
+            $query->where('age', '>=', 60);
+        } elseif ($classification === 'pwd') {
+            $query->where('is_pwd', true);
+        } elseif ($classification === 'voter') {
+            $query->where('is_voter', true);
+        } elseif ($classification === 'solo_parent') {
+            $query->where('is_solo_parent', true);
+        }
+        if ($sector) {
+            if ($sector === 'out_of_school_child') {
+                $query->where('is_out_of_school_child', true);
+            } elseif ($sector === 'out_of_school_youth') {
+                $query->where('is_out_of_school_youth', true);
+            } elseif ($sector === 'labor_force') {
+                $query->where('is_labor_force', true)->where('is_unemployed', true);
+            } else {
+                $query->where("is_{$sector}", true);
+            }
+        }
+        if ($citizenship) {
+            $query->whereRaw('LOWER(nationality) = ?', [strtolower($citizenship)]);
+        }
+        if ($residentStatus === 'deceased') {
+            $query->where('is_deceased', true);
+        } elseif ($residentStatus === 'transferred') {
+            $query->whereNotNull('transferred_to');
+        } elseif ($residentStatus === 'no_household') {
+            $query->whereNull('household_id');
+        } elseif ($residentStatus === 'no_family') {
+            $query->whereNull('family_id');
+        }
+        if ($ageMin !== null) {
+            $query->where('age', '>=', $ageMin);
+        }
+        if ($ageMax !== null) {
+            $query->where('age', '<=', $ageMax);
+        }
+        if ($search) {
+            $s = strtolower($search);
+            $query->where(function ($q) use ($s) {
+                $q->whereRaw('LOWER(first_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(last_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(middle_name) like ?', ["%{$s}%"])
+                    ->orWhereRaw('LOWER(address) like ?', ["%{$s}%"]);
+            });
+        }
+
+        $query->orderBy('household_id')->orderBy('last_name')->orderBy('first_name');
+
+        ActivityLog::log('exported', 'Resident', 'Exported residents list in RBI format.');
+
+        return (new ResidentsRbiExport($query))->download();
     }
 
     public function suggest(Request $request): JsonResponse

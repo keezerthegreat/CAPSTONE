@@ -163,8 +163,9 @@ tbody tr:last-child td { border-bottom: none; }
     @endif
     @php
       $exportBase = route('residents.export') . (request()->getQueryString() ? '?' . request()->getQueryString() . '&' : '?');
+      $exportRbiUrl = route('residents.export.rbi') . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
     @endphp
-    <a href="{{ $exportBase }}format=xlsx"
+    <a href="{{ $exportRbiUrl }}"
        class="btn" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-weight:600;">
       <i class="fas fa-file-excel"></i> Export Excel
     </a>

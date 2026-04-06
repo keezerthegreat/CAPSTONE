@@ -120,6 +120,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/residents-import', [ResidentController::class, 'importForm'])->name('residents.import.form');
         Route::post('/residents-import', [ResidentController::class, 'import'])->name('residents.import');
         Route::get('/residents-export', [ResidentController::class, 'export'])->name('residents.export');
+        Route::get('/residents-export-rbi', [ResidentController::class, 'exportRbi'])->name('residents.export.rbi');
         Route::post('/residents/{id}/approve', [ResidentController::class, 'approve'])->name('residents.approve');
         Route::post('/residents/{id}/reject', [ResidentController::class, 'reject'])->name('residents.reject');
         Route::post('/residents/edits/{id}/approve', [ResidentController::class, 'approveEdit'])->name('residents.approveEdit');
