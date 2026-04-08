@@ -449,14 +449,19 @@ class ResidentController extends Controller
         }
 
         $imported = $import->dataSheet->imported;
+        $updated = $import->dataSheet->updated;
         $skipped = $import->dataSheet->skipped;
         $duplicates = $import->dataSheet->duplicates;
 
-        ActivityLog::log('created', 'Resident', "Bulk imported {$imported} resident(s) via Excel.");
+        ActivityLog::log('created', 'Resident', "Bulk imported {$imported} resident(s), updated {$updated} record(s) via Excel.");
 
-        $msg = "Import complete — {$imported} resident(s) added, {$skipped} row(s) skipped.";
+        $msg = "Import complete — {$imported} resident(s) added";
+        if ($updated > 0) {
+            $msg .= ", {$updated} existing record(s) updated from newer spreadsheet data";
+        }
+        $msg .= ", {$skipped} row(s) skipped.";
         if ($duplicates > 0) {
-            $msg .= " ({$duplicates} duplicate(s) skipped.)";
+            $msg .= " ({$duplicates} already up-to-date.)";
         }
 
         return redirect()->route('residents.index')->with('success', $msg);

@@ -462,15 +462,27 @@ tbody tr:last-child td { border-bottom: none; }
             </td>
 
             <td>
+              @php
+                $isMinor = $resident->age !== null && $resident->age < 18;
+                $hasAny = $resident->is_senior || $resident->is_pwd || $resident->is_voter
+                    || $resident->is_solo_parent || $isMinor
+                    || $resident->is_labor_force || $resident->is_unemployed || $resident->is_ofw
+                    || $resident->is_indigenous || $resident->is_out_of_school_child
+                    || $resident->is_out_of_school_youth || $resident->is_student;
+              @endphp
               @if($resident->is_senior)<span class="badge badge-senior">Senior</span>@endif
               @if($resident->is_pwd)<span class="badge badge-pwd">PWD</span>@endif
               @if($resident->is_voter)<span class="badge" style="background:#f3e8ff;color:#6b21a8">Voter</span>@endif
               @if($resident->is_solo_parent)<span class="badge" style="background:#fef9c3;color:#854d0e">Solo Parent</span>@endif
-              @php $isMinor = $resident->age !== null && $resident->age < 18; @endphp
               @if($isMinor)<span class="badge" style="background:#e0f2fe;color:#0369a1">Minor</span>@endif
-              @if(!$resident->is_senior && !$resident->is_pwd && !$resident->is_voter && !$resident->is_solo_parent && !$isMinor)
-              <span style="color:var(--muted);font-size:12px">—</span>
-              @endif
+              @if($resident->is_labor_force && !$resident->is_unemployed)<span class="badge" style="background:#dcfce7;color:#166534">Labor Force</span>@endif
+              @if($resident->is_unemployed)<span class="badge" style="background:#fee2e2;color:#991b1b">Unemployed</span>@endif
+              @if($resident->is_ofw)<span class="badge" style="background:#dbeafe;color:#1e40af">OFW</span>@endif
+              @if($resident->is_indigenous)<span class="badge" style="background:#fde8d8;color:#92400e">Indigenous</span>@endif
+              @if($resident->is_out_of_school_child)<span class="badge" style="background:#fef9c3;color:#713f12">OSC</span>@endif
+              @if($resident->is_out_of_school_youth)<span class="badge" style="background:#fef9c3;color:#713f12">OSY</span>@endif
+              @if($resident->is_student)<span class="badge" style="background:#e0f2fe;color:#075985">Student</span>@endif
+              @if(!$hasAny)<span style="color:var(--muted);font-size:12px">—</span>@endif
             </td>
 
             <td>

@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Resident;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
@@ -47,7 +48,10 @@ class ResidentsRbiExport
             $sheet->setCellValue('K'.$rowNum, strtoupper($resident->place_of_birth ?? ''));
 
             if ($resident->birthdate) {
-                $excelDate = ExcelDate::PHPToExcel(strtotime($resident->birthdate));
+                // Use noon UTC to prevent timezone-induced off-by-one day when re-importing
+                $excelDate = ExcelDate::PHPToExcel(
+                    Carbon::parse($resident->birthdate)->setTime(12, 0, 0)->utc()->timestamp
+                );
                 $sheet->setCellValue('L'.$rowNum, $excelDate);
                 $sheet->getStyle('L'.$rowNum)->getNumberFormat()->setFormatCode('MM/DD/YYYY');
             }

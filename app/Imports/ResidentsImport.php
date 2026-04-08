@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Family;
 use App\Models\Household;
 use App\Models\Resident;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
@@ -12,6 +13,9 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Events\BeforeSheet;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 class ResidentsImport implements WithMultipleSheets
 {
@@ -32,9 +36,13 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
 {
     public int $imported = 0;
 
+    public int $updated = 0;
+
     public int $skipped = 0;
 
     public int $duplicates = 0;
+
+    private ?Carbon $submissionDate = null;
 
     /** @var int[] */
     private array $touchedHouseholdIds = [];
@@ -47,6 +55,18 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
     public function registerEvents(): array
     {
         return [
+            BeforeSheet::class => function (BeforeSheet $event) {
+                $raw = $event->sheet->getDelegate()->getCell('A4')->getValue();
+                if ($raw) {
+                    try {
+                        $this->submissionDate = is_numeric($raw)
+                            ? Carbon::instance(ExcelDate::excelToDateTimeObject((float) $raw))
+                            : Carbon::parse($raw);
+                    } catch (\Exception) {
+                        $this->submissionDate = null;
+                    }
+                }
+            },
             AfterSheet::class => function (AfterSheet $event) {
                 $this->processHouseholdsAndFamilies();
             },
@@ -144,25 +164,66 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
         }
         // ───────────────────────────────────────────────────────────────────
 
-        // Skip duplicate residents, but restore household/family_role if they were cleared
+        $philsysNumber = $this->val($row, 18); // col S
+
+        // Primary match: exact first name + last name + birthdate
         $existingResident = Resident::whereRaw('LOWER(first_name) = ?', [strtolower($firstName)])
             ->whereRaw('LOWER(last_name) = ?', [strtolower($lastName)])
             ->where('birthdate', $birthdate)
             ->first();
 
+        // Fallback: PhilSys number match (catches name corrections in the spreadsheet)
+        if (! $existingResident && $philsysNumber) {
+            $existingResident = Resident::whereRaw('LOWER(philsys_number) = ?', [strtolower($philsysNumber)])
+                ->first();
+        }
+
         if ($existingResident) {
-            $updates = [];
-            if ($householdId && ! $existingResident->household_id) {
-                $updates['household_id'] = $householdId;
+            // If the spreadsheet submission date is newer than the last system update, apply changes
+            if ($this->submissionDate && $this->submissionDate->gt($existingResident->updated_at)) {
+                $existingResident->update([
+                    // Include name fields — allows corrections when matched via PhilSys fallback
+                    'first_name' => $this->titleCase($firstName) ?? $existingResident->first_name,
+                    'last_name' => $this->titleCase($lastName) ?? $existingResident->last_name,
+                    'middle_name' => $this->titleCase($middleName) ?? $existingResident->middle_name,
+                    'civil_status' => $this->titleCase($this->val($row, 14)) ?? $existingResident->civil_status,
+                    'nationality' => $this->titleCase($this->val($row, 15)) ?: $existingResident->nationality,
+                    'occupation' => $this->titleCase($this->val($row, 16)),
+                    'philsys_number' => $this->val($row, 18) ?? $existingResident->philsys_number,
+                    'religion' => $this->titleCase($this->val($row, 19)) ?? $existingResident->religion,
+                    'contact_number' => $this->val($row, 20) ?? $existingResident->contact_number,
+                    'email' => $this->val($row, 21) ?? $existingResident->email,
+                    'education_level' => $this->titleCase($educLevel) ?? $existingResident->education_level,
+                    'address' => $address ?? $existingResident->address,
+                    'is_pwd' => $isPwd,
+                    'is_senior' => $age !== null && $age >= 60,
+                    'is_solo_parent' => $isSoloParent,
+                    'is_labor_force' => $isLaborForce,
+                    'is_unemployed' => $isUnemployed,
+                    'is_ofw' => $isOfw,
+                    'is_indigenous' => $isIndigenous,
+                    'is_out_of_school_child' => $isOutOfSchoolChild,
+                    'is_out_of_school_youth' => $isOutOfSchoolYouth,
+                    'is_student' => $isStudent,
+                    'household_id' => $householdId ?? $existingResident->household_id,
+                    'family_role' => $familyRole ?? $existingResident->family_role,
+                ]);
+                $this->updated++;
+            } else {
+                // Spreadsheet is older or same — only fill in blanks, never overwrite
+                $updates = [];
+                if ($householdId && ! $existingResident->household_id) {
+                    $updates['household_id'] = $householdId;
+                }
+                if ($familyRole && ! $existingResident->family_role) {
+                    $updates['family_role'] = $familyRole;
+                }
+                if ($updates) {
+                    $existingResident->update($updates);
+                }
+                $this->duplicates++;
+                $this->skipped++;
             }
-            if ($familyRole && ! $existingResident->family_role) {
-                $updates['family_role'] = $familyRole;
-            }
-            if ($updates) {
-                $existingResident->update($updates);
-            }
-            $this->duplicates++;
-            $this->skipped++;
 
             return null;
         }
@@ -320,15 +381,15 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
         }
         try {
             if ($birthdateRaw instanceof \DateTime) {
-                return \Carbon\Carbon::instance($birthdateRaw)->age;
+                return Carbon::instance($birthdateRaw)->age;
             }
             if (is_numeric($birthdateRaw)) {
-                return \Carbon\Carbon::instance(
-                    \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $birthdateRaw)
+                return Carbon::instance(
+                    Date::excelToDateTimeObject((float) floor((float) $birthdateRaw))
                 )->age;
             }
 
-            return \Carbon\Carbon::parse($birthdateRaw)->age;
+            return Carbon::parse($birthdateRaw)->age;
         } catch (\Exception $e) {
             return null;
         }
@@ -341,14 +402,15 @@ class DataSheetImport implements SkipsEmptyRows, ToModel, WithCalculatedFormulas
         }
         try {
             if ($value instanceof \DateTime) {
-                return \Carbon\Carbon::instance($value)->format('Y-m-d');
+                return Carbon::instance($value)->format('Y-m-d');
             }
             if (is_numeric($value)) {
-                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value)
+                // Floor to strip the time-of-day fraction and avoid timezone off-by-one
+                return Date::excelToDateTimeObject((float) floor((float) $value))
                     ->format('Y-m-d');
             }
 
-            return \Carbon\Carbon::parse($value)->format('Y-m-d');
+            return Carbon::parse($value)->format('Y-m-d');
         } catch (\Exception $e) {
             return null;
         }

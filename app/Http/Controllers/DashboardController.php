@@ -35,6 +35,7 @@ class DashboardController extends Controller
         ];
 
         $recentLogs = ActivityLog::latest()->take(8)->get();
+        $mappedHouseholds = Household::whereNotNull('latitude')->whereNotNull('longitude')->get();
 
         // Residents per sitio (via resident's own address field)
         $bySitio = Resident::where('is_deceased', false)
@@ -79,7 +80,7 @@ class DashboardController extends Controller
         return view('dashboard', compact(
             'totalResidents', 'male', 'female', 'seniors', 'pwd', 'voters', 'soloParents',
             'minors', 'adults', 'clearances', 'totalFamilies', 'totalHouseholds',
-            'civilStatus', 'recentLogs', 'bySitio', 'noSitio', 'householdsBySitio', 'householdsByType', 'familiesBySitio'
+            'civilStatus', 'recentLogs', 'bySitio', 'noSitio', 'householdsBySitio', 'householdsByType', 'familiesBySitio', 'mappedHouseholds'
         ));
     }
 }

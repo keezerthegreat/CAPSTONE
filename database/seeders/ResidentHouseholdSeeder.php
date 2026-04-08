@@ -15,17 +15,18 @@ use Illuminate\Support\Facades\DB;
 
 class ResidentHouseholdSeeder extends Seeder
 {
-    // Purok centers within Cogon, Ormoc City (~11.005°N, 124.607°E)
+    // Purok centers placed inside the Cogon boundary polygon
+    // Boundary spans approx lat 11.011–11.031, lng 124.599–124.610
     private array $purokCenters = [
-        'Chrysanthemum' => [11.0065, 124.6045],
-        'Dahlia' => [11.0080, 124.6060],
-        'Dama de Noche' => [11.0055, 124.6080],
-        'Ilang-Ilang' => [11.0040, 124.6055],
-        'Ilang-Ilang 1' => [11.0045, 124.6030],
-        'Ilang-Ilang 2' => [11.0035, 124.6070],
-        'Jasmin' => [11.0070, 124.6090],
-        'Rosal' => [11.0090, 124.6040],
-        'Sampaguita' => [11.0025, 124.6085],
+        'Chrysanthemum' => [11.0280, 124.6030],
+        'Dahlia'        => [11.0270, 124.6060],
+        'Dama de Noche' => [11.0250, 124.6040],
+        'Ilang-Ilang'   => [11.0230, 124.6040],
+        'Ilang-Ilang 1' => [11.0210, 124.6030],
+        'Ilang-Ilang 2' => [11.0210, 124.6060],
+        'Jasmin'        => [11.0190, 124.6050],
+        'Rosal'         => [11.0160, 124.6040],
+        'Sampaguita'    => [11.0140, 124.6060],
     ];
 
     private array $lastNames = [
@@ -114,9 +115,9 @@ class ResidentHouseholdSeeder extends Seeder
             for ($h = 0; $h < $householdsPerPurok; $h++) {
                 $lastName = $faker->randomElement($this->lastNames);
 
-                // GPS: scatter within ~0.003° (~300m) of purok center
-                $lat = $centerLat + ($faker->randomFloat(5, -0.003, 0.003));
-                $lng = $centerLng + ($faker->randomFloat(5, -0.003, 0.003));
+                // GPS: scatter within ~0.001° (~100m) of purok center
+                $lat = $centerLat + ($faker->randomFloat(6, -0.0010, 0.0010));
+                $lng = $centerLng + ($faker->randomFloat(6, -0.0010, 0.0010));
 
                 $household = Household::create([
                     'household_number' => sprintf('HH-%04d', $hhCounter),
@@ -400,15 +401,16 @@ class ResidentHouseholdSeeder extends Seeder
             return ['solo_parent', $flags];
         }
 
-        // Working-age: labor force or unemployed
+        // Working-age: employed labor force OR unemployed (mutually exclusive)
         if ($age >= 15 && $age <= 64) {
             if ($faker->boolean(65)) {
-                $flags['is_labor_force'] = true;
                 if ($faker->boolean(18)) {
                     $flags['is_unemployed'] = true;
 
                     return ['unemployed', $flags];
                 }
+
+                $flags['is_labor_force'] = true;
 
                 return ['labor_force', $flags];
             }

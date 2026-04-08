@@ -193,7 +193,16 @@ tbody tr:last-child td { border-bottom:none; }
             <th style="width:40px"><input type="checkbox" id="selectAll" onchange="toggleAll(this)" style="width:16px;height:16px;cursor:pointer" title="Select All"></th>
             @endif
             <th>#</th>
-            <th>Household No.</th>
+            <th>
+              @php
+                $sortUrl = request()->fullUrlWithQuery(['sort' => $filters['sort'] === 'latest' ? '' : 'latest', 'page' => 1]);
+                $isSortedByNum = $filters['sort'] !== 'latest';
+              @endphp
+              <a href="{{ $sortUrl }}" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:4px">
+                Household No.
+                <i class="fas fa-sort{{ $isSortedByNum ? '-up' : '' }}" style="font-size:10px;color:{{ $isSortedByNum ? 'var(--primary)' : 'var(--muted)' }}"></i>
+              </a>
+            </th>
             <th>Household Head</th>
             <th>Households</th>
             <th>Members</th>

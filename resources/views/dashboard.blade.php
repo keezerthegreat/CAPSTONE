@@ -276,50 +276,49 @@ function svgDonut($segments, $size=160, $thickness=30) {
 
   </div>
 
-  <!-- Recent Activity -->
-  <div class="card" style="margin-bottom:20px">
+  <!-- Household Location Map -->
+  <div class="card" style="margin-bottom:20px;overflow:hidden">
     <div class="card-header">
-      <div class="card-title"><i class="fas fa-history"></i> Recent Activity</div>
-      @if(auth()->user()->role === 'admin')
-      <a href="{{ route('audit.index') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">View All →</a>
-      @endif
+      <div class="card-title"><i class="fas fa-map-marked-alt"></i> Household Location Map</div>
+      <a href="{{ route('residents.location') }}" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">Full Map →</a>
     </div>
-    <table class="recent-table">
-      <thead>
-        <tr><th>User</th><th>Action</th><th>Module</th><th>Description</th><th>Time</th></tr>
-      </thead>
-      <tbody>
-        @forelse($recentLogs as $log)
-        @php
-          $badgeMap = [
-            'created'    => ['bg'=>'#dcfce7','color'=>'#15803d'],
-            'updated'    => ['bg'=>'#dbeafe','color'=>'#1e40af'],
-            'deleted'    => ['bg'=>'#fee2e2','color'=>'#991b1b'],
-            'logged_in'  => ['bg'=>'#fef9c3','color'=>'#854d0e'],
-            'logged_out' => ['bg'=>'#f3e8ff','color'=>'#6b21a8'],
-            'printed'    => ['bg'=>'#e0f2fe','color'=>'#0369a1'],
-          ];
-          $b = $badgeMap[$log->action] ?? ['bg'=>'#f1f5f9','color'=>'#475569'];
-        @endphp
-        <tr>
-          <td style="font-weight:600;white-space:nowrap">{{ $log->user_name }}</td>
-          <td>
-            <span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700;background:{{ $b['bg'] }};color:{{ $b['color'] }}">
-              {{ ucfirst(str_replace('_',' ',$log->action)) }}
-            </span>
-          </td>
-          <td>
-            <span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10.5px;font-weight:600;background:var(--header-bg);color:var(--muted);border:1px solid var(--border)">{{ $log->module }}</span>
-          </td>
-          <td style="color:var(--muted);font-size:12px;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $log->description }}</td>
-          <td style="color:var(--muted);font-size:11px;white-space:nowrap">{{ $log->created_at->diffForHumans() }}</td>
-        </tr>
-        @empty
-        <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">No activity logged yet.</td></tr>
-        @endforelse
-      </tbody>
-    </table>
+    <div style="position:relative">
+      <div id="dashMap" style="height:420px;width:100%"></div>
+    </div>
   </div>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+  const cogonBounds = L.latLngBounds([11.0112, 124.5982], [11.0307, 124.6100]);
+  const dashMap = L.map('dashMap', { maxBounds: cogonBounds, maxBoundsViscosity: 1.0, minZoom: 14 }).setView([11.0207, 124.6047], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(dashMap);
+  const cogonBoundary = [
+    [11.030234977356443,124.60167151058135],[11.024138850617248,124.59993112167416],[11.023602921343993,124.60191038749116],
+    [11.02199841553464,124.60224272719506],[11.013176512837916,124.60085297739778],[11.012933130596423,124.6015926549021],
+    [11.012495960590513,124.60222183066207],[11.01147589471995,124.60307015753074],[11.012275845430722,124.60427413224107],
+    [11.011819200932948,124.60627281394892],[11.012111976063025,124.60680203532627],[11.01277768276465,124.60734798244658],
+    [11.013342546617736,124.60780452150698],[11.013330502643186,124.60781209246971],[11.015173877780228,124.60767381484305],
+    [11.016824805731105,124.60713467157808],[11.019523490106792,124.60689925198847],[11.021487652923867,124.60695810706932],
+    [11.023801055019462,124.6070467555349],[11.025545638342095,124.6096972420873],[11.026218983523677,124.60994669964413],
+    [11.027841126946072,124.60905800709384],[11.02966220170373,124.608652639154],[11.030656901704731,124.6078574931883],
+    [11.03023536631963,124.60167118828224]
+  ];
+  L.polygon(cogonBoundary, { color:'#2563eb', weight:2, fillColor:'#2563eb', fillOpacity:0.05 }).addTo(dashMap);
+  @foreach($mappedHouseholds as $hh)
+  L.marker([{{ $hh->latitude }}, {{ $hh->longitude }}])
+    .addTo(dashMap)
+    .bindPopup(`<div style="font-family:sans-serif;min-width:160px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:3px">HH #{{ $hh->household_number }}</div>
+      <div style="font-weight:600;font-size:12px">{{ $hh->head_last_name }}, {{ $hh->head_first_name }}</div>
+      <div style="font-size:11px;color:#64748b">Sitio {{ $hh->sitio }}</div>
+      <div style="font-size:11px;margin-top:5px;color:#1a3a6b;font-weight:600">{{ $hh->member_count }} member(s)</div>
+      <a href="{{ route('residents.location') }}?focus={{ $hh->id }}" style="display:block;margin-top:8px;text-align:center;padding:5px 0;background:#1a3a6b;color:#fff;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">View Details</a>
+    </div>`);
+  @endforeach
+  </script>
 
 </div>
 

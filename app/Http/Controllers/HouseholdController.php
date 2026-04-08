@@ -14,6 +14,7 @@ class HouseholdController extends Controller
         $search = $request->get('search', '');
         $sitio = $request->get('sitio', '');
         $residency = $request->get('residency', '');
+        $sort = $request->get('sort', '');
 
         $query = Household::with('members');
 
@@ -38,8 +39,14 @@ class HouseholdController extends Controller
         $totalRented = Household::where('residency_type', 'Rented')->count();
         $totalMembers = Household::sum('member_count');
 
-        $households = $query->latest()->paginate(20)->withQueryString();
-        $filters = compact('search', 'sitio', 'residency');
+        if ($sort === 'latest') {
+            $query->latest();
+        } else {
+            $query->orderBy('household_number');
+        }
+
+        $households = $query->paginate(20)->withQueryString();
+        $filters = compact('search', 'sitio', 'residency', 'sort');
 
         return view('households.index', compact(
             'households', 'filters',
